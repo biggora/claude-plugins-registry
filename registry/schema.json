@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Claude Plugins Registry",
+  "type": "object",
+  "required": ["version", "plugins"],
+  "properties": {
+    "version": { "type": "string" },
+    "updated": { "type": "string", "format": "date" },
+    "plugins": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "version", "description", "repository"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$",
+            "description": "Unique plugin identifier (lowercase, hyphens only)"
+          },
+          "version": { "type": "string" },
+          "description": { "type": "string", "maxLength": 200 },
+          "author": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "url": { "type": "string", "format": "uri" }
+            },
+            "required": ["name"]
+          },
+          "repository": { "type": "string", "format": "uri" },
+          "keywords": {
+            "type": "array",
+            "items": { "type": "string" },
+            "maxItems": 10
+          },
+          "license": { "type": "string" },
+          "commands": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "category": {
+            "type": "string",
+            "enum": ["code-quality", "workflow", "testing", "documentation", "security", "devops", "other"]
+          }
+        }
+      }
+    }
+  }
+}

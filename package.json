@@ -1,0 +1,37 @@
+{
+  "name": "claude-plugins",
+  "version": "1.0.0",
+  "description": "CLI marketplace for discovering, installing, and managing Claude Code plugins",
+  "main": "src/index.js",
+  "bin": {
+    "claude-plugins": "bin/cli.js"
+  },
+  "scripts": {
+    "test": "node bin/cli.js --help"
+  },
+  "keywords": [
+    "claude",
+    "claude-code",
+    "plugins",
+    "marketplace",
+    "cli"
+  ],
+  "author": {
+    "name": "biggora",
+    "url": "https://github.com/biggora"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/biggora/claude-plugins"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0",
+    "ora": "^8.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "type": "module"
+}

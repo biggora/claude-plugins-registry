@@ -1,0 +1,49 @@
+{
+  "$schema": "./schema.json",
+  "version": "1.0.0",
+  "updated": "2026-02-08",
+  "plugins": [
+    {
+      "name": "code-optimizer",
+      "version": "1.0.0",
+      "description": "Pragmatic code optimization plugin that finds duplicates, extracts constants, and suggests concise solutions without over-engineering",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/code-optimizer",
+      "keywords": ["optimization", "refactoring", "duplicates", "constants", "code-quality"],
+      "license": "MIT",
+      "commands": ["/optimize", "/optimize-project"],
+      "category": "code-quality"
+    },
+    {
+      "name": "github-issues-solver",
+      "version": "1.0.0",
+      "description": "Analyze, investigate, and fix GitHub issues with AI assistance. Full workflow from issue to PR.",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/github-issues-solver",
+      "keywords": ["github", "issues", "bug-fix", "automation", "workflow"],
+      "license": "MIT",
+      "commands": ["/gh-solve-issue", "/gh-list-issues"],
+      "category": "workflow"
+    },
+    {
+      "name": "typescript-eslint-fixer",
+      "version": "1.0.0",
+      "description": "Automatically detect and fix TypeScript type errors and ESLint violations in TypeScript/JavaScript projects",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/typescript-eslint-fixer",
+      "keywords": ["typescript", "eslint", "linting", "code-quality", "auto-fix"],
+      "license": "MIT",
+      "commands": ["/fix-typescript-eslint"],
+      "category": "code-quality"
+    }
+  ]
+}
