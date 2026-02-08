@@ -1,5 +1,8 @@
 {
-  "name": "claude-plugins",
+  "name": "@biggora/claude-plugins",
+  "publishConfig": {
+    "access": "public"
+  },
   "version": "1.0.0",
   "description": "CLI marketplace for discovering, installing, and managing Claude Code plugins",
   "main": "src/index.js",

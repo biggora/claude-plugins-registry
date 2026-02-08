@@ -9,7 +9,7 @@ export const PLUGINS_DIR = join(home, '.claude', 'plugins');
 export const CACHE_DIR = join(home, '.claude', '.cache', 'claude-plugins');
 export const CACHE_TTL = 1000 * 60 * 15; // 15 minutes
 export const REGISTRY_URL =
-  'https://raw.githubusercontent.com/biggora/claude-plugins-registry/main/registry.json';
+  'https://raw.githubusercontent.com/biggora/claude-plugins-registry/main/registry/registry.json';
 
 export function ensureDir(dir) {
   if (!existsSync(dir)) {
