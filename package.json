@@ -16,6 +16,8 @@
     "test:skills": "node --test tests/skills/*.test.js",
     "test:validation": "node --test tests/validation/*.test.js",
     "test:integration": "node --test tests/integration/*.test.js",
+    "test:functional": "node --test tests/functional/*.test.js",
+    "test:all": "node --test tests/unit/*.test.js tests/commands/*.test.js tests/skills/*.test.js tests/validation/*.test.js tests/integration/*.test.js tests/functional/*.test.js",
     "test:coverage": "node --test --experimental-test-coverage tests/unit/*.test.js tests/commands/*.test.js tests/skills/*.test.js tests/validation/*.test.js tests/integration/*.test.js"
   },
   "keywords": [
