@@ -41,6 +41,16 @@
           "category": {
             "type": "string",
             "enum": ["code-quality", "workflow", "testing", "documentation", "security", "devops", "other"]
+          },
+          "type": {
+            "type": "string",
+            "enum": ["plugin", "skill"],
+            "default": "plugin",
+            "description": "Whether this entry is a full plugin or a standalone skill"
+          },
+          "skillsDir": {
+            "type": "string",
+            "description": "Subdirectory path for multi-skill repos"
           }
         }
       }

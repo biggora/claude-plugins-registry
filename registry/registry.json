@@ -1,7 +1,7 @@
 {
   "$schema": "./schema.json",
   "version": "1.0.0",
-  "updated": "2026-02-08",
+  "updated": "2026-03-06",
   "plugins": [
     {
       "name": "code-optimizer",
@@ -44,6 +44,171 @@
       "license": "MIT",
       "commands": ["/fix-typescript-eslint"],
       "category": "code-quality"
+    },
+    {
+      "name": "screen-recording",
+      "version": "1.0.0",
+      "description": "Autonomous video creation skill — product demos, presentation videos, UI walkthroughs, and narrated screencasts via Pillow, MoviePy, and pyttsx3",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/screen-recording",
+      "keywords": ["video", "screencast", "demo", "recording", "narration", "moviepy"],
+      "license": "MIT",
+      "commands": [],
+      "category": "other",
+      "type": "skill"
+    },
+    {
+      "name": "text-to-speech",
+      "version": "1.0.0",
+      "description": "Converts text to speech audio files autonomously using pyttsx3, espeak-ng, Kokoro ONNX, or cloud TTS engines with multilingual support",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/text-to-speech",
+      "keywords": ["tts", "audio", "narration", "speech", "espeak", "voiceover"],
+      "license": "MIT",
+      "commands": [],
+      "category": "other",
+      "type": "skill"
+    },
+    {
+      "name": "youtube-thumbnail",
+      "version": "1.0.0",
+      "description": "Generates professional YouTube thumbnails in 11 strategic styles with auto-detection of AI image backends and Pillow compositing",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/youtube-thumbnail",
+      "keywords": ["youtube", "thumbnail", "image", "design", "pillow", "ai-image"],
+      "license": "MIT",
+      "commands": [],
+      "category": "other",
+      "type": "skill"
+    },
+    {
+      "name": "youtube-search",
+      "version": "1.0.0",
+      "description": "Search YouTube for videos, channels, playlists and extract metadata, transcripts, and analytics via multiple API methods",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/youtube-search",
+      "keywords": ["youtube", "search", "video", "metadata", "transcript", "analytics"],
+      "license": "MIT",
+      "commands": [],
+      "category": "workflow",
+      "type": "skill"
+    },
+    {
+      "name": "wp-rest-api",
+      "version": "1.0.0",
+      "description": "Build, extend, and debug WordPress REST API endpoints — routes, controllers, schema validation, authentication, and custom fields",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/wp-rest-api",
+      "keywords": ["wordpress", "rest-api", "php", "endpoints", "wp-cli", "custom-post-types"],
+      "license": "MIT",
+      "commands": [],
+      "category": "workflow",
+      "type": "skill"
+    },
+    {
+      "name": "notebook-lm",
+      "version": "1.0.0",
+      "description": "Automate Google NotebookLM — create notebooks, add sources, chat, generate audio/video overviews, quizzes, reports, and mind maps",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/notebook-lm",
+      "keywords": ["notebooklm", "google", "research", "podcast", "audio", "automation"],
+      "license": "MIT",
+      "commands": [],
+      "category": "workflow",
+      "type": "skill"
+    },
+    {
+      "name": "codex-cli",
+      "version": "1.0.0",
+      "description": "Install, configure, and automate tasks using OpenAI Codex CLI — approval modes, sandbox policies, MCP servers, and CI integration",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/codex-cli",
+      "keywords": ["openai", "codex", "cli", "automation", "ci-cd", "agent"],
+      "license": "MIT",
+      "commands": [],
+      "category": "devops",
+      "type": "skill"
+    },
+    {
+      "name": "gemini-cli",
+      "version": "1.0.0",
+      "description": "Install, configure, and script with Gemini CLI — headless prompts, MCP servers, custom slash commands, extensions, and CI automation",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/gemini-cli",
+      "keywords": ["gemini", "google", "cli", "automation", "mcp", "scripting"],
+      "license": "MIT",
+      "commands": [],
+      "category": "devops",
+      "type": "skill"
+    },
+    {
+      "name": "tm-search",
+      "version": "1.0.0",
+      "description": "Search, validate, and check availability of US trademarks via USPTO APIs — keyword search, batch validation, and status lookup",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/tm-search",
+      "keywords": ["trademark", "uspto", "brand", "search", "validation", "legal"],
+      "license": "MIT",
+      "commands": [],
+      "category": "workflow",
+      "type": "skill"
+    },
+    {
+      "name": "test-web-ui",
+      "version": "1.0.0",
+      "description": "Automated web QA — discovers site structure, generates use cases and test plans, runs Playwright tests, and produces HTML reports",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/test-web-ui",
+      "keywords": ["qa", "playwright", "web-testing", "automation", "test-report", "e2e"],
+      "license": "MIT",
+      "commands": [],
+      "category": "testing",
+      "type": "skill"
+    },
+    {
+      "name": "test-mobile-app",
+      "version": "1.0.0",
+      "description": "Automated mobile app testing — analyzes APK/source, generates use cases, runs Appium tests on emulator, and produces QA reports",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/test-mobile-app",
+      "keywords": ["mobile", "appium", "android", "qa", "testing", "automation"],
+      "license": "MIT",
+      "commands": [],
+      "category": "testing",
+      "type": "skill"
     }
   ]
 }

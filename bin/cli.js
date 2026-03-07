@@ -76,4 +76,43 @@ program
     await publish();
   });
 
+const skills = program
+  .command('skills')
+  .description('Manage Claude Code skills');
+
+skills
+  .command('add <source>')
+  .description('Install a skill from a Git URL or registry name')
+  .option('--skill <name>', 'Select a specific skill from a multi-skill repo')
+  .action(async (source, options) => {
+    const { add } = await import('../src/commands/skills/add.js');
+    await add(source, options);
+  });
+
+skills
+  .command('list')
+  .alias('ls')
+  .description('List installed skills')
+  .action(async () => {
+    const { list } = await import('../src/commands/skills/list.js');
+    await list();
+  });
+
+skills
+  .command('remove <name>')
+  .alias('rm')
+  .description('Remove an installed skill')
+  .action(async (name) => {
+    const { remove } = await import('../src/commands/skills/remove.js');
+    await remove(name);
+  });
+
+skills
+  .command('update [name]')
+  .description('Update one or all installed skills')
+  .action(async (name) => {
+    const { update } = await import('../src/commands/skills/update.js');
+    await update(name);
+  });
+
 program.parse();
