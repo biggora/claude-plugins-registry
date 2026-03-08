@@ -1,13 +1,31 @@
 {
   "name": "@biggora/claude-plugins",
-  "publishConfig": {
-    "access": "public"
-  },
   "version": "1.1.0",
   "description": "CLI marketplace for discovering, installing, and managing Claude Code plugins",
+  "keywords": [
+    "claude",
+    "claude-code",
+    "plugins",
+    "marketplace",
+    "cli"
+  ],
+  "homepage": "https://github.com/biggora/claude-plugins-registry#readme",
+  "bugs": {
+    "url": "https://github.com/biggora/claude-plugins-registry/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/biggora/claude-plugins-registry.git"
+  },
+  "license": "MIT",
+  "author": "biggora (https://github.com/biggora)",
+  "type": "module",
   "main": "src/index.js",
   "bin": {
     "claude-plugins": "bin/cli.js"
+  },
+  "directories": {
+    "test": "tests"
   },
   "scripts": {
     "test": "node --test tests/unit/*.test.js tests/commands/*.test.js tests/skills/*.test.js tests/validation/*.test.js tests/integration/*.test.js",
@@ -20,29 +38,16 @@
     "test:all": "node --test tests/unit/*.test.js tests/commands/*.test.js tests/skills/*.test.js tests/validation/*.test.js tests/integration/*.test.js tests/functional/*.test.js",
     "test:coverage": "node --test --experimental-test-coverage tests/unit/*.test.js tests/commands/*.test.js tests/skills/*.test.js tests/validation/*.test.js tests/integration/*.test.js"
   },
-  "keywords": [
-    "claude",
-    "claude-code",
-    "plugins",
-    "marketplace",
-    "cli"
-  ],
-  "author": {
-    "name": "biggora",
-    "url": "https://github.com/biggora"
-  },
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/biggora/claude-plugins-registry"
-  },
   "dependencies": {
     "chalk": "^5.3.0",
     "commander": "^12.1.0",
     "ora": "^8.1.0"
   },
+  "devDependencies": {},
   "engines": {
     "node": ">=18.0.0"
   },
-  "type": "module"
+  "publishConfig": {
+    "access": "public"
+  }
 }

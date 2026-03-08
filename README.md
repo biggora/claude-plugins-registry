@@ -27,22 +27,10 @@ Install a specific skill directly from a Git repository:
 
 ```bash
 # Install a single skill from a repository
-npx skills add https://github.com/biggora/claude-plugins-registry --skill commafeed-api
+npx @biggora/claude-plugins skills add https://github.com/biggora/claude-plugins-registry --skill commafeed-api
 
-# With npx (no global install required)
-npx @biggora/claude-plugins skills add https://github.com/biggora/claude-plugins-registry --skill n8n-api
-```
-
-Install a skill from a single-skill repository:
-
-```bash
-claude-plugins skills add https://github.com/biggora/screen-recording
-```
-
-Install a skill by registry name:
-
-```bash
-claude-plugins skills add youtube-search
+# Short form
+claude-plugins skills add https://github.com/biggora/claude-plugins-registry --skill n8n-api
 ```
 
 ### Manage Installed Skills
@@ -82,22 +70,19 @@ claude-plugins skills remove commafeed-api
 #### Install Examples
 
 ```bash
-# From the multi-skill registry repository
-npx skills add https://github.com/biggora/claude-plugins-registry --skill codex-cli
-npx skills add https://github.com/biggora/claude-plugins-registry --skill gemini-cli
-npx skills add https://github.com/biggora/claude-plugins-registry --skill n8n-api
-npx skills add https://github.com/biggora/claude-plugins-registry --skill notebook-lm
-npx skills add https://github.com/biggora/claude-plugins-registry --skill commafeed-api
-npx skills add https://github.com/biggora/claude-plugins-registry --skill tm-search
-npx skills add https://github.com/biggora/claude-plugins-registry --skill wp-rest-api
-npx skills add https://github.com/biggora/claude-plugins-registry --skill youtube-search
-npx skills add https://github.com/biggora/claude-plugins-registry --skill youtube-thumbnail
-
-# From standalone repositories
-claude-plugins skills add https://github.com/biggora/screen-recording
-claude-plugins skills add https://github.com/biggora/text-to-speech
-claude-plugins skills add https://github.com/biggora/test-web-ui
-claude-plugins skills add https://github.com/biggora/test-mobile-app
+npx @biggora/claude-plugins skills add https://github.com/biggora/claude-plugins-registry --skill codex-cli
+npx @biggora/claude-plugins skills add https://github.com/biggora/claude-plugins-registry --skill gemini-cli
+npx @biggora/claude-plugins skills add https://github.com/biggora/claude-plugins-registry --skill n8n-api
+npx @biggora/claude-plugins skills add https://github.com/biggora/claude-plugins-registry --skill notebook-lm
+npx @biggora/claude-plugins skills add https://github.com/biggora/claude-plugins-registry --skill commafeed-api
+npx @biggora/claude-plugins skills add https://github.com/biggora/claude-plugins-registry --skill tm-search
+npx @biggora/claude-plugins skills add https://github.com/biggora/claude-plugins-registry --skill wp-rest-api
+npx @biggora/claude-plugins skills add https://github.com/biggora/claude-plugins-registry --skill youtube-search
+npx @biggora/claude-plugins skills add https://github.com/biggora/claude-plugins-registry --skill youtube-thumbnail
+npx @biggora/claude-plugins skills add https://github.com/biggora/claude-plugins-registry --skill screen-recording
+npx @biggora/claude-plugins skills add https://github.com/biggora/claude-plugins-registry --skill text-to-speech
+npx @biggora/claude-plugins skills add https://github.com/biggora/claude-plugins-registry --skill test-web-ui
+npx @biggora/claude-plugins skills add https://github.com/biggora/claude-plugins-registry --skill test-mobile-app
 ```
 
 ## Plugins
