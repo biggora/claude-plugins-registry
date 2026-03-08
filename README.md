@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/@biggora/claude-plugins.svg)](https://www.npmjs.com/package/@biggora/claude-plugins)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-CLI marketplace for discovering, installing, and managing [Claude Code](https://docs.anthropic.com/en/docs/claude-code) plugins.
+CLI marketplace for discovering, installing, and managing [Claude Code](https://docs.anthropic.com/en/docs/claude-code) plugins and skills.
 
 ## Installation
 
@@ -17,7 +17,92 @@ Or use directly with npx (no install required):
 npx @biggora/claude-plugins search
 ```
 
-## Quick Start
+## Skills
+
+Skills are self-contained instruction sets (SKILL.md files) that teach Claude Code how to perform specific tasks. They are installed into `~/.claude/skills/` and auto-discovered by Claude Code on startup.
+
+### Install a Skill from Git
+
+Install a specific skill directly from a Git repository:
+
+```bash
+# Install a single skill from a repository
+npx skills add https://github.com/biggora/claude-plugins-registry --skill commafeed-api
+
+# With npx (no global install required)
+npx @biggora/claude-plugins skills add https://github.com/biggora/claude-plugins-registry --skill n8n-api
+```
+
+Install a skill from a single-skill repository:
+
+```bash
+claude-plugins skills add https://github.com/biggora/screen-recording
+```
+
+Install a skill by registry name:
+
+```bash
+claude-plugins skills add youtube-search
+```
+
+### Manage Installed Skills
+
+```bash
+# List installed skills
+claude-plugins skills list
+
+# Update a specific skill
+claude-plugins skills update commafeed-api
+
+# Update all installed skills
+claude-plugins skills update
+
+# Remove a skill
+claude-plugins skills remove commafeed-api
+```
+
+### Available Skills
+
+| Skill | Category | Description |
+|-------|----------|-------------|
+| `codex-cli` | devops | Install, configure, and automate tasks using OpenAI Codex CLI — approval modes, sandbox policies, MCP servers, and CI integration |
+| `commafeed-api` | workflow | Manage CommaFeed RSS reader via REST API — subscriptions, categories, feeds, entries, and OPML import/export |
+| `gemini-cli` | devops | Install, configure, and script with Gemini CLI — headless prompts, MCP servers, custom slash commands, extensions, and CI automation |
+| `n8n-api` | workflow | Build, debug, and manage n8n workflows via REST API — create workflows, manage credentials, execute and monitor runs |
+| `notebook-lm` | workflow | Automate Google NotebookLM — create notebooks, add sources, chat, generate audio/video overviews, quizzes, reports, and mind maps |
+| `screen-recording` | other | Autonomous video creation — product demos, presentation videos, UI walkthroughs, and narrated screencasts via Pillow, MoviePy, and pyttsx3 |
+| `test-mobile-app` | testing | Automated mobile app testing — analyzes APK/source, generates use cases, runs Appium tests on emulator, and produces QA reports |
+| `test-web-ui` | testing | Automated web QA — discovers site structure, generates use cases and test plans, runs Playwright tests, and produces HTML reports |
+| `text-to-speech` | other | Converts text to speech audio files using pyttsx3, espeak-ng, Kokoro ONNX, or cloud TTS engines with multilingual support |
+| `tm-search` | workflow | Search, validate, and check availability of US trademarks via USPTO APIs — keyword search, batch validation, and status lookup |
+| `wp-rest-api` | workflow | Build, extend, and debug WordPress REST API endpoints — routes, controllers, schema validation, authentication, and custom fields |
+| `youtube-search` | workflow | Search YouTube for videos, channels, playlists and extract metadata, transcripts, and analytics via multiple API methods |
+| `youtube-thumbnail` | other | Generates professional YouTube thumbnails in 11 strategic styles with auto-detection of AI image backends and Pillow compositing |
+
+#### Install Examples
+
+```bash
+# From the multi-skill registry repository
+npx skills add https://github.com/biggora/claude-plugins-registry --skill codex-cli
+npx skills add https://github.com/biggora/claude-plugins-registry --skill gemini-cli
+npx skills add https://github.com/biggora/claude-plugins-registry --skill n8n-api
+npx skills add https://github.com/biggora/claude-plugins-registry --skill notebook-lm
+npx skills add https://github.com/biggora/claude-plugins-registry --skill commafeed-api
+npx skills add https://github.com/biggora/claude-plugins-registry --skill tm-search
+npx skills add https://github.com/biggora/claude-plugins-registry --skill wp-rest-api
+npx skills add https://github.com/biggora/claude-plugins-registry --skill youtube-search
+npx skills add https://github.com/biggora/claude-plugins-registry --skill youtube-thumbnail
+
+# From standalone repositories
+claude-plugins skills add https://github.com/biggora/screen-recording
+claude-plugins skills add https://github.com/biggora/text-to-speech
+claude-plugins skills add https://github.com/biggora/test-web-ui
+claude-plugins skills add https://github.com/biggora/test-mobile-app
+```
+
+## Plugins
+
+### Quick Start
 
 ```bash
 # Browse all available plugins
@@ -32,7 +117,7 @@ claude-plugins install code-optimizer
 # Restart Claude Code to load the plugin
 ```
 
-## Commands
+### Plugin Commands
 
 | Command | Description |
 |---------|-------------|
@@ -44,15 +129,27 @@ claude-plugins install code-optimizer
 | `claude-plugins update [name]` | Update one or all installed plugins |
 | `claude-plugins publish` | Validate plugin and generate registry entry for submission |
 
+### Skills Commands
+
+| Command | Description |
+|---------|-------------|
+| `claude-plugins skills add <source>` | Install a skill from a Git URL or registry name |
+| `claude-plugins skills add <url> --skill <name>` | Install a specific skill from a multi-skill repository |
+| `claude-plugins skills list` | List installed skills |
+| `claude-plugins skills update [name]` | Update one or all installed skills |
+| `claude-plugins skills remove <name>` | Remove an installed skill |
+
 ### Aliases
 
 - `claude-plugins ls` - alias for `list`
 - `claude-plugins remove <name>` - alias for `uninstall`
 - `claude-plugins upgrade [name]` - alias for `update`
+- `claude-plugins skills ls` - alias for `skills list`
+- `claude-plugins skills rm <name>` - alias for `skills remove`
 
 ## Usage Examples
 
-### Search & Install
+### Search & Install Plugins
 
 ```bash
 # List all plugins in the registry
@@ -128,6 +225,30 @@ my-plugin/
 }
 ```
 
+## Skill Structure
+
+Skills are simpler than plugins — just a SKILL.md file with optional supporting files:
+
+```
+my-skill/
+  SKILL.md            # Required: skill instructions with YAML frontmatter
+  references/         # Reference docs (optional)
+  scripts/            # Helper scripts (optional)
+```
+
+### SKILL.md
+
+```markdown
+---
+name: my-skill
+description: What this skill teaches Claude to do
+---
+
+# My Skill
+
+Instructions for Claude Code...
+```
+
 ## Registry
 
 The plugin registry is a GitHub-hosted JSON file at [biggora/claude-plugins-registry](https://github.com/biggora/claude-plugins-registry).
@@ -145,10 +266,11 @@ The plugin registry is a GitHub-hosted JSON file at [biggora/claude-plugins-regi
 
 ## How It Works
 
-- Plugins are installed via `git clone` to `~/.claude/plugins/<name>`
+- **Plugins** are installed via `git clone` to `~/.claude/plugins/<name>`
+- **Skills** are installed via `git clone` + copy to `~/.claude/skills/<name>`
 - Updates use `git pull --ff-only` to safely fast-forward
-- Claude Code automatically discovers plugins in `~/.claude/plugins/`
-- Restart Claude Code after installing or removing plugins
+- Claude Code automatically discovers plugins and skills in `~/.claude/`
+- Restart Claude Code after installing or removing plugins/skills
 
 ## Requirements
 
