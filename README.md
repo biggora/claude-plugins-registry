@@ -70,19 +70,19 @@ claude-plugins skills remove commafeed-api
 #### Install Examples
 
 ```bash
-npx skills add https://github.com/biggora/claude-plugins-registry --skill --skill codex-cli
-npx skills add https://github.com/biggora/claude-plugins-registry --skill --skill gemini-cli
-npx skills add https://github.com/biggora/claude-plugins-registry --skill --skill n8n-api
-npx skills add https://github.com/biggora/claude-plugins-registry --skill --skill notebook-lm
-npx skills add https://github.com/biggora/claude-plugins-registry --skill --skill commafeed-api
-npx skills add https://github.com/biggora/claude-plugins-registry --skill --skill tm-search
-npx skills add https://github.com/biggora/claude-plugins-registry --skill --skill wp-rest-api
-npx skills add https://github.com/biggora/claude-plugins-registry --skill --skill youtube-search
-npx skills add https://github.com/biggora/claude-plugins-registry --skill --skill youtube-thumbnail
-npx skills add https://github.com/biggora/claude-plugins-registry --skill --skill screen-recording
-npx skills add https://github.com/biggora/claude-plugins-registry --skill --skill text-to-speech
-npx skills add https://github.com/biggora/claude-plugins-registry --skill --skill test-web-ui
-npx skills add https://github.com/biggora/claude-plugins-registry --skill --skill test-mobile-app
+npx skills add https://github.com/biggora/claude-plugins-registry --skill codex-cli
+npx skills add https://github.com/biggora/claude-plugins-registry --skill gemini-cli
+npx skills add https://github.com/biggora/claude-plugins-registry --skill n8n-api
+npx skills add https://github.com/biggora/claude-plugins-registry --skill notebook-lm
+npx skills add https://github.com/biggora/claude-plugins-registry --skill commafeed-api
+npx skills add https://github.com/biggora/claude-plugins-registry --skill tm-search
+npx skills add https://github.com/biggora/claude-plugins-registry --skill wp-rest-api
+npx skills add https://github.com/biggora/claude-plugins-registry --skill youtube-search
+npx skills add https://github.com/biggora/claude-plugins-registry --skill youtube-thumbnail
+npx skills add https://github.com/biggora/claude-plugins-registry --skill screen-recording
+npx skills add https://github.com/biggora/claude-plugins-registry --skill text-to-speech
+npx skills add https://github.com/biggora/claude-plugins-registry --skill test-web-ui
+npx skills add https://github.com/biggora/claude-plugins-registry --skill test-mobile-app
 ```
 
 ## Plugins
