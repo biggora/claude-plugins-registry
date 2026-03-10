@@ -1,5 +1,5 @@
 ---
-name: notebooklm
+name: notebook-lm
 description: |
   Automate Google NotebookLM via the notebooklm-py Python library. Use this skill whenever the user wants to:
   - Create, manage, or delete NotebookLM notebooks
