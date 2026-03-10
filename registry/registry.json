@@ -1,7 +1,7 @@
 {
   "$schema": "./schema.json",
   "version": "1.0.0",
-  "updated": "2026-03-06",
+  "updated": "2026-03-10",
   "plugins": [
     {
       "name": "code-optimizer",
@@ -208,6 +208,36 @@
       "license": "MIT",
       "commands": [],
       "category": "testing",
+      "type": "skill"
+    },
+    {
+      "name": "commafeed-api",
+      "version": "1.0.0",
+      "description": "Interact with CommaFeed RSS reader via REST API — subscribe, unsubscribe, read, star, tag entries, manage categories, import/export OPML, and manage user settings",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/commafeed-api",
+      "keywords": ["rss", "commaFeed", "feed-reader", "opml", "rest-api", "automation"],
+      "license": "MIT",
+      "commands": [],
+      "category": "workflow",
+      "type": "skill"
+    },
+    {
+      "name": "n8n-api",
+      "version": "1.0.0",
+      "description": "Interact with n8n automation platform via REST API — manage workflows, executions, credentials, tags, variables, users, and audit logs",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/n8n-api",
+      "keywords": ["n8n", "automation", "workflows", "rest-api", "low-code", "integration"],
+      "license": "MIT",
+      "commands": [],
+      "category": "workflow",
       "type": "skill"
     }
   ]
