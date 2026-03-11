@@ -39,23 +39,27 @@ codex e "Update CHANGELOG"         # Short alias for exec
 ## Core Concepts
 
 ### Approval Modes (`-a` / `--ask-for-approval`)
-Controls when Codex pauses to ask before executing:
+Controls when Codex pauses to ask before executing. The ONLY valid values are:
 
-| Mode | Flag | Behavior |
-|------|------|----------|
-| `untrusted` | `-a untrusted` | Max caution — approves almost everything |
-| `on-request` | `-a on-request` | Asks on sensitive actions (default for auto) |
-| `never` | `-a never` | Never asks — runs fully automated |
-| `reject` | `-a reject` | Blocks all tool use |
+| Mode | Flag | Config value | Behavior |
+|------|------|-------------|----------|
+| `untrusted` | `-a untrusted` | `approval_policy = "untrusted"` | Max caution — approves almost everything |
+| `on-request` | `-a on-request` | `approval_policy = "on-request"` | Asks on sensitive actions (default for auto) |
+| `never` | `-a never` | `approval_policy = "never"` | Never asks — runs fully automated |
+| `reject` | `-a reject` | `approval_policy = "reject"` | Blocks all tool use |
+
+Note: `--full-auto` is a CLI-only shortcut (equivalent to `-a on-request -s workspace-write`). It is NOT a valid `approval_policy` config value. Values like "suggest", "auto-edit", or "full-auto" do not exist as config values.
 
 ### Sandbox Modes (`-s` / `--sandbox`)
-Controls filesystem and network access:
+Controls filesystem and network access. The ONLY valid values are:
 
 | Mode | Flag | Access |
 |------|------|--------|
 | `read-only` | `-s read-only` | Read files only, no writes |
 | `workspace-write` | `-s workspace-write` | Write within working directory only |
 | `danger-full-access` | `-s danger-full-access` | Full system access (use with caution) |
+
+Note: There is no `--no-sandbox` flag or `sandbox = "none"` config option. To bypass the sandbox entirely, use `--dangerously-bypass-approvals-and-sandbox` (alias `--yolo`).
 
 ### Common Combinations
 ```bash
@@ -77,6 +81,8 @@ codex --dangerously-bypass-approvals-and-sandbox "task"
 ---
 
 ## Configuration (`~/.codex/config.toml`)
+
+Config uses **TOML format** (not JSON). The file is `config.toml`, never `config.json`.
 
 ### Minimal config
 ```toml
@@ -101,6 +107,9 @@ animations = true
 ```
 
 ### Profiles (for different workflows)
+
+Profiles use `[profiles.<name>]` (plural "profiles", not singular "profile"):
+
 ```toml
 [profiles.ci]
 model = "gpt-5-codex"
@@ -112,7 +121,7 @@ model_reasoning_effort = "high"
 approval_policy = "untrusted"
 ```
 
-Use a profile: `codex --profile ci "task"` or set `profile = "ci"` at the top level.
+Use a profile: `codex --profile ci "task"` or `codex -p ci "task"`, or set `profile = "ci"` at the top level as default.
 
 ### Config precedence (highest → lowest)
 1. CLI flags (`--model`, `-c key=value`)
@@ -124,7 +133,7 @@ Use a profile: `codex --profile ci "task"` or set `profile = "ci"` at the top le
 
 ## Non-Interactive Mode (`codex exec`)
 
-Ideal for CI pipelines and shell scripts:
+For CI pipelines and shell scripts, always use `codex exec` (not bare `codex`). The `exec` subcommand runs non-interactively and exits when done:
 
 ```bash
 # Basic
@@ -195,9 +204,10 @@ env = { GITHUB_TOKEN = "$GITHUB_TOKEN" }
 url = "https://my-server.example.com/mcp"
 ```
 
-Run Codex itself as an MCP server (for other agents to consume):
+Run Codex itself as an MCP server (for other agents to consume) using the `mcp` subcommand (not a flag):
 ```bash
 codex mcp
+# Note: this is a subcommand, NOT "codex --mcp-server"
 ```
 
 ---

@@ -1,0 +1,47 @@
+{
+  "skill_name": "codex-cli",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I want to set up OpenAI Codex CLI in my GitHub Actions pipeline to auto-fix lint errors on PRs. How do I configure it with full-auto mode and workspace-write sandbox? My OPENAI_API_KEY is stored in GitHub secrets.",
+      "expected_output": "Should provide a GitHub Actions workflow YAML with npm install -g @openai/codex, codex exec with --full-auto flag, OPENAI_API_KEY from secrets, and correct sandbox/approval behavior explanation.",
+      "files": [],
+      "assertions": [
+        {"id": "installs-globally", "text": "Shows npm install -g @openai/codex for global installation"},
+        {"id": "uses-exec-mode", "text": "Uses 'codex exec' for non-interactive CI mode (not bare 'codex')"},
+        {"id": "full-auto-flag", "text": "Uses --full-auto flag and correctly explains it equals -a on-request -s workspace-write"},
+        {"id": "api-key-from-secrets", "text": "Shows OPENAI_API_KEY set from ${{ secrets.OPENAI_API_KEY }} in env"},
+        {"id": "provides-workflow-yaml", "text": "Provides a complete GitHub Actions workflow YAML snippet"},
+        {"id": "no-hallucinated-flags", "text": "Does not invent non-existent CLI flags or options"}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "How do I add a custom MCP server to codex CLI? I have a Python-based MCP server that needs a GITHUB_TOKEN env var. Also want to run codex itself as an MCP server for other agents to consume.",
+      "expected_output": "Should show ~/.codex/config.toml mcp_servers section with command, args, env fields. Should show 'codex mcp' command for running as MCP server. Should use $GITHUB_TOKEN pattern for env vars.",
+      "files": [],
+      "assertions": [
+        {"id": "correct-config-location", "text": "Points to ~/.codex/config.toml for MCP server configuration"},
+        {"id": "mcp-servers-toml-syntax", "text": "Shows [mcp_servers.name] TOML section with command, args fields"},
+        {"id": "env-var-dollar-pattern", "text": "Shows $GITHUB_TOKEN or $ENV_VAR pattern for environment variable references"},
+        {"id": "codex-as-mcp-server", "text": "Shows 'codex mcp' command for running codex as an MCP server"},
+        {"id": "python-command-correct", "text": "Uses correct Python command (python/python3) in the MCP server command field"},
+        {"id": "no-hallucinated-config", "text": "Does not invent non-existent config keys or MCP server fields"}
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I'm getting Landlock errors on WSL2 when running codex. Also, I need to set up two profiles in config.toml — one for safe daily dev and one for CI with no approvals. How do I fix the Landlock issue and configure the profiles?",
+      "expected_output": "Should explain Landlock fix (update WSL2 or use --dangerously-bypass-approvals-and-sandbox in isolated env). Should show config.toml profiles section with [profiles.dev] and [profiles.ci] using correct approval_policy values.",
+      "files": [],
+      "assertions": [
+        {"id": "landlock-wsl-fix", "text": "Mentions updating WSL2 kernel or using --dangerously-bypass-approvals-and-sandbox (--yolo) as workarounds"},
+        {"id": "profiles-toml-syntax", "text": "Shows correct [profiles.name] TOML syntax for defining profiles"},
+        {"id": "ci-profile-no-approval", "text": "CI profile uses approval_policy = 'never' for fully automated mode"},
+        {"id": "dev-profile-safe", "text": "Dev profile uses a safe approval_policy like 'on-request' or 'untrusted'"},
+        {"id": "profile-usage-flag", "text": "Shows --profile flag for selecting a profile at runtime"},
+        {"id": "no-hallucinated-fixes", "text": "Does not invent non-existent troubleshooting steps or config options"}
+      ]
+    }
+  ]
+}
