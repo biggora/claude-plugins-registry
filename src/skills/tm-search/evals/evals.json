@@ -1,0 +1,23 @@
+{
+  "skill_name": "tm-search",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I'm thinking of naming my startup 'NeonPulse'. Can you check if that's trademarked in the US?",
+      "expected_output": "Should search USPTO for 'NEONPULSE', report whether active trademarks exist, include legal disclaimer about consulting a trademark attorney",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Look up trademark serial number 85073086 and tell me who owns it and what its status is",
+      "expected_output": "Should use the TSDR Details API to look up serial 85073086, return the owner (The Viking Corporation), status (Live/Registered, renewed), and class info",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "I need to validate a batch of brand name ideas against USPTO: CloudPeak, SkyBridge, NeonVault, AquaForge. Which ones are available?",
+      "expected_output": "Should search each keyword, report availability status for each, include delay between requests, provide a summary table, and include legal disclaimer",
+      "files": []
+    }
+  ]
+}

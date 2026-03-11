@@ -1,135 +1,100 @@
-# Web Scraping Fallback for tmsearch.uspto.gov
+# Browser Automation Fallback for tmsearch.uspto.gov
 
-Use this when the direct backend API calls return errors or unexpected responses.
+The tmsearch.uspto.gov search backend uses an Elasticsearch API at
+`https://tmsearch.uspto.gov/prod-stage-v1-0-0/` but it is protected by AWS WAF bot detection.
+Direct HTTP requests (curl, requests, fetch) return `403` or `Missing Authentication Token`.
 
-## Background
+Browser automation is the only reliable way to perform keyword searches programmatically.
 
-The tmsearch.uspto.gov frontend is a React SPA. The backend API it uses may change endpoint paths.
-If the documented endpoints in SKILL.md fail, use browser DevTools (Network tab) on
-https://tmsearch.uspto.gov/search/search-information to intercept the actual XHR/fetch requests
-being made, then replicate those in code.
+## Why Direct HTTP Doesn't Work
 
-## Python Requests Approach
+The site's `configuration.json` reveals:
+- Search backend: `https://tmsearch.uspto.gov/prod-stage-v1-0-0/`
+- WAF challenge script: loaded dynamically from `awsWafChallengeUrl`
+- The browser must solve the WAF challenge to get a token that's sent with API requests
 
-```python
-import requests
-import time
+Any attempt to call the Elasticsearch endpoint directly will fail because the WAF token
+is missing from the request.
 
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
-    "Accept": "application/json, text/plain, */*",
-    "Accept-Language": "en-US,en;q=0.9",
-    "Referer": "https://tmsearch.uspto.gov/search/search-information",
-    "Origin": "https://tmsearch.uspto.gov",
-}
-
-def search_trademark_web(keyword: str, status: str = "A", rows: int = 25) -> dict:
-    """
-    Search USPTO trademark database.
-    status: "A" = active, "D" = dead, "" = all
-    """
-    session = requests.Session()
-    
-    # First GET the main page to get any session cookies
-    session.get("https://tmsearch.uspto.gov/search/search-information", headers=HEADERS)
-    
-    # Attempt POST to backend
-    payload = {
-        "keyword": keyword.upper(),
-        "searchType": "1",
-        "statusType": status,
-        "pluralVariants": False,
-        "start": 0,
-        "rows": rows
-    }
-    
-    response = session.post(
-        "https://tmsearch.uspto.gov/search/keyword",
-        json=payload,
-        headers=HEADERS,
-        timeout=30
-    )
-    
-    if response.status_code == 200:
-        return response.json()
-    
-    # If POST fails, try GET
-    params = {
-        "keyword": keyword.upper(),
-        "statusType": status,
-        "rows": rows,
-        "start": 0
-    }
-    response = session.get(
-        "https://tmsearch.uspto.gov/search/keyword",
-        params=params,
-        headers=HEADERS,
-        timeout=30
-    )
-    
-    return response.json()
-```
-
-## Selenium/Playwright Approach (Last Resort)
-
-If all HTTP approaches fail, use a headless browser to drive the UI directly:
+## Playwright Approach (Recommended)
 
 ```python
 from playwright.sync_api import sync_playwright
 import json
 
-def search_with_playwright(keyword: str) -> list:
+def search_trademark(keyword: str, max_results: int = 25) -> dict:
+    """Search USPTO trademarks by keyword using browser automation."""
+    results = {"totalFound": 0, "trademarks": []}
+
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
-        results = []
-        
-        # Intercept API responses
+
         def handle_response(response):
-            if "search" in response.url and response.status == 200:
+            if "prod-stage" in response.url and response.status == 200:
                 try:
                     data = response.json()
-                    if "trademarks" in data:
-                        results.extend(data["trademarks"])
-                except:
+                    if isinstance(data, dict) and "hits" in data:
+                        hits = data.get("hits", {})
+                        total = hits.get("total", {})
+                        results["totalFound"] = total.get("value", 0) if isinstance(total, dict) else total
+                        for hit in hits.get("hits", [])[:max_results]:
+                            results["trademarks"].append(hit.get("_source", {}))
+                except Exception:
                     pass
-        
+
         page.on("response", handle_response)
         page.goto("https://tmsearch.uspto.gov/search/search-information")
-        
-        # Fill in search form
-        page.fill('input[placeholder*="search"]', keyword)
-        page.click('button[type="submit"]')
         page.wait_for_load_state("networkidle")
-        
+
+        search_input = page.locator('input[type="text"]').first
+        search_input.fill(keyword.upper())
+        search_input.press("Enter")
+
+        page.wait_for_load_state("networkidle")
+        page.wait_for_timeout(3000)
+
         browser.close()
-        return results
+
+    return results
 ```
 
 ## Install Playwright
+
 ```bash
 pip install playwright
 playwright install chromium
 ```
 
-## Alternative: Use RapidAPI Wrapper
+## TSDR Details API (No browser needed)
 
-If USPTO direct access is problematic, the RapidAPI unofficial wrapper is reliable:
+For looking up a single trademark by serial number, the TSDR Details API works with plain HTTP:
+
+```bash
+curl -s "https://tmsearch.uspto.gov/tsdr-api-v1-0-0/tsdr-api?serialNumber=78787878" \
+  -H "Accept: application/json"
+```
+
+This returns JSON with case status, owner info, classes, prosecution history, etc.
+
+## Alternative: RapidAPI Wrapper
+
+If browser automation is not practical, the RapidAPI unofficial wrapper provides reliable
+keyword search with a simple REST API:
 
 ```bash
 # Endpoint: https://uspto-trademark.p.rapidapi.com
 # Requires: RapidAPI key (freemium plan available)
 
-curl --request GET \
-  --url "https://uspto-trademark.p.rapidapi.com/v1/trademarkSearch/{KEYWORD}/active" \
-  --header "x-rapidapi-host: uspto-trademark.p.rapidapi.com" \
-  --header "x-rapidapi-key: YOUR_RAPIDAPI_KEY"
+# Keyword search
+curl "https://uspto-trademark.p.rapidapi.com/v1/trademarkSearch/APPLE/active" \
+  -H "x-rapidapi-host: uspto-trademark.p.rapidapi.com" \
+  -H "x-rapidapi-key: YOUR_RAPIDAPI_KEY"
 
 # Availability check
-curl --request GET \
-  --url "https://uspto-trademark.p.rapidapi.com/v1/trademarkAvailable/{KEYWORD}" \
-  --header "x-rapidapi-host: uspto-trademark.p.rapidapi.com" \
-  --header "x-rapidapi-key: YOUR_RAPIDAPI_KEY"
+curl "https://uspto-trademark.p.rapidapi.com/v1/trademarkAvailable/CLOUDPEAK" \
+  -H "x-rapidapi-host: uspto-trademark.p.rapidapi.com" \
+  -H "x-rapidapi-key: YOUR_RAPIDAPI_KEY"
 ```
 
 RapidAPI wrapper endpoints:
