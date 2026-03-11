@@ -1,75 +1,76 @@
 ---
 name: screen-recording
 description: >
-  Autonomous video creation skill for the Agent — creates product demos, presentation videos,
-  UI walkthroughs, and narrated screencasts entirely without user intervention.
-  Use this skill whenever a user asks to: "record a screen", "create a demo video", "make a product video",
-  "create a presentation video", "record a walkthrough", "make a screencast", "automate video creation",
-  "generate a narrated video", or anything involving producing an MP4/video file showing content, UI, or animations.
-  This skill covers the full pipeline: animated frames → video assembly → TTS narration → final MP4.
-  Always trigger this skill for any video generation or screen recording automation task.
+  Record the actual screen to video. Use this skill whenever a user asks to:
+  "record my screen", "capture my screen", "make a screen recording", "screencast",
+  "record what's on screen", "capture desktop", "record a video of my screen",
+  "take a video of my desktop", "screen capture to video", or anything involving
+  recording the actual display output to an MP4/video file.
+  Also supports creating synthetic demo videos programmatically when no real screen
+  capture is needed (product demos, animated presentations).
+  Always trigger this skill for any screen recording, screen capture, or video creation task.
 ---
 
-> ⚠️ **Platform notes**: Approach 1 (Programmatic) works on **Linux, macOS, and Windows**. Approach 2 (Xvfb) is **Linux-only**. TTS via pyttsx3 uses espeak-ng on Linux, NSSpeechSynthesizer on macOS, and SAPI5 on Windows — no extra install needed on macOS/Windows.
+> **Requires FFmpeg** for primary recording. Install: `choco install ffmpeg` (Windows), `brew install ffmpeg` (macOS), `apt install ffmpeg` (Linux). Python fallback available if FFmpeg is not installed (no audio/cursor).
 
 # Screen Recording Skill
 
-Autonomous video creation pipeline for the Agent. No user interaction required after initial brief.
+Record the actual screen — full desktop, a specific region, or a named window — to MP4 video with optional audio and cursor capture.
 
-## What this skill creates
+## What this skill does
 
-- **Product demo videos** — animated walkthroughs showing features, UI flows, dashboards
-- **Presentation videos** — slide-style videos with animated content and narration
-- **Screen recordings** — capture of a virtual X11 display (Xvfb) with real browser/app content
-- **Narrated screencasts** — video + TTS voiceover, fully automated
-
----
-
-## Architecture: 3 Confirmed Approaches
-
-### Approach 1 — Programmatic Animation (RECOMMENDED)
-**Best for**: product demos, feature showcases, presentation videos, marketing videos
-
-Stack: `Pillow` → frame generation → `MoviePy` → video assembly → `pyttsx3+espeak` → narration
-
-**Why preferred**: Fully offline, fast, no browser needed, complete creative control.
-
-### Approach 2 — Virtual Display Recording (Linux only)
-**Best for**: capturing real browser/app interactions, UI walkthroughs with live content
-
-Stack: `Xvfb` (virtual display :99) → `FFmpeg x11grab` → records actual screen content
-
-**Why use**: When you need to show a real running application or website.
-
-### Approach 3 — Hybrid (Approach 1 + 2 combined)
-**Best for**: complex demos mixing animated overlays with real UI screenshots
+- **Screen recording** — capture what's actually on screen (primary purpose)
+- **Region/window recording** — capture a specific area or application window
+- **Audio capture** — record system audio alongside video
+- **Synthetic video generation** — create animated demo videos programmatically (secondary)
 
 ---
 
-## Quick Start Workflow
+## Quick Start
 
-### Step 1 — Understand the request
-Determine:
-- What content to show (UI flow, feature list, data visualization, slides)
-- Duration (default: 30–120 seconds)
-- Has narration? (default: yes, using pyttsx3)
-- Resolution (default: 1280×720 HD)
-- Output format (default: MP4, H.264)
-- Output path (ask the user, or default to `./output.mp4` in the current working directory)
-
-### Step 2 — Choose approach (see decision tree below)
-
-### Step 3 — Generate video (see implementation guides)
-
-### Step 4 — Present the file
+### Record full screen for 30 seconds
 ```python
-import os
-output_path = os.path.join(os.getcwd(), "demo.mp4")
-print(f"Video saved to: {output_path}")
+import platform, subprocess, shutil, signal, os
 
-# If present_files is available (e.g., Claude.ai sandbox), optionally copy there:
-# import shutil
-# shutil.copy(output_path, "/mnt/user-data/outputs/demo.mp4")
+def record_screen(output="recording.mp4", duration=30, fps=30, audio=False):
+    system = platform.system()
+    cmd = ["ffmpeg"]
+
+    if system == "Windows":
+        if audio:
+            cmd += ["-f", "dshow", "-i", "audio=Stereo Mix"]
+        cmd += ["-f", "gdigrab", "-framerate", str(fps), "-draw_mouse", "1",
+                "-i", "desktop"]
+    elif system == "Darwin":
+        devices = "0" if not audio else "0:1"
+        cmd += ["-f", "avfoundation", "-framerate", str(fps),
+                "-capture_cursor", "1", "-i", devices]
+    else:  # Linux
+        if audio:
+            cmd += ["-f", "pulse", "-i", "default"]
+        display = os.environ.get("DISPLAY", ":0.0")
+        cmd += ["-f", "x11grab", "-framerate", str(fps), "-draw_mouse", "1",
+                "-i", display]
+
+    cmd += ["-c:v", "libx264", "-preset", "ultrafast", "-crf", "23",
+            "-pix_fmt", "yuv420p"]
+    if audio:
+        cmd += ["-c:a", "aac", "-b:a", "128k"]
+    if duration:
+        cmd += ["-t", str(duration)]
+    cmd += [output, "-y"]
+
+    print(f"Recording → {output}")
+    proc = subprocess.Popen(cmd, stderr=subprocess.PIPE)
+    try:
+        proc.wait()
+    except KeyboardInterrupt:
+        proc.send_signal(signal.SIGINT)
+        proc.wait()
+    print(f"Saved: {output} ({os.path.getsize(output):,} bytes)")
+    return output
+
+record_screen("recording.mp4", duration=30)
 ```
 
 ---
@@ -79,325 +80,260 @@ print(f"Video saved to: {output_path}")
 ```
 User wants a video
 │
-├── Need REAL browser/app on screen?
-│   ├── YES → Approach 2 (Xvfb + x11grab, Linux only)
-│   └── NO  → Continue
+├─ Record what's actually on screen?
+│  ├─ FFmpeg installed? → Approach 1: FFmpeg (RECOMMENDED)
+│  └─ No FFmpeg?       → Approach 2: Python fallback (mss + OpenCV)
 │
-├── Presentation / slides / feature demo / marketing?
-│   └── YES → Approach 1 (Programmatic, FASTEST)
-│
-└── Mix of real UI + animated overlays?
-    └── YES → Approach 3 (Hybrid)
+└─ Create a synthetic animated demo/presentation?
+   └─ YES → Approach 3: Programmatic generation (Pillow + MoviePy)
 ```
 
 ---
 
-## Implementation: Approach 1 (Programmatic)
+## Approach 1: FFmpeg Screen Recording (RECOMMENDED)
 
-Read `references/approach1-programmatic.md` for the full implementation guide.
+FFmpeg uses platform-native capture APIs for fast, high-quality recording with audio and cursor support.
+
+Read `references/ffmpeg-recording.md` for the full platform reference including window capture, audio device detection, and quality tuning.
+
+### Platform-specific input formats
+
+| Platform | Input Format | Cursor | Audio | Region |
+|----------|-------------|--------|-------|--------|
+| Windows | `gdigrab` | `-draw_mouse 1` | `-f dshow -i audio="Stereo Mix"` | `-offset_x/-offset_y/-video_size` |
+| macOS | `avfoundation` | `-capture_cursor 1` | Device index `"0:1"` | `-vf crop=w:h:x:y` |
+| Linux X11 | `x11grab` | `-draw_mouse 1` | `-f pulse -i default` | `-video_size WxH -i :0.0+X,Y` |
+| Linux Wayland | `wf-recorder` | Default | `-a` flag | `-g "x,y wxh"` |
+
+### Full screen recording
+
+**Windows:**
+```bash
+ffmpeg -f gdigrab -framerate 30 -draw_mouse 1 -i desktop -c:v libx264 -preset ultrafast -crf 23 -pix_fmt yuv420p -t 30 recording.mp4 -y
+```
+
+**macOS:**
+```bash
+ffmpeg -f avfoundation -framerate 30 -capture_cursor 1 -i "0" -c:v libx264 -preset ultrafast -crf 23 -pix_fmt yuv420p -t 30 recording.mp4 -y
+```
+
+**Linux (X11):**
+```bash
+ffmpeg -f x11grab -framerate 30 -draw_mouse 1 -i :0.0 -c:v libx264 -preset ultrafast -crf 23 -pix_fmt yuv420p -t 30 recording.mp4 -y
+```
+
+### Region recording
+
+```python
+# Record a specific area: (x=100, y=200, width=800, height=600)
+region = (100, 200, 800, 600)
+
+if system == "Windows":
+    cmd += ["-offset_x", "100", "-offset_y", "200", "-video_size", "800x600", "-i", "desktop"]
+elif system == "Darwin":
+    cmd += ["-i", "0", "-vf", "crop=800:600:100:200"]  # crop after capture
+else:  # Linux
+    cmd += ["-video_size", "800x600", "-i", ":0.0+100,200"]
+```
+
+### Window recording
+
+**Windows** — by window title:
+```bash
+ffmpeg -f gdigrab -framerate 30 -i title="My App" -c:v libx264 -preset ultrafast recording.mp4 -y
+```
+
+**macOS/Linux** — get window bounds, then record as region. See `references/ffmpeg-recording.md` for platform-specific window geometry detection.
+
+### Audio capture
+
+Audio device names vary per system. Detect available devices:
+
+```python
+import subprocess, platform
+
+system = platform.system()
+if system == "Windows":
+    # Lists DirectShow audio devices
+    subprocess.run(["ffmpeg", "-list_devices", "true", "-f", "dshow", "-i", "dummy"])
+elif system == "Darwin":
+    # Lists AVFoundation devices (screens + audio)
+    subprocess.run(["ffmpeg", "-f", "avfoundation", "-list_devices", "true", "-i", ""])
+else:
+    # PulseAudio sources
+    subprocess.run(["pactl", "list", "short", "sources"])
+```
+
+> **Windows note**: "Stereo Mix" must be enabled in Sound Settings → Recording tab. Right-click → Show Disabled Devices → Enable "Stereo Mix".
+
+### Stopping the recording
+
+- **Duration-based**: Use `-t SECONDS` in the FFmpeg command
+- **Manual stop**: Send `SIGINT` (Ctrl+C) to the FFmpeg process
+- **From Python**: `proc.send_signal(signal.SIGINT)` then `proc.wait()`
+
+---
+
+## Approach 2: Python Fallback (No FFmpeg)
+
+When FFmpeg is not available, use `mss` for screenshots and `cv2.VideoWriter` to assemble them.
+
+Read `references/python-fallback.md` for the full working template.
+
+```bash
+pip install mss opencv-python numpy
+```
+
+### Basic capture loop
+```python
+import mss, cv2, numpy as np, time
+
+def record_screen_python(output="recording.mp4", duration=30, fps=20, region=None):
+    with mss.mss() as sct:
+        if region:
+            x, y, w, h = region
+            area = {"left": x, "top": y, "width": w, "height": h}
+        else:
+            mon = sct.monitors[1]
+            area = {"left": mon["left"], "top": mon["top"],
+                    "width": mon["width"], "height": mon["height"]}
+
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+        writer = cv2.VideoWriter(output, fourcc, fps, (area["width"], area["height"]))
+        interval = 1.0 / fps
+        start = time.time()
+
+        while time.time() - start < duration:
+            t0 = time.time()
+            frame = np.array(sct.grab(area))[:, :, :3]
+            writer.write(frame)
+            elapsed = time.time() - t0
+            if elapsed < interval:
+                time.sleep(interval - elapsed)
+
+        writer.release()
+        print(f"Saved: {output}")
+```
+
+### Limitations
+- **No audio** — mss captures pixels only
+- **No cursor** — cursor is not included in screenshots
+- **Lower FPS** — typically 15-25 fps depending on resolution
+- **Larger files** — mp4v codec is less efficient than H.264
+
+---
+
+## Approach 3: Synthetic Video Generation
+
+For creating animated demo videos, product showcases, or presentations without recording the real screen.
+
+Read `references/programmatic-generation.md` for the full implementation guide.
+
+**Stack**: Pillow (frame drawing) → MoviePy (video assembly) → pyttsx3 (TTS narration)
+
+```bash
+pip install "moviepy>=2.0" pillow pyttsx3
+```
 
 **Key pattern:**
 ```python
 from moviepy import VideoClip, AudioFileClip
-import numpy as np
 from PIL import Image, ImageDraw
-import pyttsx3, subprocess, tempfile, os
-
-TMP = tempfile.gettempdir()
-
-# 1. Generate TTS
-engine = pyttsx3.init()
-engine.setProperty('rate', 140)  # speaking speed
-wav_path = os.path.join(TMP, 'narration.wav')
-mp3_path = os.path.join(TMP, 'narration.mp3')
-engine.save_to_file("Your narration text here", wav_path)
-engine.runAndWait()
-subprocess.run(['ffmpeg', '-i', wav_path, '-c:a', 'libmp3lame',
-                mp3_path, '-y', '-loglevel', 'quiet'])
-
-# 2. Generate frames
-scenes = build_scene_list()  # list of {duration, draw_fn}
+import numpy as np
 
 def make_frame(t):
-    img = Image.new('RGB', (1280, 720), BACKGROUND_COLOR)
+    img = Image.new('RGB', (1280, 720), (12, 12, 32))
     draw = ImageDraw.Draw(img)
-    current_scene(draw, t)  # draw current scene content
+    draw.text((100, 300), f"Frame at t={t:.1f}s", fill=(255, 255, 255))
     return np.array(img)
 
-# 3. Assemble
-total_duration = sum(s['duration'] for s in scenes)
-clip = VideoClip(make_frame, duration=total_duration)
-audio = AudioFileClip(mp3_path).with_duration(total_duration)
-final = clip.with_audio(audio)
-output_path = os.path.join(os.getcwd(), "output.mp4")
-final.write_videofile(output_path, fps=24, logger=None)
+clip = VideoClip(make_frame, duration=10)
+clip.write_videofile("demo.mp4", fps=24, logger=None)
 ```
 
 ---
 
-## Implementation: Approach 2 (Xvfb + x11grab)
-
-Read `references/approach2-xvfb.md` for the full implementation guide.
-
-**Key pattern:**
-```bash
-# 1. Start virtual display
-Xvfb :99 -screen 0 1280x720x24 &
-XVFB_PID=$!
-
-# 2. Start recording
-DISPLAY=:99 ffmpeg -f x11grab -video_size 1280x720 -i :99 \
-  -c:v libx264 -preset fast -r 24 recording.mp4 &
-FFMPEG_PID=$!
-
-# 3. Run your app/browser on DISPLAY=:99
-DISPLAY=:99 chromium --no-sandbox --headless=new ...
-# OR
-DISPLAY=:99 python3 your_app.py
-
-# 4. Stop recording
-kill $FFMPEG_PID $XVFB_PID
-```
-
----
-
-## Audio / TTS
-
-### pyttsx3 (OFFLINE — always works)
-```python
-import pyttsx3, tempfile, os
-engine = pyttsx3.init()  # Uses espeak-ng (Linux), NSSpeechSynthesizer (macOS), SAPI5 (Windows)
-engine.setProperty('rate', 140)   # 100-200, default ~200
-engine.setProperty('volume', 0.9) # 0.0-1.0
-
-# List voices:
-for v in engine.getProperty('voices'):
-    print(v.id, v.name)
-
-TMP = tempfile.gettempdir()
-engine.save_to_file("Text to speak", os.path.join(TMP, 'out.wav'))
-engine.runAndWait()
-```
-Convert WAV→MP3: `ffmpeg -i "$TMPDIR/out.wav" -c:a libmp3lame "$TMPDIR/out.mp3" -y -loglevel quiet`
-
-### Silent video (no narration)
-```python
-# Just skip the audio step, write video without audio
-clip.write_videofile("output.mp4", fps=24, logger=None)
-```
-
-### Fallback Strategy
-
-If TTS initialization fails (missing espeak-ng on Linux, etc.), generate a silent video instead of crashing:
-
-```python
-import tempfile, os
-
-TMP = tempfile.gettempdir()
-audio_path = None
-
-try:
-    import pyttsx3
-    engine = pyttsx3.init()
-    engine.setProperty('rate', 140)
-    wav_path = os.path.join(TMP, 'narration.wav')
-    engine.save_to_file(narration_text, wav_path)
-    engine.runAndWait()
-    mp3_path = os.path.join(TMP, 'narration.mp3')
-    subprocess.run(['ffmpeg', '-i', wav_path, '-c:a', 'libmp3lame',
-                    mp3_path, '-y', '-loglevel', 'quiet'])
-    audio_path = mp3_path
-except Exception as e:
-    print(f"⚠️  TTS unavailable ({e}). Generating silent video.")
-
-# When assembling:
-if audio_path and os.path.exists(audio_path):
-    audio = AudioFileClip(audio_path).with_duration(total_duration)
-    final = clip.with_audio(audio)
-else:
-    final = clip
-final.write_videofile(output_path, fps=24, logger=None)
-```
-
----
-
-## Design System
-
-### Color Palettes (use consistently per video)
-```python
-# Tech/Product (dark)
-BG = (12, 12, 32)          # background
-HEADER = (25, 25, 60)       # header bar
-ACCENT = (60, 120, 255)     # primary accent
-TEXT = (255, 255, 255)      # main text
-SUBTEXT = (150, 150, 200)   # secondary text
-
-# Presentation (light)
-BG = (245, 248, 255)
-HEADER = (30, 60, 180)
-ACCENT = (255, 100, 50)
-TEXT = (20, 20, 40)
-SUBTEXT = (100, 100, 130)
-```
-
-### Standard Resolutions
-- `1280x720` — HD (default, fast)
-- `1920x1080` — Full HD (for high-quality output)
-- `1080x1920` — Vertical (mobile/social)
-
-### Font Handling
-
-Pillow's default bitmap font renders tiny unreadable text. Always load a TrueType font:
-
-```python
-from PIL import ImageFont
-import os
-
-def get_font(size=24):
-    """Load a TrueType font with cross-platform fallback."""
-    font_paths = [
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",        # Linux (Debian/Ubuntu)
-        "/usr/share/fonts/TTF/DejaVuSans.ttf",                    # Linux (Arch)
-        "/System/Library/Fonts/Helvetica.ttc",                     # macOS
-        "C:/Windows/Fonts/arial.ttf",                              # Windows
-    ]
-    for path in font_paths:
-        if os.path.exists(path):
-            return ImageFont.truetype(path, size)
-    print("⚠️  No TrueType font found — text will render small. Install dejavu-sans.")
-    return ImageFont.load_default()
-
-# Usage in draw functions:
-title_font = get_font(36)
-body_font = get_font(20)
-small_font = get_font(14)
-draw.text((x, y), "Hello", fill=C["text"], font=title_font)
-```
-
-### Animation Patterns
-```python
-# Smooth ease-in-out (0→1 over duration d, current time t from scene start)
-def ease(t, d): 
-    x = t/d
-    return x*x*(3-2*x)
-
-# Fade in text
-alpha = int(255 * ease(t, 0.5))  # fade over 0.5s
-
-# Slide in from left
-x = int(-500 + 600 * ease(t, 0.8))
-
-# Progress bar
-fill_width = int(max_width * ease(t, d))
-```
-
----
-
-## Scene Structure Pattern
-
-For multi-scene videos, use a scene list:
-
-```python
-scenes = [
-    {
-        "title": "Intro",
-        "duration": 3,
-        "narration": "Welcome to our product demo.",
-        "draw": draw_intro_scene
-    },
-    {
-        "title": "Feature 1",
-        "duration": 5,
-        "narration": "Our AI detects issues automatically.",
-        "draw": draw_feature1_scene
-    },
-    # ...
-]
-
-# Build timeline
-def make_frame(t):
-    elapsed = 0
-    for scene in scenes:
-        if t < elapsed + scene['duration']:
-            scene_t = t - elapsed
-            scene['draw'](img, draw, scene_t, scene['duration'])
-            return np.array(img)
-        elapsed += scene['duration']
-```
-
-> **Narration timing**: The pattern above concatenates all narration into a single TTS call, so per-scene audio timing may drift. For precise sync, generate audio separately per scene:
->
-> ```python
-> from moviepy import concatenate_audioclips
-> audio_clips = []
-> for scene in scenes:
->     path = os.path.join(TMP, f"narration_{scene['title']}.wav")
->     engine.save_to_file(scene['narration'], path)
->     engine.runAndWait()
->     audio_clips.append(AudioFileClip(path).with_duration(scene['duration']))
-> full_audio = concatenate_audioclips(audio_clips)
-> ```
-
----
-
-## FFmpeg Post-Processing
+## Post-Processing (FFmpeg)
 
 ```bash
-# Add subtitles/captions
-ffmpeg -i input.mp4 -vf "subtitles=subs.srt" output.mp4
+# Compress for sharing
+ffmpeg -i recording.mp4 -c:v libx264 -crf 23 -preset medium -c:a aac -b:a 128k compressed.mp4
 
-# Compress for web
-ffmpeg -i input.mp4 -c:v libx264 -crf 23 -preset medium -c:a aac -b:a 128k web.mp4
+# Trim (start at 5s, keep 30s)
+ffmpeg -i recording.mp4 -ss 00:00:05 -t 00:00:30 -c copy trimmed.mp4
 
-# GIF (for short demos)
-ffmpeg -i input.mp4 -vf "fps=12,scale=960:-1:flags=lanczos" -loop 0 demo.gif
+# Convert to GIF (for docs/chat)
+ffmpeg -i recording.mp4 -vf "fps=12,scale=960:-1:flags=lanczos" -loop 0 demo.gif
 
-# Trim
-ffmpeg -i input.mp4 -ss 00:00:05 -t 00:00:30 -c copy trimmed.mp4
+# Add text overlay
+ffmpeg -i recording.mp4 -vf "drawtext=text='Demo':fontcolor=white:fontsize=24:x=20:y=20" overlay.mp4
 
-# Concatenate multiple clips
+# Extract audio
+ffmpeg -i recording.mp4 -vn -c:a mp3 audio.mp3
+
+# Concatenate clips
 # Create concat.txt: file 'clip1.mp4' \n file 'clip2.mp4'
 ffmpeg -f concat -safe 0 -i concat.txt -c copy combined.mp4
 ```
 
 ---
 
-## Installation (run once if needed)
+## Installation
+
+### FFmpeg (required for Approach 1)
+
+| Platform | Command |
+|----------|---------|
+| Windows | `choco install ffmpeg` or `winget install FFmpeg` or download from ffmpeg.org |
+| macOS | `brew install ffmpeg` |
+| Ubuntu/Debian | `sudo apt install ffmpeg` |
+| Arch | `sudo pacman -S ffmpeg` |
+
+Verify: `ffmpeg -version`
+
+### Python packages
 
 ```bash
-# Core dependencies (moviepy v2 required)
-pip install "moviepy>=2.0" pillow opencv-python pyttsx3
+# For Approach 2 (Python fallback)
+pip install mss opencv-python numpy
 
-# On Linux — offline TTS engine:
-# apt-get install -y espeak-ng
-# On macOS — pyttsx3 uses NSSpeechSynthesizer (no extra install needed)
-# On Windows — pyttsx3 uses SAPI5 (no extra install needed)
+# For Approach 3 (synthetic video generation)
+pip install "moviepy>=2.0" pillow pyttsx3
 
-# Verify
-python3 -c "from moviepy import VideoClip; import pyttsx3; print('OK')"
+# On Linux, for TTS in Approach 3:
+# sudo apt install espeak-ng
 ```
 
-> **Note**: If you get an "externally-managed-environment" error on Debian/Ubuntu, add `--break-system-packages` to the pip command.
+### Wayland (Linux)
+
+If on Wayland (`echo $WAYLAND_DISPLAY` returns a value), install wf-recorder:
+```bash
+sudo apt install wf-recorder    # Ubuntu
+sudo pacman -S wf-recorder      # Arch
+```
 
 ---
 
 ## Common Pitfalls
 
 | Problem | Solution |
-|---|---|
-| MoviePy `verbose` kwarg error | Use `logger=None` not `verbose=False` (MoviePy v2) |
-| MoviePy import error (`from moviepy.editor`) | Use `from moviepy import VideoClip` (v2 syntax). Install `moviepy>=2.0` |
-| pyttsx3 "no espeak" error | Linux: `apt-get install -y espeak-ng`. macOS/Windows: works out of the box |
-| gTTS/edge-tts connection error | Use pyttsx3 (offline, always works) |
-| Black video output | Check `make_frame` returns `np.array(img)` not `img` |
-| Tiny/unreadable text | Use `ImageFont.truetype()` with font path — see Font Handling section |
-| Audio/video length mismatch | Use `.with_duration(video.duration)` on audio clip |
-| Xvfb display conflict | Use `DISPLAY=:99` and kill after recording (Linux only) |
+|---------|----------|
+| FFmpeg not found | Install FFmpeg and ensure it's on PATH |
+| Windows: no audio device | Enable "Stereo Mix" in Sound Settings → Recording → Show Disabled Devices |
+| macOS: permission denied | Grant Screen Recording permission: System Settings → Privacy → Screen Recording |
+| Linux: `x11grab` fails on Wayland | Use `wf-recorder` instead (see Wayland section) |
+| Linux: no audio with x11grab | Install PulseAudio: `sudo apt install pulseaudio` |
+| Black/empty video | Check DISPLAY variable on Linux (`echo $DISPLAY`), permissions on macOS |
+| Recording too large | Re-encode: `ffmpeg -i big.mp4 -crf 28 -preset slow small.mp4` |
+| Python fallback: low FPS | Reduce capture resolution or target FPS |
+| Python fallback: no cursor | Known limitation — use FFmpeg approach for cursor capture |
+| MoviePy import error | Use `from moviepy import VideoClip` (v2 syntax), install `moviepy>=2.0` |
 
 ---
 
 ## Reference Files
 
-- `references/approach1-programmatic.md` — Full Approach 1 code templates
-- `references/approach2-xvfb.md` — Full Approach 2 (Xvfb) code templates
-- `references/design-patterns.md` — Advanced animations, transitions, UI components
+- `references/ffmpeg-recording.md` — Full FFmpeg command reference per platform, audio devices, window capture, quality tuning
+- `references/python-fallback.md` — Complete mss + OpenCV recording template with performance tips
+- `references/programmatic-generation.md` — Pillow + MoviePy synthetic video generation (animated demos)
+- `references/design-patterns.md` — UI components and animation patterns for synthetic videos
