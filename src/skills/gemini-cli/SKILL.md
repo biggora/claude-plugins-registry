@@ -7,7 +7,7 @@ description: >
   prompts with -p flag, configuring settings.json, creating GEMINI.md context files, writing
   custom slash commands (.toml files), connecting MCP servers, creating extensions, automating
   tasks with shell scripts, using --output-format json/stream-json, managing chat sessions,
-  using /memory commands, --yolo mode, or any scripting/automation involving gemini-cli.
+  using /memory commands, --auto-approve mode, Application Default Credentials (ADC), or any scripting/automation involving gemini-cli.
   Also trigger when user asks about integrating Gemini models into CLI workflows, CI/CD pipelines,
   or programmatic use of the Gemini API through the CLI tool.
 ---
@@ -66,11 +66,19 @@ gemini
 - Free: 1,000 req/day (Gemini Flash/Pro mix)
 - Can also store in `~/.gemini/.env` or `./.gemini/.env`
 
-### Option 3: Vertex AI (enterprise)
+### Option 3: Application Default Credentials (ADC)
 ```bash
-export GOOGLE_API_KEY="your_key"
+gcloud auth application-default login
+gemini
+```
+- Uses Google Cloud ADC — no API key needed
+- Best for developers already using Google Cloud
+
+### Option 4: Vertex AI (enterprise)
+```bash
 export GOOGLE_GENAI_USE_VERTEXAI=true
 export GOOGLE_CLOUD_PROJECT="your-project-id"
+gcloud auth application-default login
 gemini
 ```
 
@@ -119,8 +127,8 @@ gemini -p "Run tests and analyze results" --output-format stream-json
 # Extract response field with jq
 gemini -p "List top 5 Python testing frameworks" --output-format json | jq -r '.response'
 
-# Auto-accept all tool actions (YOLO mode) — use with care in automation
-gemini -p "Generate unit tests for @./src/utils.js" --yolo
+# Auto-accept all tool actions (auto-approve mode) — use with care in automation
+gemini -p "Generate unit tests for @./src/utils.js" --auto-approve
 ```
 
 ### JSON output schema
@@ -154,7 +162,7 @@ For full scripting patterns → read `references/headless-and-scripting.md`
 | `/restore` | List checkpoints |
 | `/restore <file>` | Restore a checkpoint |
 | `/bug` | Report an issue directly from CLI |
-| `Ctrl+Y` | Toggle YOLO mode (auto-accept all tools) |
+| `Ctrl+Y` | Toggle auto-approve mode |
 
 ---
 
@@ -226,11 +234,17 @@ Location: `~/.gemini/settings.json` (global) or `<project>/.gemini/settings.json
 
 ```json
 {
-  "model": "gemini-2.5-pro",
-  "theme": "dark",
+  "model": {
+    "name": "gemini-2.5-pro"
+  },
+  "theme": {
+    "name": "dark"
+  },
   "autoAccept": false,
-  "coreTools": ["read_file", "write_file", "run_shell_command"],
-  "excludeTools": ["dangerous_tool"],
+  "tools": {
+    "core": ["read_file", "write_file", "run_shell_command"],
+    "disabled": ["dangerous_tool"]
+  },
   "mcpServers": {
     "github": {
       "command": "npx",
@@ -288,7 +302,7 @@ Extensions bundle MCP servers + GEMINI.md + custom commands into a reusable pack
 
 **Install from URL:**
 ```bash
-gemini extension install https://github.com/GoogleCloudPlatform/cloud-run-mcp
+gemini extensions install https://github.com/GoogleCloudPlatform/cloud-run-mcp
 ```
 
 **Browse gallery:** https://geminicli.com/extensions/
@@ -347,7 +361,7 @@ echo "$result" | jq -r '.response' > openapi.json
 export GEMINI_API_KEY="${{ secrets.GEMINI_API_KEY }}"
 gemini -p "Analyze test failures in @./test-results.xml and suggest fixes" \
   --output-format json \
-  --yolo \
+  --auto-approve \
   | jq -r '.response'
 ```
 
@@ -374,6 +388,6 @@ For Vertex AI: additional enterprise models available.
 | Rate limit errors | Free tier: 60 req/min, 1000/day — wait or upgrade |
 | MCP server not connecting | Check `/mcp status`, verify server binary is installed |
 | Slash command not recognized in headless | Known limitation — embed prompt text directly for now |
-| Tool confirmation loops | Add `--yolo` flag for automation, or set `"autoAccept": true` in settings.json |
+| Tool confirmation loops | Add `--auto-approve` flag for automation, or set `"autoAccept": true` in settings |
 
 Full troubleshooting: https://geminicli.com/docs/resources/troubleshooting/

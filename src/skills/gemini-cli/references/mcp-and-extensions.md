@@ -49,10 +49,13 @@ resources to Gemini CLI. MCP servers act as a bridge between Gemini and external
 | `args` | string[] | Arguments array |
 | `cwd` | string | Working directory |
 | `env` | object | Environment variables (use `"$VAR"` to reference env) |
-| `timeout` | number | Connection timeout in ms (default: 10000) |
+| `timeout` | number | Connection timeout in ms (default: 600000 — 10 minutes) |
 | `trust` | boolean | Skip all confirmation dialogs (use with caution) |
 | `includeTools` | string[] | Whitelist of tools to expose |
 | `excludeTools` | string[] | Blacklist of tools to hide |
+| `description` | string | Human-readable description of the server |
+| `httpUrl` | string | HTTP endpoint URL (for streamable HTTP transport) |
+| `headers` | object | Custom HTTP headers for remote connections |
 
 ## Remote MCP Servers (SSE/HTTP)
 
@@ -128,7 +131,7 @@ Extensions bundle together MCP servers, context files, and custom commands into 
 
 ### Install from Git URL
 ```bash
-gemini extension install https://github.com/GoogleCloudPlatform/cloud-run-mcp
+gemini extensions install https://github.com/GoogleCloudPlatform/cloud-run-mcp
 ```
 
 ### Browse the gallery
@@ -176,9 +179,9 @@ my-extension/
 ### Managing Extensions
 
 ```
-/extension list          # list installed extensions
-/extension enable <n>    # enable extension
-/extension disable <n>   # disable extension
+/extensions list          # list installed extensions
+/extensions enable <n>    # enable extension
+/extensions disable <n>   # disable extension
 ```
 
 ---
@@ -206,8 +209,11 @@ description = "What this command does"
 # Use {{args}} to insert all user-provided arguments
 prompt = "Review this code: {{args}}"
 
-# Shell command execution (backtick-style)
+# Shell command execution
 prompt = "Review staged changes:\n!{git diff --cached}"
+
+# File content injection
+prompt = "Review this config:\n@{./config.json}"
 
 # Combined example
 description = "Commit with AI message"

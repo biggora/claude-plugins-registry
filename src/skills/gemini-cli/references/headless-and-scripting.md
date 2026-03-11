@@ -60,8 +60,8 @@
 |---|---|
 | 0 | Success |
 | 1 | General error |
-| 2 | Authentication error |
-| 3 | Rate limit / quota exceeded |
+| 42 | Input error (invalid arguments, missing config) |
+| 53 | Turn limit exceeded |
 
 ## Session Management in Headless Mode
 
@@ -74,9 +74,8 @@ gemini -p "Continue from where we left off" --resume <session_id>
 
 ## Input Sources (merged in order)
 
-1. `--context-file` flag
-2. Stdin pipe
-3. `-p` prompt argument
+1. Stdin pipe
+2. `-p` prompt argument
 
 ## Bash Scripting Patterns
 
@@ -104,10 +103,10 @@ echo "$RESULT" | jq -r '.response'
 git log --oneline -20 | gemini -p "Summarize the recent development activity"
 ```
 
-### Pattern 5: Auto-accept all tool actions (YOLO)
+### Pattern 5: Auto-accept all tool actions (auto-approve)
 ```bash
 # For CI pipelines where no human is present
-gemini -p "Fix lint errors in @./src/ and save changes" --yolo --output-format json
+gemini -p "Fix lint errors in @./src/ and save changes" --auto-approve --output-format json
 ```
 
 ### Pattern 6: Batch processing multiple files
@@ -115,7 +114,7 @@ gemini -p "Fix lint errors in @./src/ and save changes" --yolo --output-format j
 #!/bin/bash
 for py_file in $(find src -name "*.py"); do
   echo "Processing: $py_file"
-  gemini -p "Add type hints to @$py_file and save" --yolo
+  gemini -p "Add type hints to @$py_file and save" --auto-approve
 done
 ```
 
@@ -165,15 +164,6 @@ $output.response > data.json
     REVIEW=$(git diff origin/main...HEAD | gemini -p "Review these changes for bugs and issues" --output-format json | jq -r '.response')
     echo "$REVIEW" >> $GITHUB_STEP_SUMMARY
 ```
-
-## Logging / Debugging
-
-```bash
-# Enable debug logging to file
-gemini -p "My prompt" --debug-log ./gemini-debug.jsonl
-```
-
-The log file captures all API interactions and tool executions as JSONL events.
 
 ## Known Limitations
 

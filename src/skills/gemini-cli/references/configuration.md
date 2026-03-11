@@ -17,20 +17,25 @@
 
 ```json
 {
-  // Model selection
-  "model": "gemini-2.5-pro",
+  // Model selection (nested under "model" object)
+  "model": {
+    "name": "gemini-2.5-pro"
+  },
 
-  // UI theme: "dark" | "light" | "auto" | custom theme name
-  "theme": "dark",
+  // UI theme (nested under "theme" object)
+  "theme": {
+    "name": "dark"
+  },
 
-  // Auto-accept all tool confirmations (like --yolo)
+  // Auto-accept all tool confirmations (like --auto-approve)
   "autoAccept": false,
 
-  // Tools to include (whitelist) — if set, only these are available
-  "coreTools": ["read_file", "write_file", "run_shell_command", "google_web_search"],
-
-  // Tools to explicitly exclude (blacklist)
-  "excludeTools": ["dangerous_tool_name"],
+  // Tools configuration (nested under "tools" object)
+  "tools": {
+    "core": ["read_file", "write_file", "run_shell_command", "google_web_search"],
+    "allowed": ["my_custom_tool"],
+    "disabled": ["dangerous_tool_name"]
+  },
 
   // Generation parameters
   "generationConfig": {
@@ -48,7 +53,7 @@
       "env": {
         "API_KEY": "$MY_ENV_VAR"
       },
-      "timeout": 15000,
+      "timeout": 600000,
       "trust": false,
       "includeTools": ["safe_tool_1"],
       "excludeTools": ["unsafe_tool"]
@@ -107,6 +112,7 @@ Main services: auth, api, worker.
 ```
 /memory add "Staging database is on port 5432"
 /memory show
+/memory reload     # reload from disk after external edits
 ```
 (Writes to `~/.gemini/GEMINI.md`)
 
@@ -130,6 +136,9 @@ Gemini CLI also respects `.gitignore` automatically.
 
 ```json
 {
+  "model": {
+    "name": "gemini-2.5-pro"
+  },
   "generationConfig": {
     "temperature": 1.0,
     "topP": 0.95,
@@ -146,18 +155,14 @@ Gemini CLI also respects `.gitignore` automatically.
 
 ## System Prompt Override
 
-Override the entire system prompt (advanced):
-
-```bash
-gemini --system-prompt "You are a strict TypeScript reviewer. Only respond with code issues."
-```
-
-Or via settings.json:
+Override the system prompt via settings.json:
 ```json
 {
   "systemPrompt": "You are a helpful assistant for Python development."
 }
 ```
+
+Or use GEMINI.md context files to provide project-specific instructions (preferred approach).
 
 ## Trusted Folders
 

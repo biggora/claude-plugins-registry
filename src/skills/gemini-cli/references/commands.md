@@ -10,11 +10,9 @@ Options:
   -m, --model <model>          Model to use (e.g., gemini-2.5-pro)
   --output-format <format>     Output format: text (default), json, stream-json
   --include-directories <dirs> Comma-separated extra directories to include
-  --yolo                       Auto-accept all tool actions (no confirmations)
+  --auto-approve               Auto-accept all tool actions (no confirmations)
   --resume <session-id>        Resume a previous session
-  --system-prompt <text>       Override system prompt
-  --raw-output                 Disable ANSI codes in output
-  --debug-log <path>           Write debug JSONL log to file
+  --sandbox <type>             Run in sandboxed environment (docker, podman, etc.)
   -v, --version                Show version
   -h, --help                   Show help
 ```
@@ -56,6 +54,13 @@ Options:
 | `/chat resume <name>` | Resume a saved conversation |
 | `/chat list` | List saved conversations |
 
+### Context / Compaction
+
+| Command | Description |
+|---|---|
+| `/compact` | Compact conversation context (free tokens) |
+| `/diff` | Show diff of changes made in current session |
+
 ### Memory
 
 | Command | Description |
@@ -63,6 +68,7 @@ Options:
 | `/memory add <text>` | Add a persistent fact to GEMINI.md |
 | `/memory show` | Display current memory contents |
 | `/memory clear` | Clear all memory entries |
+| `/memory reload` | Reload memory from disk |
 
 ### Checkpointing
 
@@ -75,9 +81,9 @@ Options:
 
 | Command | Description |
 |---|---|
-| `/extension list` | List installed extensions |
-| `/extension enable <n>` | Enable an extension |
-| `/extension disable <n>` | Disable an extension |
+| `/extensions list` | List installed extensions |
+| `/extensions enable <n>` | Enable an extension |
+| `/extensions disable <n>` | Disable an extension |
 
 ### Theme
 
@@ -95,7 +101,7 @@ Options:
 | `replace` | Replace text in files (old_string → new_string) |
 | `list_directory` | List directory contents |
 | `glob` | Find files by pattern |
-| `search_file_content` | Search within files by pattern |
+| `grep_search` | Search within files by pattern |
 | `run_shell_command` | Execute shell commands |
 | `google_web_search` | Search the web (Google Search grounding) |
 | `web_fetch` | Fetch URL content |
@@ -123,10 +129,11 @@ gemini -p "Summarize @https://github.com/org/repo/README.md"
 |---|---|
 | `Ctrl+C` | Cancel current operation |
 | `Ctrl+D` | Exit |
-| `Ctrl+Y` | Toggle YOLO mode (auto-accept tools) |
+| `Ctrl+Y` | Toggle auto-approve mode (auto-accept tools) |
 | `Ctrl+L` | Clear screen |
+| `Ctrl+J` | Insert newline (multi-line input) |
 | `↑ / ↓` | Navigate input history |
-| `Tab` | Autocomplete slash commands |
+| `Tab` | Autocomplete slash commands and file paths |
 
 ## gemini mcp CLI Commands (outside session)
 
@@ -136,10 +143,10 @@ gemini mcp list
 gemini mcp remove <n>
 ```
 
-## gemini extension CLI Commands (outside session)
+## gemini extensions CLI Commands (outside session)
 
 ```bash
-gemini extension install <url>
-gemini extension list
-gemini extension remove <n>
+gemini extensions install <url>
+gemini extensions list
+gemini extensions remove <n>
 ```
