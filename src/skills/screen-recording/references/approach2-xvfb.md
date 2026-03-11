@@ -1,5 +1,7 @@
 # Approach 2: Virtual Display Recording (Xvfb + FFmpeg x11grab)
 
+> ⚠️ **Linux only**: Xvfb and x11grab are Linux-specific. This approach does not work on macOS or Windows. Use Approach 1 (Programmatic) for cross-platform video generation.
+
 Capture a real running application on a virtual screen.
 
 ## How It Works
@@ -21,13 +23,14 @@ Virtual Display Screen Recorder
 Launches a real app on a virtual display and records it.
 """
 
-import subprocess, os, time, signal, shutil
+import subprocess, os, time, signal, tempfile
 
 WIDTH, HEIGHT = 1280, 720
 DISPLAY_NUM = ":99"
 FPS = 24
 DURATION = 30  # seconds to record
-OUTPUT = "/home/claude/recording.mp4"
+TMP = tempfile.gettempdir()
+OUTPUT = os.path.join(os.getcwd(), "recording.mp4")
 
 
 def start_virtual_display():
@@ -127,12 +130,12 @@ root.mainloop()
 
 def run_demo(display):
     # Write app to temp file
-    with open('/tmp/demo_app.py', 'w') as f:
+    with open(os.path.join(TMP, 'demo_app.py'), 'w') as f:
         f.write(my_tkinter_app_script())
     
     env = os.environ.copy()
     env["DISPLAY"] = display
-    subprocess.Popen(["python3", "/tmp/demo_app.py"], env=env)
+    subprocess.Popen(["python3", os.path.join(TMP, 'demo_app.py')], env=env)
     time.sleep(10)  # let app run
 
 
@@ -171,17 +174,19 @@ def add_narration(video_path, narration_text, output_path):
     
     engine = pyttsx3.init()
     engine.setProperty('rate', 140)
-    engine.save_to_file(narration_text, '/tmp/narration.wav')
+    wav_path = os.path.join(TMP, 'narration.wav')
+    mp3_path = os.path.join(TMP, 'narration.mp3')
+    engine.save_to_file(narration_text, wav_path)
     engine.runAndWait()
-    
+
     subprocess.run([
-        'ffmpeg', '-i', '/tmp/narration.wav', 
+        'ffmpeg', '-i', wav_path,
         '-c:a', 'libmp3lame', '-b:a', '128k',
-        '/tmp/narration.mp3', '-y', '-loglevel', 'quiet'
+        mp3_path, '-y', '-loglevel', 'quiet'
     ])
-    
+
     subprocess.run([
-        'ffmpeg', '-i', video_path, '-i', '/tmp/narration.mp3',
+        'ffmpeg', '-i', video_path, '-i', mp3_path,
         '-c:v', 'copy', '-c:a', 'aac',
         '-shortest', output_path, '-y', '-loglevel', 'quiet'
     ])
@@ -208,10 +213,9 @@ def add_overlay_text(video_path, text, position="bottom", output_path=None):
 if __name__ == "__main__":
     result = record_session(run_demo, duration=12, output=OUTPUT)
     # Add narration
-    final = add_narration(result, "This is our automated UI demo.", 
-                          "/home/claude/final_recording.mp4")
-    shutil.copy(final, "/mnt/user-data/outputs/recording.mp4")
-    print(f"🎉 Done: /mnt/user-data/outputs/recording.mp4")
+    final = add_narration(result, "This is our automated UI demo.",
+                          os.path.join(os.getcwd(), "final_recording.mp4"))
+    print(f"🎉 Done: {final}")
 ```
 
 ## When to Use This Approach

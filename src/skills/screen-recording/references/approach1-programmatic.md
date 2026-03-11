@@ -9,19 +9,19 @@ Full offline pipeline. No browser, no display server needed.
 """
 Autonomous Product Demo Video Generator
 Usage: python3 generate_demo.py
-Output: /mnt/user-data/outputs/demo.mp4
+Output: ./demo.mp4 (current working directory)
 """
 
 from moviepy import VideoClip, AudioFileClip
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
-import pyttsx3, subprocess, os, shutil
+import pyttsx3, subprocess, os, tempfile
 
 # ── CONFIG ─────────────────────────────────────────────────────────────────────
 WIDTH, HEIGHT = 1280, 720
 FPS = 24
-OUTPUT_PATH = "/home/claude/demo.mp4"
-FINAL_OUTPUT = "/mnt/user-data/outputs/demo.mp4"
+TMP = tempfile.gettempdir()
+OUTPUT_PATH = os.path.join(os.getcwd(), "demo.mp4")
 
 # Color palette (dark tech theme)
 C = {
@@ -35,6 +35,20 @@ C = {
     "warning":  (255, 180, 40),
     "card":     (25, 28, 60),
 }
+
+# Font handling (falls back to Pillow default if no TTF found)
+def _load_font(size=24):
+    for p in ["/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+              "/usr/share/fonts/TTF/DejaVuSans.ttf",
+              "/System/Library/Fonts/Helvetica.ttc",
+              "C:/Windows/Fonts/arial.ttf"]:
+        if os.path.exists(p):
+            return ImageFont.truetype(p, size)
+    return ImageFont.load_default()
+
+FONT_LG = _load_font(36)
+FONT_MD = _load_font(24)
+FONT_SM = _load_font(16)
 
 # ── SCENES ─────────────────────────────────────────────────────────────────────
 SCENES = [
@@ -70,9 +84,9 @@ def ease(t, d):
 
 def draw_header(draw, title, subtitle=""):
     draw.rectangle([0, 0, WIDTH, 72], fill=C["header"])
-    draw.text((32, 16), title, fill=C["text"])
+    draw.text((32, 16), title, fill=C["text"], font=FONT_MD)
     if subtitle:
-        draw.text((32, 46), subtitle, fill=C["subtext"])
+        draw.text((32, 46), subtitle, fill=C["subtext"], font=FONT_SM)
     # Header accent line
     draw.rectangle([0, 72, WIDTH, 75], fill=C["accent"])
 
@@ -105,7 +119,8 @@ def draw_intro(draw, t, d):
     x = int(WIDTH/2 - len(title)*12)
     y = int(200 + (1 - alpha_title) * 60)
     draw.text((x, y), title, fill=(
-        int(255 * alpha_title), int(255 * alpha_title), int(255 * alpha_title)))
+        int(255 * alpha_title), int(255 * alpha_title), int(255 * alpha_title)),
+        font=FONT_LG)
     
     # Subtitle
     sub = "Transforming workflows with AI automation"
@@ -223,15 +238,24 @@ DRAW_FUNCTIONS = {
 
 # ── MAIN PIPELINE ──────────────────────────────────────────────────────────────
 def generate_video():
+    # NOTE: Single TTS call for all scenes. For per-scene timing, generate audio per scene
+    # (see SKILL.md "Scene Structure Pattern" section for the per-scene alternative).
     print("📝 Step 1: Generating TTS narration...")
     narration_text = " ".join(s["narration"] for s in SCENES)
-    engine = pyttsx3.init()
-    engine.setProperty('rate', 140)
-    engine.save_to_file(narration_text, '/tmp/narration.wav')
-    engine.runAndWait()
-    subprocess.run(['ffmpeg', '-i', '/tmp/narration.wav', '-c:a', 'libmp3lame',
-                    '-b:a', '128k', '/tmp/narration.mp3', '-y', '-loglevel', 'quiet'])
-    print(f"   ✅ Narration: {os.path.getsize('/tmp/narration.mp3'):,} bytes")
+    wav_path = os.path.join(TMP, 'narration.wav')
+    mp3_path = os.path.join(TMP, 'narration.mp3')
+    audio_available = False
+    try:
+        engine = pyttsx3.init()
+        engine.setProperty('rate', 140)
+        engine.save_to_file(narration_text, wav_path)
+        engine.runAndWait()
+        subprocess.run(['ffmpeg', '-i', wav_path, '-c:a', 'libmp3lame',
+                        '-b:a', '128k', mp3_path, '-y', '-loglevel', 'quiet'])
+        audio_available = True
+        print(f"   ✅ Narration: {os.path.getsize(mp3_path):,} bytes")
+    except Exception as e:
+        print(f"   ⚠️  TTS unavailable ({e}). Generating silent video.")
 
     print("🎬 Step 2: Rendering video frames...")
     # Build timeline
@@ -254,18 +278,17 @@ def generate_video():
     print(f"   ✅ Clip: {TOTAL_DURATION}s at {FPS}fps")
 
     print("🎵 Step 3: Combining video + audio...")
-    audio = AudioFileClip('/tmp/narration.mp3').with_duration(TOTAL_DURATION)
-    final = clip.with_audio(audio)
+    if audio_available:
+        audio = AudioFileClip(mp3_path).with_duration(TOTAL_DURATION)
+        final = clip.with_audio(audio)
+    else:
+        final = clip
     final.write_videofile(OUTPUT_PATH, fps=FPS, logger=None)
     size = os.path.getsize(OUTPUT_PATH)
     print(f"   ✅ Video: {size:,} bytes ({size//1024} KB)")
+    print(f"   ✅ Saved to: {OUTPUT_PATH}")
 
-    print("📦 Step 4: Copying to outputs...")
-    os.makedirs(os.path.dirname(FINAL_OUTPUT), exist_ok=True)
-    shutil.copy(OUTPUT_PATH, FINAL_OUTPUT)
-    print(f"   ✅ Saved to: {FINAL_OUTPUT}")
-    
-    return FINAL_OUTPUT
+    return OUTPUT_PATH
 
 if __name__ == "__main__":
     result = generate_video()

@@ -1,5 +1,7 @@
 # Design Patterns for Screen Recording Videos
 
+> **Font note**: All `draw.text()` examples below omit the `font=` parameter for brevity. Always pass a loaded TrueType font (see SKILL.md "Font Handling" section) to avoid tiny unreadable text.
+
 ## UI Component Library (Pillow)
 
 ### Rounded Rectangle
@@ -164,5 +166,5 @@ subprocess.run([
 - [ ] `total_duration = sum(s["duration"] for s in SCENES)` is correct
 - [ ] `make_frame` returns `np.array(img)` (not PIL Image)
 - [ ] Audio `.with_duration(total_duration)` called
-- [ ] Output path is in `/home/claude/` first, then copied to `/mnt/user-data/outputs/`
-- [ ] `apt-get install -y espeak-ng` was run if pyttsx3 is used
+- [ ] Output path uses `os.getcwd()` or user-specified directory
+- [ ] On Linux: `apt-get install -y espeak-ng` was run if pyttsx3 is used

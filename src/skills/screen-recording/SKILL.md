@@ -10,6 +10,8 @@ description: >
   Always trigger this skill for any video generation or screen recording automation task.
 ---
 
+> ⚠️ **Platform notes**: Approach 1 (Programmatic) works on **Linux, macOS, and Windows**. Approach 2 (Xvfb) is **Linux-only**. TTS via pyttsx3 uses espeak-ng on Linux, NSSpeechSynthesizer on macOS, and SAPI5 on Windows — no extra install needed on macOS/Windows.
+
 # Screen Recording Skill
 
 Autonomous video creation pipeline for the Agent. No user interaction required after initial brief.
@@ -32,7 +34,7 @@ Stack: `Pillow` → frame generation → `MoviePy` → video assembly → `pytts
 
 **Why preferred**: Fully offline, fast, no browser needed, complete creative control.
 
-### Approach 2 — Virtual Display Recording
+### Approach 2 — Virtual Display Recording (Linux only)
 **Best for**: capturing real browser/app interactions, UI walkthroughs with live content
 
 Stack: `Xvfb` (virtual display :99) → `FFmpeg x11grab` → records actual screen content
@@ -50,9 +52,10 @@ Stack: `Xvfb` (virtual display :99) → `FFmpeg x11grab` → records actual scre
 Determine:
 - What content to show (UI flow, feature list, data visualization, slides)
 - Duration (default: 30–120 seconds)
-- Has narration? (default: yes, using pyttsx3+espeak)
+- Has narration? (default: yes, using pyttsx3)
 - Resolution (default: 1280×720 HD)
 - Output format (default: MP4, H.264)
+- Output path (ask the user, or default to `./output.mp4` in the current working directory)
 
 ### Step 2 — Choose approach (see decision tree below)
 
@@ -60,9 +63,13 @@ Determine:
 
 ### Step 4 — Present the file
 ```python
-# Always copy to outputs and use present_files
-import shutil
-shutil.copy("/home/claude/output.mp4", "/mnt/user-data/outputs/demo.mp4")
+import os
+output_path = os.path.join(os.getcwd(), "demo.mp4")
+print(f"Video saved to: {output_path}")
+
+# If present_files is available (e.g., Claude.ai sandbox), optionally copy there:
+# import shutil
+# shutil.copy(output_path, "/mnt/user-data/outputs/demo.mp4")
 ```
 
 ---
@@ -73,7 +80,7 @@ shutil.copy("/home/claude/output.mp4", "/mnt/user-data/outputs/demo.mp4")
 User wants a video
 │
 ├── Need REAL browser/app on screen?
-│   ├── YES → Approach 2 (Xvfb + x11grab)
+│   ├── YES → Approach 2 (Xvfb + x11grab, Linux only)
 │   └── NO  → Continue
 │
 ├── Presentation / slides / feature demo / marketing?
@@ -94,15 +101,19 @@ Read `references/approach1-programmatic.md` for the full implementation guide.
 from moviepy import VideoClip, AudioFileClip
 import numpy as np
 from PIL import Image, ImageDraw
-import pyttsx3, subprocess
+import pyttsx3, subprocess, tempfile, os
+
+TMP = tempfile.gettempdir()
 
 # 1. Generate TTS
 engine = pyttsx3.init()
 engine.setProperty('rate', 140)  # speaking speed
-engine.save_to_file("Your narration text here", '/tmp/narration.wav')
+wav_path = os.path.join(TMP, 'narration.wav')
+mp3_path = os.path.join(TMP, 'narration.mp3')
+engine.save_to_file("Your narration text here", wav_path)
 engine.runAndWait()
-subprocess.run(['ffmpeg', '-i', '/tmp/narration.wav', '-c:a', 'libmp3lame', 
-                '/tmp/narration.mp3', '-y', '-loglevel', 'quiet'])
+subprocess.run(['ffmpeg', '-i', wav_path, '-c:a', 'libmp3lame',
+                mp3_path, '-y', '-loglevel', 'quiet'])
 
 # 2. Generate frames
 scenes = build_scene_list()  # list of {duration, draw_fn}
@@ -116,9 +127,10 @@ def make_frame(t):
 # 3. Assemble
 total_duration = sum(s['duration'] for s in scenes)
 clip = VideoClip(make_frame, duration=total_duration)
-audio = AudioFileClip('/tmp/narration.mp3').with_duration(total_duration)
+audio = AudioFileClip(mp3_path).with_duration(total_duration)
 final = clip.with_audio(audio)
-final.write_videofile("/home/claude/output.mp4", fps=24, logger=None)
+output_path = os.path.join(os.getcwd(), "output.mp4")
+final.write_videofile(output_path, fps=24, logger=None)
 ```
 
 ---
@@ -135,7 +147,7 @@ XVFB_PID=$!
 
 # 2. Start recording
 DISPLAY=:99 ffmpeg -f x11grab -video_size 1280x720 -i :99 \
-  -c:v libx264 -preset fast -r 24 /home/claude/recording.mp4 &
+  -c:v libx264 -preset fast -r 24 recording.mp4 &
 FFMPEG_PID=$!
 
 # 3. Run your app/browser on DISPLAY=:99
@@ -151,10 +163,10 @@ kill $FFMPEG_PID $XVFB_PID
 
 ## Audio / TTS
 
-### pyttsx3 + espeak-ng (OFFLINE — always works)
+### pyttsx3 (OFFLINE — always works)
 ```python
-import pyttsx3
-engine = pyttsx3.init()
+import pyttsx3, tempfile, os
+engine = pyttsx3.init()  # Uses espeak-ng (Linux), NSSpeechSynthesizer (macOS), SAPI5 (Windows)
 engine.setProperty('rate', 140)   # 100-200, default ~200
 engine.setProperty('volume', 0.9) # 0.0-1.0
 
@@ -162,15 +174,49 @@ engine.setProperty('volume', 0.9) # 0.0-1.0
 for v in engine.getProperty('voices'):
     print(v.id, v.name)
 
-engine.save_to_file("Text to speak", '/tmp/out.wav')
+TMP = tempfile.gettempdir()
+engine.save_to_file("Text to speak", os.path.join(TMP, 'out.wav'))
 engine.runAndWait()
 ```
-Convert WAV→MP3: `ffmpeg -i /tmp/out.wav -c:a libmp3lame /tmp/out.mp3 -y -loglevel quiet`
+Convert WAV→MP3: `ffmpeg -i "$TMPDIR/out.wav" -c:a libmp3lame "$TMPDIR/out.mp3" -y -loglevel quiet`
 
 ### Silent video (no narration)
 ```python
 # Just skip the audio step, write video without audio
-clip.write_videofile("/home/claude/output.mp4", fps=24, logger=None)
+clip.write_videofile("output.mp4", fps=24, logger=None)
+```
+
+### Fallback Strategy
+
+If TTS initialization fails (missing espeak-ng on Linux, etc.), generate a silent video instead of crashing:
+
+```python
+import tempfile, os
+
+TMP = tempfile.gettempdir()
+audio_path = None
+
+try:
+    import pyttsx3
+    engine = pyttsx3.init()
+    engine.setProperty('rate', 140)
+    wav_path = os.path.join(TMP, 'narration.wav')
+    engine.save_to_file(narration_text, wav_path)
+    engine.runAndWait()
+    mp3_path = os.path.join(TMP, 'narration.mp3')
+    subprocess.run(['ffmpeg', '-i', wav_path, '-c:a', 'libmp3lame',
+                    mp3_path, '-y', '-loglevel', 'quiet'])
+    audio_path = mp3_path
+except Exception as e:
+    print(f"⚠️  TTS unavailable ({e}). Generating silent video.")
+
+# When assembling:
+if audio_path and os.path.exists(audio_path):
+    audio = AudioFileClip(audio_path).with_duration(total_duration)
+    final = clip.with_audio(audio)
+else:
+    final = clip
+final.write_videofile(output_path, fps=24, logger=None)
 ```
 
 ---
@@ -198,6 +244,35 @@ SUBTEXT = (100, 100, 130)
 - `1280x720` — HD (default, fast)
 - `1920x1080` — Full HD (for high-quality output)
 - `1080x1920` — Vertical (mobile/social)
+
+### Font Handling
+
+Pillow's default bitmap font renders tiny unreadable text. Always load a TrueType font:
+
+```python
+from PIL import ImageFont
+import os
+
+def get_font(size=24):
+    """Load a TrueType font with cross-platform fallback."""
+    font_paths = [
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",        # Linux (Debian/Ubuntu)
+        "/usr/share/fonts/TTF/DejaVuSans.ttf",                    # Linux (Arch)
+        "/System/Library/Fonts/Helvetica.ttc",                     # macOS
+        "C:/Windows/Fonts/arial.ttf",                              # Windows
+    ]
+    for path in font_paths:
+        if os.path.exists(path):
+            return ImageFont.truetype(path, size)
+    print("⚠️  No TrueType font found — text will render small. Install dejavu-sans.")
+    return ImageFont.load_default()
+
+# Usage in draw functions:
+title_font = get_font(36)
+body_font = get_font(20)
+small_font = get_font(14)
+draw.text((x, y), "Hello", fill=C["text"], font=title_font)
+```
 
 ### Animation Patterns
 ```python
@@ -250,6 +325,19 @@ def make_frame(t):
         elapsed += scene['duration']
 ```
 
+> **Narration timing**: The pattern above concatenates all narration into a single TTS call, so per-scene audio timing may drift. For precise sync, generate audio separately per scene:
+>
+> ```python
+> from moviepy import concatenate_audioclips
+> audio_clips = []
+> for scene in scenes:
+>     path = os.path.join(TMP, f"narration_{scene['title']}.wav")
+>     engine.save_to_file(scene['narration'], path)
+>     engine.runAndWait()
+>     audio_clips.append(AudioFileClip(path).with_duration(scene['duration']))
+> full_audio = concatenate_audioclips(audio_clips)
+> ```
+
 ---
 
 ## FFmpeg Post-Processing
@@ -277,15 +365,19 @@ ffmpeg -f concat -safe 0 -i concat.txt -c copy combined.mp4
 ## Installation (run once if needed)
 
 ```bash
-# Core dependencies (usually pre-installed)
-pip install moviepy pillow opencv-python pyttsx3 --break-system-packages
+# Core dependencies (moviepy v2 required)
+pip install "moviepy>=2.0" pillow opencv-python pyttsx3
 
-# Offline TTS engine
-apt-get install -y espeak-ng
+# On Linux — offline TTS engine:
+# apt-get install -y espeak-ng
+# On macOS — pyttsx3 uses NSSpeechSynthesizer (no extra install needed)
+# On Windows — pyttsx3 uses SAPI5 (no extra install needed)
 
 # Verify
 python3 -c "from moviepy import VideoClip; import pyttsx3; print('OK')"
 ```
+
+> **Note**: If you get an "externally-managed-environment" error on Debian/Ubuntu, add `--break-system-packages` to the pip command.
 
 ---
 
@@ -293,12 +385,14 @@ python3 -c "from moviepy import VideoClip; import pyttsx3; print('OK')"
 
 | Problem | Solution |
 |---|---|
-| MoviePy `verbose` kwarg error | Use `logger=None` not `verbose=False` |
-| pyttsx3 "no espeak" error | `apt-get install -y espeak-ng` |
-| gTTS/edge-tts connection error | Use pyttsx3+espeak (offline, always works) |
+| MoviePy `verbose` kwarg error | Use `logger=None` not `verbose=False` (MoviePy v2) |
+| MoviePy import error (`from moviepy.editor`) | Use `from moviepy import VideoClip` (v2 syntax). Install `moviepy>=2.0` |
+| pyttsx3 "no espeak" error | Linux: `apt-get install -y espeak-ng`. macOS/Windows: works out of the box |
+| gTTS/edge-tts connection error | Use pyttsx3 (offline, always works) |
 | Black video output | Check `make_frame` returns `np.array(img)` not `img` |
+| Tiny/unreadable text | Use `ImageFont.truetype()` with font path — see Font Handling section |
 | Audio/video length mismatch | Use `.with_duration(video.duration)` on audio clip |
-| Xvfb display conflict | Use `DISPLAY=:99` and kill after recording |
+| Xvfb display conflict | Use `DISPLAY=:99` and kill after recording (Linux only) |
 
 ---
 
