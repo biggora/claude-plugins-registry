@@ -81,7 +81,7 @@ def safe_find(driver, by, value, timeout=10):
     )
 
 
-def check_for_crash(driver) -> str | None:
+def check_for_crash(driver):
     """Returns crash message if a crash dialog is detected, else None."""
     try:
         # Look for common crash dialog text

@@ -44,11 +44,12 @@ def check_appium_python():
 
 def check_python_deps():
     missing = []
-    for pkg in ["pytest", "jinja2", "PIL"]:
+    pkg_map = {"pytest": "pytest", "jinja2": "jinja2", "PIL": "pillow"}
+    for import_name, install_name in pkg_map.items():
         try:
-            __import__(pkg)
+            __import__(import_name)
         except ImportError:
-            missing.append(pkg)
+            missing.append(install_name)
     if missing:
         raise RuntimeError(f"Missing packages: {missing}. Run: pip install {' '.join(missing)} --break-system-packages")
     return "All Python deps OK"
@@ -66,12 +67,11 @@ def check_avd():
 def main():
     checks = [
         ("ADB", check_adb),
-        ("Android Emulator Binary", check_emulator),
+        ("Android Virtual Devices", check_avd),
         ("Connected Device/Emulator", check_emulator),
         ("Appium Server", check_appium_server),
         ("Appium Python Client", check_appium_python),
         ("Python Dependencies", check_python_deps),
-        ("Android Virtual Devices", check_avd),
     ]
 
     print("\n🔍 MOBILE TESTING ENVIRONMENT CHECK")

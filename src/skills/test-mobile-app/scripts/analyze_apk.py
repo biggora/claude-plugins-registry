@@ -50,10 +50,21 @@ def analyze_apk(apk_path: str) -> dict:
 
         # String resources (sample)
         try:
-            for lang, strings in apk.get_strings_analysis().items():
-                sample = list(strings.keys())[:30]
-                result["strings_sample"] = sample
-                break
+            # Try modern androguard API first, fall back to legacy
+            try:
+                from androguard.core.axml import AXMLPrinter
+                res_parser = apk.get_android_resources()
+                if res_parser:
+                    strings = res_parser.get_resolved_strings()
+                    if strings:
+                        for lang_strings in strings.values():
+                            result["strings_sample"] = list(lang_strings.values())[:30]
+                            break
+            except (ImportError, AttributeError):
+                # Fallback: extract string-like values from manifest
+                manifest_xml = apk.get_android_manifest_xml()
+                if manifest_xml is not None:
+                    result["strings_sample"] = []
         except Exception:
             pass
 

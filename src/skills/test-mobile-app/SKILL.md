@@ -151,15 +151,20 @@ python3 scripts/run_tests.py --apk path/to/app.apk --device emulator-5554 --outp
 
 ### Test Execution Without Emulator (Static Mode)
 
-If no emulator is available, Claude can:
-1. Analyze source code / screenshots statically
-2. Write all test scenarios
+If no emulator is available (which is common — most users won't have Appium set up),
+Claude can still provide significant value:
+1. Analyze source code / screenshots / APK statically
+2. Generate use cases and write all test scenarios
 3. Mark execution status as `MANUAL_REQUIRED`
-4. Generate a report with all test cases ready to be run manually
+4. Generate a comprehensive report with all test cases ready to be run manually
+5. Provide step-by-step manual testing instructions the user can follow
+
+This is the **most common execution path** — don't treat it as a fallback.
+Make the static report just as polished and detailed as the automated one.
 
 Use `--static` flag:
 ```bash
-python3 scripts/run_tests.py --static --output results/
+python3 scripts/run_tests.py --static --tests tests.json --output results/
 ```
 
 ---
@@ -208,5 +213,5 @@ Read `references/report-template.md` for report structure details.
 - **Locators**: Prefer `accessibility id` > `resource-id` > `xpath`. Never use index-based xpath.
 - **Waits**: Always use explicit waits (`WebDriverWait`), never `time.sleep`.
 - **Screenshots**: Capture on every assertion failure automatically.
-- **Crash detection**: After every interaction, check for crash dialogs (`scripts/crash_detector.py`).
+- **Crash detection**: After every interaction, check for crash dialogs (the `check_for_crash()` function in `scripts/run_tests.py` handles this automatically).
 - **Language**: Generate use cases and reports in the language the user is using.
