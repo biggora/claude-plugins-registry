@@ -2,6 +2,10 @@
 """
 Web Tester - Site Discovery
 Auto-crawls a website to discover pages, forms, links, and interactive elements.
+
+Usage:
+    python scripts/discover.py --url https://example.com --output discovery.json
+    python scripts/discover.py --url http://localhost:8080 --max-pages 20
 """
 
 import json
@@ -13,7 +17,8 @@ from urllib.parse import urljoin, urlparse
 try:
     from playwright.sync_api import sync_playwright
 except ImportError:
-    print("ERROR: playwright not installed.")
+    print("ERROR: playwright not installed. Install with:")
+    print("  pip install playwright && playwright install chromium")
     sys.exit(1)
 
 
@@ -31,11 +36,19 @@ def discover_site(url, max_pages=10):
         context = browser.new_context(viewport={'width': 1280, 'height': 800})
         page = context.new_page()
 
+        # Register console listener BEFORE any navigation
+        # so we catch errors that occur during page load
+        console_errors = []
+        page.on('console', lambda msg: console_errors.append(msg.text) if msg.type == 'error' else None)
+
         while to_visit and len(visited) < max_pages:
             current_url = to_visit.pop(0)
             if current_url in visited:
                 continue
             visited.add(current_url)
+
+            # Clear for each page
+            console_errors.clear()
 
             try:
                 page.goto(current_url, wait_until='domcontentloaded', timeout=15000)
@@ -51,14 +64,10 @@ def discover_site(url, max_pages=10):
                 'links': [],
                 'forms': [],
                 'buttons': [],
-                'images': [],
+                'images': {},
                 'nav_items': [],
-                'console_errors': [],
+                'console_errors': list(console_errors)[:5],
             }
-
-            # Collect console errors
-            console_errors = []
-            page.on('console', lambda msg: console_errors.append(msg.text) if msg.type == 'error' else None)
 
             # Headings
             for tag in ['h1', 'h2', 'h3']:
@@ -137,14 +146,18 @@ def discover_site(url, max_pages=10):
             # Images
             images = page.locator('img').all()
             broken = 0
+            missing_alt = 0
             for img in images:
                 try:
                     natural_w = img.evaluate('el => el.naturalWidth')
                     if natural_w == 0:
                         broken += 1
+                    alt = img.get_attribute('alt')
+                    if alt is None or alt.strip() == '':
+                        missing_alt += 1
                 except Exception:
                     pass
-            page_data['images'] = {'total': len(images), 'broken': broken}
+            page_data['images'] = {'total': len(images), 'broken': broken, 'missing_alt': missing_alt}
 
             page_data['console_errors'] = console_errors[:5]
             pages.append(page_data)
@@ -160,10 +173,10 @@ def discover_site(url, max_pages=10):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--url', required=True)
-    parser.add_argument('--max-pages', type=int, default=10)
-    parser.add_argument('--output', default='/home/claude/discovery.json')
+    parser = argparse.ArgumentParser(description='Web Tester - Site Discovery')
+    parser.add_argument('--url', required=True, help='URL to crawl')
+    parser.add_argument('--max-pages', type=int, default=10, help='Max pages to visit')
+    parser.add_argument('--output', default='discovery.json', help='Output JSON path')
     args = parser.parse_args()
 
     print(f"\nDiscovering: {args.url}")

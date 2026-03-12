@@ -16,7 +16,8 @@ from pathlib import Path
 try:
     from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeout
 except ImportError:
-    print("ERROR: playwright not installed. Run: pip install playwright --break-system-packages")
+    print("ERROR: playwright not installed. Install with:")
+    print("  pip install playwright && playwright install chromium")
     sys.exit(1)
 
 
@@ -290,7 +291,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Web Tester - Execution Engine')
     parser.add_argument('--url', required=True, help='Base URL to test')
     parser.add_argument('--test-plan', required=True, help='Path to test_plan.json')
-    parser.add_argument('--output', default='/home/claude/test_results', help='Output directory')
+    parser.add_argument('--output', default='test_results', help='Output directory')
     args = parser.parse_args()
 
     run_tests(args.url, args.test_plan, args.output)
