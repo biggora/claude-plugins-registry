@@ -1,7 +1,7 @@
 {
   "$schema": "./schema.json",
   "version": "1.0.0",
-  "updated": "2026-03-10",
+  "updated": "2026-03-26",
   "plugins": [
     {
       "name": "code-optimizer",
@@ -46,75 +46,75 @@
       "category": "code-quality"
     },
     {
-      "name": "screen-recording",
+      "name": "captcha",
       "version": "1.0.0",
-      "description": "Autonomous video creation skill — product demos, presentation videos, UI walkthroughs, and narrated screencasts via Pillow, MoviePy, and pyttsx3",
+      "description": "Solve CAPTCHAs in automated browser sessions — reCAPTCHA v2/v3, hCaptcha, Cloudflare Turnstile via third-party services (2captcha, CapMonster), and image grid challenges via Claude/GPT-4V vision AI",
       "author": {
         "name": "biggora",
         "url": "https://github.com/biggora"
       },
-      "repository": "https://github.com/biggora/screen-recording",
-      "keywords": ["video", "screencast", "demo", "recording", "narration", "moviepy"],
+      "repository": "https://github.com/biggora/claude-plugins-registry",
+      "keywords": ["captcha", "recaptcha", "hcaptcha", "turnstile", "playwright", "automation", "web-scraping"],
       "license": "MIT",
       "commands": [],
-      "category": "other",
+      "category": "automation",
       "type": "skill"
     },
     {
-      "name": "text-to-speech",
+      "name": "codex-cli",
       "version": "1.0.0",
-      "description": "Converts text to speech audio files autonomously using pyttsx3, espeak-ng, Kokoro ONNX, or cloud TTS engines with multilingual support",
+      "description": "Install, configure, and automate tasks using OpenAI Codex CLI — approval modes, sandbox policies, MCP servers, and CI integration",
       "author": {
         "name": "biggora",
         "url": "https://github.com/biggora"
       },
-      "repository": "https://github.com/biggora/text-to-speech",
-      "keywords": ["tts", "audio", "narration", "speech", "espeak", "voiceover"],
+      "repository": "https://github.com/biggora/claude-plugins-registry",
+      "keywords": ["openai", "codex", "cli", "automation", "ci-cd", "agent"],
       "license": "MIT",
       "commands": [],
-      "category": "other",
+      "category": "devops",
       "type": "skill"
     },
     {
-      "name": "youtube-thumbnail",
+      "name": "commafeed-api",
       "version": "1.0.0",
-      "description": "Generates professional YouTube thumbnails in 11 strategic styles with auto-detection of AI image backends and Pillow compositing",
+      "description": "Interact with CommaFeed RSS reader via REST API — subscribe, unsubscribe, read, star, tag entries, manage categories, import/export OPML, and manage user settings",
       "author": {
         "name": "biggora",
         "url": "https://github.com/biggora"
       },
-      "repository": "https://github.com/biggora/youtube-thumbnail",
-      "keywords": ["youtube", "thumbnail", "image", "design", "pillow", "ai-image"],
-      "license": "MIT",
-      "commands": [],
-      "category": "other",
-      "type": "skill"
-    },
-    {
-      "name": "youtube-search",
-      "version": "1.0.0",
-      "description": "Search YouTube for videos, channels, playlists and extract metadata, transcripts, and analytics via multiple API methods",
-      "author": {
-        "name": "biggora",
-        "url": "https://github.com/biggora"
-      },
-      "repository": "https://github.com/biggora/youtube-search",
-      "keywords": ["youtube", "search", "video", "metadata", "transcript", "analytics"],
+      "repository": "https://github.com/biggora/claude-plugins-registry",
+      "keywords": ["rss", "commaFeed", "feed-reader", "opml", "rest-api", "automation"],
       "license": "MIT",
       "commands": [],
       "category": "workflow",
       "type": "skill"
     },
     {
-      "name": "wp-rest-api",
+      "name": "gemini-cli",
       "version": "1.0.0",
-      "description": "Build, extend, and debug WordPress REST API endpoints — routes, controllers, schema validation, authentication, and custom fields",
+      "description": "Install, configure, and script with Gemini CLI — headless prompts, MCP servers, custom slash commands, extensions, and CI automation",
       "author": {
         "name": "biggora",
         "url": "https://github.com/biggora"
       },
-      "repository": "https://github.com/biggora/wp-rest-api",
-      "keywords": ["wordpress", "rest-api", "php", "endpoints", "wp-cli", "custom-post-types"],
+      "repository": "https://github.com/biggora/claude-plugins-registry",
+      "keywords": ["gemini", "google", "cli", "automation", "mcp", "scripting"],
+      "license": "MIT",
+      "commands": [],
+      "category": "devops",
+      "type": "skill"
+    },
+    {
+      "name": "n8n-api",
+      "version": "1.0.0",
+      "description": "Interact with n8n automation platform via REST API — manage workflows, executions, credentials, tags, variables, users, and audit logs",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/claude-plugins-registry",
+      "keywords": ["n8n", "automation", "workflows", "rest-api", "low-code", "integration"],
       "license": "MIT",
       "commands": [],
       "category": "workflow",
@@ -128,7 +128,7 @@
         "name": "biggora",
         "url": "https://github.com/biggora"
       },
-      "repository": "https://github.com/biggora/notebook-lm",
+      "repository": "https://github.com/biggora/claude-plugins-registry",
       "keywords": ["notebooklm", "google", "research", "podcast", "audio", "automation"],
       "license": "MIT",
       "commands": [],
@@ -136,63 +136,18 @@
       "type": "skill"
     },
     {
-      "name": "codex-cli",
+      "name": "screen-recording",
       "version": "1.0.0",
-      "description": "Install, configure, and automate tasks using OpenAI Codex CLI — approval modes, sandbox policies, MCP servers, and CI integration",
+      "description": "Autonomous video creation skill — product demos, presentation videos, UI walkthroughs, and narrated screencasts via Pillow, MoviePy, and pyttsx3",
       "author": {
         "name": "biggora",
         "url": "https://github.com/biggora"
       },
-      "repository": "https://github.com/biggora/codex-cli",
-      "keywords": ["openai", "codex", "cli", "automation", "ci-cd", "agent"],
+      "repository": "https://github.com/biggora/claude-plugins-registry",
+      "keywords": ["video", "screencast", "demo", "recording", "narration", "moviepy"],
       "license": "MIT",
       "commands": [],
-      "category": "devops",
-      "type": "skill"
-    },
-    {
-      "name": "gemini-cli",
-      "version": "1.0.0",
-      "description": "Install, configure, and script with Gemini CLI — headless prompts, MCP servers, custom slash commands, extensions, and CI automation",
-      "author": {
-        "name": "biggora",
-        "url": "https://github.com/biggora"
-      },
-      "repository": "https://github.com/biggora/gemini-cli",
-      "keywords": ["gemini", "google", "cli", "automation", "mcp", "scripting"],
-      "license": "MIT",
-      "commands": [],
-      "category": "devops",
-      "type": "skill"
-    },
-    {
-      "name": "tm-search",
-      "version": "1.0.0",
-      "description": "Search, validate, and check availability of US trademarks via USPTO APIs — keyword search, batch validation, and status lookup",
-      "author": {
-        "name": "biggora",
-        "url": "https://github.com/biggora"
-      },
-      "repository": "https://github.com/biggora/tm-search",
-      "keywords": ["trademark", "uspto", "brand", "search", "validation", "legal"],
-      "license": "MIT",
-      "commands": [],
-      "category": "workflow",
-      "type": "skill"
-    },
-    {
-      "name": "test-web-ui",
-      "version": "1.0.0",
-      "description": "Automated web QA — discovers site structure, generates use cases and test plans, runs Playwright tests, and produces HTML reports",
-      "author": {
-        "name": "biggora",
-        "url": "https://github.com/biggora"
-      },
-      "repository": "https://github.com/biggora/test-web-ui",
-      "keywords": ["qa", "playwright", "web-testing", "automation", "test-report", "e2e"],
-      "license": "MIT",
-      "commands": [],
-      "category": "testing",
+      "category": "other",
       "type": "skill"
     },
     {
@@ -203,7 +158,7 @@
         "name": "biggora",
         "url": "https://github.com/biggora"
       },
-      "repository": "https://github.com/biggora/test-mobile-app",
+      "repository": "https://github.com/biggora/claude-plugins-registry",
       "keywords": ["mobile", "appium", "android", "qa", "testing", "automation"],
       "license": "MIT",
       "commands": [],
@@ -211,33 +166,93 @@
       "type": "skill"
     },
     {
-      "name": "commafeed-api",
+      "name": "test-web-ui",
       "version": "1.0.0",
-      "description": "Interact with CommaFeed RSS reader via REST API — subscribe, unsubscribe, read, star, tag entries, manage categories, import/export OPML, and manage user settings",
+      "description": "Automated web QA — discovers site structure, generates use cases and test plans, runs Playwright tests, and produces HTML reports",
       "author": {
         "name": "biggora",
         "url": "https://github.com/biggora"
       },
-      "repository": "https://github.com/biggora/commafeed-api",
-      "keywords": ["rss", "commaFeed", "feed-reader", "opml", "rest-api", "automation"],
+      "repository": "https://github.com/biggora/claude-plugins-registry",
+      "keywords": ["qa", "playwright", "web-testing", "automation", "test-report", "e2e"],
+      "license": "MIT",
+      "commands": [],
+      "category": "testing",
+      "type": "skill"
+    },
+    {
+      "name": "text-to-speech",
+      "version": "1.0.0",
+      "description": "Converts text to speech audio files autonomously using pyttsx3, espeak-ng, Kokoro ONNX, or cloud TTS engines with multilingual support",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/claude-plugins-registry",
+      "keywords": ["tts", "audio", "narration", "speech", "espeak", "voiceover"],
+      "license": "MIT",
+      "commands": [],
+      "category": "other",
+      "type": "skill"
+    },
+    {
+      "name": "tm-search",
+      "version": "1.0.0",
+      "description": "Search, validate, and check availability of US trademarks via USPTO APIs — keyword search, batch validation, and status lookup",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/claude-plugins-registry",
+      "keywords": ["trademark", "uspto", "brand", "search", "validation", "legal"],
       "license": "MIT",
       "commands": [],
       "category": "workflow",
       "type": "skill"
     },
     {
-      "name": "n8n-api",
+      "name": "wp-rest-api",
       "version": "1.0.0",
-      "description": "Interact with n8n automation platform via REST API — manage workflows, executions, credentials, tags, variables, users, and audit logs",
+      "description": "Build, extend, and debug WordPress REST API endpoints — routes, controllers, schema validation, authentication, and custom fields",
       "author": {
         "name": "biggora",
         "url": "https://github.com/biggora"
       },
-      "repository": "https://github.com/biggora/n8n-api",
-      "keywords": ["n8n", "automation", "workflows", "rest-api", "low-code", "integration"],
+      "repository": "https://github.com/biggora/claude-plugins-registry",
+      "keywords": ["wordpress", "rest-api", "php", "endpoints", "wp-cli", "custom-post-types"],
       "license": "MIT",
       "commands": [],
       "category": "workflow",
+      "type": "skill"
+    },
+    {
+      "name": "youtube-search",
+      "version": "1.0.0",
+      "description": "Search YouTube for videos, channels, playlists and extract metadata, transcripts, and analytics via multiple API methods",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/claude-plugins-registry",
+      "keywords": ["youtube", "search", "video", "metadata", "transcript", "analytics"],
+      "license": "MIT",
+      "commands": [],
+      "category": "workflow",
+      "type": "skill"
+    },
+    {
+      "name": "youtube-thumbnail",
+      "version": "1.0.0",
+      "description": "Generates professional YouTube thumbnails in 11 strategic styles with auto-detection of AI image backends and Pillow compositing",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/claude-plugins-registry",
+      "keywords": ["youtube", "thumbnail", "image", "design", "pillow", "ai-image"],
+      "license": "MIT",
+      "commands": [],
+      "category": "other",
       "type": "skill"
     }
   ]

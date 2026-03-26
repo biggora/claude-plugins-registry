@@ -53,6 +53,7 @@ claude-plugins skills remove commafeed-api
 
 | Skill | Category | Description |
 |-------|----------|-------------|
+| `captcha` | automation | Solve reCAPTCHA v2/v3, hCaptcha, Cloudflare Turnstile via 2captcha/CapMonster, and image grid challenges via Claude/GPT-4V vision AI |
 | `codex-cli` | devops | Install, configure, and automate tasks using OpenAI Codex CLI — approval modes, sandbox policies, MCP servers, and CI integration |
 | `commafeed-api` | workflow | Manage CommaFeed RSS reader via REST API — subscriptions, categories, feeds, entries, and OPML import/export |
 | `gemini-cli` | devops | Install, configure, and script with Gemini CLI — headless prompts, MCP servers, custom slash commands, extensions, and CI automation |
@@ -70,6 +71,7 @@ claude-plugins skills remove commafeed-api
 #### Install Examples
 
 ```bash
+npx skills add https://github.com/biggora/claude-plugins-registry --skill captcha
 npx skills add https://github.com/biggora/claude-plugins-registry --skill codex-cli
 npx skills add https://github.com/biggora/claude-plugins-registry --skill gemini-cli
 npx skills add https://github.com/biggora/claude-plugins-registry --skill n8n-api
