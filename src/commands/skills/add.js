@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync, cpSync, rmSync, mkdirSync, writeFileSync, statSync, copyFileSync } from 'node:fs';
-import { join, basename } from 'node:path';
+import { join, basename, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { getSkillsDir, getCommandsDir } from '../../config.js';
 import { fetchRegistry, findPlugin } from '../../registry.js';
@@ -49,6 +49,15 @@ function isUrl(str) {
   return str.startsWith('http://') || str.startsWith('https://') || str.startsWith('git@');
 }
 
+function isLocalPath(str) {
+  if (str.startsWith('./') || str.startsWith('../') || str.startsWith('/')) return true;
+  // Windows absolute paths like C:\ or E:\
+  if (/^[a-zA-Z]:[/\\]/.test(str)) return true;
+  // Explicit . for current directory
+  if (str === '.') return true;
+  return false;
+}
+
 function makeTempDir() {
   const dir = join(tmpdir(), `claude-skill-${Date.now()}`);
   mkdirSync(dir, { recursive: true });
@@ -57,9 +66,19 @@ function makeTempDir() {
 
 export async function add(source, options = {}) {
   let repoUrl = source;
+  let sourceDir = null;
 
-  // If not a URL, look up in registry
-  if (!isUrl(source)) {
+  if (isLocalPath(source)) {
+    // Local directory — use directly, no git clone
+    sourceDir = resolve(source);
+    if (!existsSync(sourceDir)) {
+      log.error(`Local path "${sourceDir}" does not exist`);
+      process.exit(1);
+    }
+    repoUrl = sourceDir;
+    log.info(`Using local path: ${sourceDir}`);
+  } else if (!isUrl(source)) {
+    // Not a URL and not a local path — look up in registry
     const registry = await fetchRegistry();
     const entry = findPlugin(registry, source);
     if (!entry) {
@@ -71,29 +90,36 @@ export async function add(source, options = {}) {
     log.info(`Resolved "${source}" to ${repoUrl}`);
   }
 
-  const tmpDir = makeTempDir();
-  const spin = spinner(`Cloning ${repoUrl}...`);
-  spin.start();
+  let tmpDir = null;
 
-  try {
-    const gitUrl = repoUrl.endsWith('.git') ? repoUrl : `${repoUrl}.git`;
-    execFileSync('git', ['clone', '--depth', '1', gitUrl, tmpDir], {
-      stdio: 'pipe',
-    });
-    spin.succeed('Repository cloned');
-  } catch (err) {
-    spin.fail('Failed to clone repository');
-    log.error(err.message);
-    rmSync(tmpDir, { recursive: true, force: true });
-    process.exit(1);
+  // Clone if remote URL, otherwise use local path directly
+  if (!sourceDir) {
+    tmpDir = makeTempDir();
+    const spin = spinner(`Cloning ${repoUrl}...`);
+    spin.start();
+
+    try {
+      const gitUrl = repoUrl.endsWith('.git') ? repoUrl : `${repoUrl}.git`;
+      execFileSync('git', ['clone', '--depth', '1', gitUrl, tmpDir], {
+        stdio: 'pipe',
+      });
+      spin.succeed('Repository cloned');
+    } catch (err) {
+      spin.fail('Failed to clone repository');
+      log.error(err.message);
+      rmSync(tmpDir, { recursive: true, force: true });
+      process.exit(1);
+    }
   }
 
+  const searchRoot = sourceDir || tmpDir;
+
   // Find all skill directories
-  const skillDirs = findSkillDirs(tmpDir);
+  const skillDirs = findSkillDirs(searchRoot);
 
   if (!skillDirs.length) {
     log.error('No SKILL.md found in repository');
-    rmSync(tmpDir, { recursive: true, force: true });
+    if (tmpDir) rmSync(tmpDir, { recursive: true, force: true });
     process.exit(1);
   }
 
@@ -118,22 +144,22 @@ export async function add(source, options = {}) {
         const fm = parseFrontmatter(readFileSync(join(d, 'SKILL.md'), 'utf-8'));
         log.dim(`  - ${fm.name || basename(d)}`);
       }
-      rmSync(tmpDir, { recursive: true, force: true });
+      if (tmpDir) rmSync(tmpDir, { recursive: true, force: true });
       process.exit(1);
     }
   } else if (skillDirs.length === 1) {
     targetDir = skillDirs[0];
   } else {
     // Check if root has SKILL.md
-    if (existsSync(join(tmpDir, 'SKILL.md'))) {
-      targetDir = tmpDir;
+    if (existsSync(join(searchRoot, 'SKILL.md'))) {
+      targetDir = searchRoot;
     } else {
       log.warn('Multiple skills found. Use --skill <name> to select one:');
       for (const d of skillDirs) {
         const fm = parseFrontmatter(readFileSync(join(d, 'SKILL.md'), 'utf-8'));
         log.dim(`  - ${fm.name || basename(d)}`);
       }
-      rmSync(tmpDir, { recursive: true, force: true });
+      if (tmpDir) rmSync(tmpDir, { recursive: true, force: true });
       process.exit(1);
     }
   }
@@ -141,7 +167,7 @@ export async function add(source, options = {}) {
   // Parse skill metadata
   const skillMd = readFileSync(join(targetDir, 'SKILL.md'), 'utf-8');
   const frontmatter = parseFrontmatter(skillMd);
-  const skillName = frontmatter.name || options.skill || basename(targetDir === tmpDir ? repoUrl.replace(/\.git$/, '').split('/').pop() : targetDir);
+  const skillName = frontmatter.name || options.skill || basename(targetDir === searchRoot ? repoUrl.replace(/\.git$/, '').split('/').pop() : targetDir);
 
   // Detect components alongside SKILL.md
   const components = detectComponents(targetDir);
@@ -154,13 +180,13 @@ export async function add(source, options = {}) {
   if (existing) {
     log.warn(`Skill "${skillName}" is already installed at ${existing.dir}`);
     log.dim(`Run "claude-plugins skills update ${skillName}" to update it`);
-    rmSync(tmpDir, { recursive: true, force: true });
+    if (tmpDir) rmSync(tmpDir, { recursive: true, force: true });
     return;
   }
 
   if (existsSync(dest)) {
     log.warn(`"${skillName}" already exists at ${dest}`);
-    rmSync(tmpDir, { recursive: true, force: true });
+    if (tmpDir) rmSync(tmpDir, { recursive: true, force: true });
     return;
   }
 
@@ -215,7 +241,7 @@ export async function add(source, options = {}) {
     spin2.fail(`Failed to install skill "${skillName}"`);
     log.error(err.message);
   } finally {
-    rmSync(tmpDir, { recursive: true, force: true });
+    if (tmpDir) rmSync(tmpDir, { recursive: true, force: true });
   }
 }
 
