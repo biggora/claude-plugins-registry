@@ -69,6 +69,7 @@ claude-plugins skills remove commafeed-api
 | `lv-aggregators-api` | workflow | Generate and manage XML product feeds for Latvian price comparison platforms — Salidzini.lv and KurPirkt.lv integration |
 | `typescript-expert` | code-quality | TypeScript type system, generics, utility types, advanced patterns, tsconfig, and TS 5.x features — includes `/typescript-fix` slash command |
 | `youtube-thumbnail` | other | Generates professional YouTube thumbnails in 11 strategic styles with auto-detection of AI image backends and Pillow compositing |
+| `next-best-practices` | frontend | Next.js 16 best practices — App Router, Server/Client Components, use cache, cacheTag, Server Actions, useActionState, useOptimistic, streaming, metadata/SEO, and PPR |
 
 #### Install Examples
 
@@ -92,6 +93,8 @@ npx skills add https://github.com/biggora/claude-plugins-registry --skill vite-b
 npx skills add https://github.com/biggora/claude-plugins-registry --skill google-merchant-api
 npx skills add https://github.com/biggora/claude-plugins-registry --skill lv-aggregators-api
 npx skills add https://github.com/biggora/claude-plugins-registry --skill typescript-expert
+npx skills add https://github.com/biggora/claude-plugins-registry --skill nest-best-practices
+npx skills add https://github.com/biggora/claude-plugins-registry --skill next-best-practices
 ```
 
 ## Plugins

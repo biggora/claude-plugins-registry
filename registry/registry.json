@@ -329,6 +329,21 @@
       "commands": ["/typescript-fix"],
       "category": "code-quality",
       "type": "skill"
+    },
+    {
+      "name": "next-best-practices",
+      "version": "1.0.0",
+      "description": "Next.js 16 best practices — App Router, Server/Client Components, data fetching, use cache directive, cacheTag, cacheLife, Server Actions, useActionState, useOptimistic, streaming, metadata/SEO, and PPR",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/claude-plugins-registry",
+      "keywords": ["nextjs", "react", "app-router", "server-components", "caching", "server-actions", "frontend"],
+      "license": "MIT",
+      "commands": [],
+      "category": "frontend",
+      "type": "skill"
     }
   ]
 }
