@@ -2,9 +2,10 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync, cpSync, rmSync, mkdirSync, writeFileSync, statSync } from 'node:fs';
 import { join, basename } from 'node:path';
 import { tmpdir } from 'node:os';
-import { getSkillsDir } from '../../config.js';
+import { getSkillsDir, getPluginsDir } from '../../config.js';
 import { fetchRegistry, findPlugin } from '../../registry.js';
 import { log, spinner } from '../../utils.js';
+import { hasPluginComponents, detectComponents, findInstalledSkill } from './resolve.js';
 
 export function parseFrontmatter(content) {
   const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
@@ -142,18 +143,30 @@ export async function add(source, options = {}) {
   const frontmatter = parseFrontmatter(skillMd);
   const skillName = frontmatter.name || options.skill || basename(targetDir === tmpDir ? repoUrl.replace(/\.git$/, '').split('/').pop() : targetDir);
 
-  const skillsDir = getSkillsDir();
-  const dest = join(skillsDir, skillName);
+  // Detect plugin components (commands, hooks, agents) alongside SKILL.md
+  const components = detectComponents(targetDir);
+  const installAsPlugin = hasPluginComponents(targetDir);
 
-  if (existsSync(dest)) {
-    log.warn(`Skill "${skillName}" is already installed at ${dest}`);
+  const destDir = installAsPlugin ? getPluginsDir() : getSkillsDir();
+  const dest = join(destDir, skillName);
+
+  // Check both locations for existing installation
+  const existing = findInstalledSkill(skillName);
+  if (existing) {
+    log.warn(`Skill "${skillName}" is already installed at ${existing.dir}`);
     log.dim(`Run "claude-plugins skills update ${skillName}" to update it`);
     rmSync(tmpDir, { recursive: true, force: true });
     return;
   }
 
-  // Copy skill files
-  const spin2 = spinner(`Installing skill "${skillName}"...`);
+  if (existsSync(dest)) {
+    log.warn(`"${skillName}" already exists at ${dest}`);
+    rmSync(tmpDir, { recursive: true, force: true });
+    return;
+  }
+
+  const label = installAsPlugin ? 'skill + components' : 'skill';
+  const spin2 = spinner(`Installing ${label} "${skillName}"...`);
   spin2.start();
 
   try {
@@ -165,6 +178,25 @@ export async function add(source, options = {}) {
       rmSync(gitInDest, { recursive: true, force: true });
     }
 
+    // Generate .claude-plugin/plugin.json if installing as plugin and none exists
+    if (installAsPlugin && !existsSync(join(dest, '.claude-plugin', 'plugin.json'))) {
+      const pluginDir = join(dest, '.claude-plugin');
+      mkdirSync(pluginDir, { recursive: true });
+
+      const pluginJson = {
+        name: skillName,
+        version: '1.0.0',
+        description: frontmatter.description || `Skill: ${skillName}`,
+        commands: listCommandFiles(dest),
+        _generatedBy: 'claude-plugins skills add',
+      };
+
+      writeFileSync(
+        join(pluginDir, 'plugin.json'),
+        JSON.stringify(pluginJson, null, 2)
+      );
+    }
+
     // Write origin metadata
     writeFileSync(
       join(dest, '.origin.json'),
@@ -172,6 +204,8 @@ export async function add(source, options = {}) {
         {
           repository: repoUrl,
           skill: options.skill || null,
+          installedAs: installAsPlugin ? 'plugin-skill' : 'skill',
+          components,
           installedAt: new Date().toISOString(),
         },
         null,
@@ -184,11 +218,33 @@ export async function add(source, options = {}) {
     if (frontmatter.description) {
       log.dim(`  ${frontmatter.description}`);
     }
+
+    if (installAsPlugin) {
+      const extras = components.filter((c) => c !== 'skill');
+      log.info(`Detected: ${components.join(', ')}`);
+      log.dim(`Installed as plugin so Claude Code discovers ${extras.join(', ')}`);
+    }
+
     log.dim('\nRestart Claude Code to load the skill.');
   } catch (err) {
     spin2.fail(`Failed to install skill "${skillName}"`);
     log.error(err.message);
   } finally {
     rmSync(tmpDir, { recursive: true, force: true });
+  }
+}
+
+/**
+ * List command file names (without extension) from a commands/ directory.
+ */
+function listCommandFiles(dir) {
+  const cmdsDir = join(dir, 'commands');
+  if (!existsSync(cmdsDir)) return [];
+  try {
+    return readdirSync(cmdsDir)
+      .filter((f) => f.endsWith('.md'))
+      .map((f) => `/${f.replace(/\.md$/, '')}`);
+  } catch {
+    return [];
   }
 }

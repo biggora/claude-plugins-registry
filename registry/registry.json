@@ -314,6 +314,21 @@
       "commands": [],
       "category": "workflow",
       "type": "skill"
+    },
+    {
+      "name": "typescript-expert",
+      "version": "1.0.0",
+      "description": "TypeScript language expertise — type system, generics, utility types, advanced type patterns, tsconfig configuration, and TS 5.x features with /typescript-fix slash command for auto-resolving type errors",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/claude-plugins-registry",
+      "keywords": ["typescript", "types", "generics", "tsconfig", "type-checking", "code-quality"],
+      "license": "MIT",
+      "commands": ["/typescript-fix"],
+      "category": "code-quality",
+      "type": "skill"
     }
   ]
 }

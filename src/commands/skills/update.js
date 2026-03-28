@@ -1,30 +1,17 @@
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
-import { getSkillsDir } from '../../config.js';
 import { log, spinner } from '../../utils.js';
+import { findInstalledSkill, listAllSkills, readOrigin } from './resolve.js';
 import { add } from './add.js';
 import { remove } from './remove.js';
 
-function readOrigin(skillDir) {
-  const originPath = join(skillDir, '.origin.json');
-  if (!existsSync(originPath)) return null;
-  try {
-    return JSON.parse(readFileSync(originPath, 'utf-8'));
-  } catch {
-    return null;
-  }
-}
-
 async function updateOne(name) {
-  const skillsDir = getSkillsDir();
-  const dest = join(skillsDir, name);
+  const found = findInstalledSkill(name);
 
-  if (!existsSync(dest)) {
+  if (!found) {
     log.error(`Skill "${name}" is not installed`);
     return false;
   }
 
-  const origin = readOrigin(dest);
+  const origin = readOrigin(found.dir);
   if (!origin || !origin.repository) {
     log.warn(`Skill "${name}" has no origin metadata, skipping`);
     return false;
@@ -51,24 +38,21 @@ export async function update(name) {
     return;
   }
 
-  const skillsDir = getSkillsDir();
-  const entries = readdirSync(skillsDir, { withFileTypes: true }).filter(
-    (e) => e.isDirectory()
-  );
+  const skills = listAllSkills();
 
-  if (!entries.length) {
+  if (!skills.length) {
     log.info('No skills installed');
     return;
   }
 
-  log.info(`Updating ${entries.length} skill${entries.length === 1 ? '' : 's'}...\n`);
+  log.info(`Updating ${skills.length} skill${skills.length === 1 ? '' : 's'}...\n`);
 
   let updated = 0;
-  for (const entry of entries) {
-    if (await updateOne(entry.name)) updated++;
+  for (const skill of skills) {
+    if (await updateOne(skill.name)) updated++;
   }
 
   console.log();
-  log.success(`${updated}/${entries.length} skills updated`);
+  log.success(`${updated}/${skills.length} skills updated`);
   log.dim('Restart Claude Code to apply changes.');
 }

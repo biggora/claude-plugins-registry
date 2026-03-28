@@ -67,6 +67,7 @@ claude-plugins skills remove commafeed-api
 | `vite-best-practices` | frontend | Vite 8 build tool best practices — configuration, Rolldown/Oxc migration, plugin API, SSR, library mode, and virtual modules |
 | `google-merchant-api` | workflow | Work with Google Merchant Center APIs — Merchant API (v1) and Content API for Shopping (v2.1) for products, inventory, promotions, and reports |
 | `lv-aggregators-api` | workflow | Generate and manage XML product feeds for Latvian price comparison platforms — Salidzini.lv and KurPirkt.lv integration |
+| `typescript-expert` | code-quality | TypeScript type system, generics, utility types, advanced patterns, tsconfig, and TS 5.x features — includes `/typescript-fix` slash command |
 | `youtube-thumbnail` | other | Generates professional YouTube thumbnails in 11 strategic styles with auto-detection of AI image backends and Pillow compositing |
 
 #### Install Examples
@@ -90,6 +91,7 @@ npx skills add https://github.com/biggora/claude-plugins-registry --skill tailwi
 npx skills add https://github.com/biggora/claude-plugins-registry --skill vite-best-practices
 npx skills add https://github.com/biggora/claude-plugins-registry --skill google-merchant-api
 npx skills add https://github.com/biggora/claude-plugins-registry --skill lv-aggregators-api
+npx skills add https://github.com/biggora/claude-plugins-registry --skill typescript-expert
 ```
 
 ## Plugins
