@@ -7,6 +7,7 @@ const isWindows = process.platform === 'win32';
 
 export const PLUGINS_DIR = join(home, '.claude', 'plugins');
 export const SKILLS_DIR = join(home, '.claude', 'skills');
+export const COMMANDS_DIR = join(home, '.claude', 'commands');
 export const CACHE_DIR = join(home, '.claude', '.cache', 'claude-plugins');
 export const CACHE_TTL = 1000 * 60 * 15; // 15 minutes
 export const REGISTRY_URL =
@@ -25,6 +26,10 @@ export function getPluginsDir() {
 
 export function getSkillsDir() {
   return ensureDir(SKILLS_DIR);
+}
+
+export function getCommandsDir() {
+  return ensureDir(COMMANDS_DIR);
 }
 
 export function getCacheDir() {

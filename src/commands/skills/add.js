@@ -1,11 +1,11 @@
 import { execFileSync } from 'node:child_process';
-import { existsSync, readFileSync, readdirSync, cpSync, rmSync, mkdirSync, writeFileSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, cpSync, rmSync, mkdirSync, writeFileSync, statSync, copyFileSync } from 'node:fs';
 import { join, basename } from 'node:path';
 import { tmpdir } from 'node:os';
-import { getSkillsDir, getPluginsDir } from '../../config.js';
+import { getSkillsDir, getCommandsDir } from '../../config.js';
 import { fetchRegistry, findPlugin } from '../../registry.js';
 import { log, spinner } from '../../utils.js';
-import { hasPluginComponents, detectComponents, findInstalledSkill } from './resolve.js';
+import { detectComponents, findInstalledSkill } from './resolve.js';
 
 export function parseFrontmatter(content) {
   const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
@@ -143,12 +143,11 @@ export async function add(source, options = {}) {
   const frontmatter = parseFrontmatter(skillMd);
   const skillName = frontmatter.name || options.skill || basename(targetDir === tmpDir ? repoUrl.replace(/\.git$/, '').split('/').pop() : targetDir);
 
-  // Detect plugin components (commands, hooks, agents) alongside SKILL.md
+  // Detect components alongside SKILL.md
   const components = detectComponents(targetDir);
-  const installAsPlugin = hasPluginComponents(targetDir);
 
-  const destDir = installAsPlugin ? getPluginsDir() : getSkillsDir();
-  const dest = join(destDir, skillName);
+  const skillsDir = getSkillsDir();
+  const dest = join(skillsDir, skillName);
 
   // Check both locations for existing installation
   const existing = findInstalledSkill(skillName);
@@ -165,8 +164,7 @@ export async function add(source, options = {}) {
     return;
   }
 
-  const label = installAsPlugin ? 'skill + components' : 'skill';
-  const spin2 = spinner(`Installing ${label} "${skillName}"...`);
+  const spin2 = spinner(`Installing skill "${skillName}"...`);
   spin2.start();
 
   try {
@@ -178,24 +176,8 @@ export async function add(source, options = {}) {
       rmSync(gitInDest, { recursive: true, force: true });
     }
 
-    // Generate .claude-plugin/plugin.json if installing as plugin and none exists
-    if (installAsPlugin && !existsSync(join(dest, '.claude-plugin', 'plugin.json'))) {
-      const pluginDir = join(dest, '.claude-plugin');
-      mkdirSync(pluginDir, { recursive: true });
-
-      const pluginJson = {
-        name: skillName,
-        version: '1.0.0',
-        description: frontmatter.description || `Skill: ${skillName}`,
-        commands: listCommandFiles(dest),
-        _generatedBy: 'claude-plugins skills add',
-      };
-
-      writeFileSync(
-        join(pluginDir, 'plugin.json'),
-        JSON.stringify(pluginJson, null, 2)
-      );
-    }
+    // Copy slash commands to ~/.claude/commands/ so Claude Code discovers them
+    const installedCommands = installCommands(dest, skillName);
 
     // Write origin metadata
     writeFileSync(
@@ -204,8 +186,8 @@ export async function add(source, options = {}) {
         {
           repository: repoUrl,
           skill: options.skill || null,
-          installedAs: installAsPlugin ? 'plugin-skill' : 'skill',
           components,
+          installedCommands,
           installedAt: new Date().toISOString(),
         },
         null,
@@ -219,10 +201,13 @@ export async function add(source, options = {}) {
       log.dim(`  ${frontmatter.description}`);
     }
 
-    if (installAsPlugin) {
-      const extras = components.filter((c) => c !== 'skill');
+    if (installedCommands.length) {
+      log.info(`Commands: ${installedCommands.map((c) => `/${c}`).join(', ')}`);
+      log.dim(`  Copied to ${getCommandsDir()}`);
+    }
+
+    if (components.length > 1) {
       log.info(`Detected: ${components.join(', ')}`);
-      log.dim(`Installed as plugin so Claude Code discovers ${extras.join(', ')}`);
     }
 
     log.dim('\nRestart Claude Code to load the skill.');
@@ -235,16 +220,33 @@ export async function add(source, options = {}) {
 }
 
 /**
- * List command file names (without extension) from a commands/ directory.
+ * Copy command .md files from skill's commands/ dir to ~/.claude/commands/.
+ * Returns array of installed command names (without extension).
  */
-function listCommandFiles(dir) {
-  const cmdsDir = join(dir, 'commands');
+function installCommands(skillDir, skillName) {
+  const cmdsDir = join(skillDir, 'commands');
   if (!existsSync(cmdsDir)) return [];
+
+  const commandsDir = getCommandsDir();
+  const installed = [];
+
   try {
-    return readdirSync(cmdsDir)
-      .filter((f) => f.endsWith('.md'))
-      .map((f) => `/${f.replace(/\.md$/, '')}`);
+    const files = readdirSync(cmdsDir).filter((f) => f.endsWith('.md'));
+    for (const file of files) {
+      const src = join(cmdsDir, file);
+      const destFile = join(commandsDir, file);
+
+      if (existsSync(destFile)) {
+        log.warn(`Command "${file}" already exists in ${commandsDir}, skipping`);
+        continue;
+      }
+
+      copyFileSync(src, destFile);
+      installed.push(file.replace(/\.md$/, ''));
+    }
   } catch {
-    return [];
+    // ignore errors reading commands dir
   }
+
+  return installed;
 }

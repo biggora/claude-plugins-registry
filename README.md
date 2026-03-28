@@ -226,6 +226,7 @@ Skills are simpler than plugins — just a SKILL.md file with optional supportin
 ```
 my-skill/
   SKILL.md            # Required: skill instructions with YAML frontmatter
+  commands/           # Slash commands (optional, copied to ~/.claude/commands/ on install)
   references/         # Reference docs (optional)
   scripts/            # Helper scripts (optional)
 ```
@@ -262,8 +263,9 @@ The plugin registry is a GitHub-hosted JSON file at [biggora/claude-plugins-regi
 
 - **Plugins** are installed via `git clone` to `~/.claude/plugins/<name>`
 - **Skills** are installed via `git clone` + copy to `~/.claude/skills/<name>`
+- **Slash commands** bundled with skills are automatically copied to `~/.claude/commands/`
 - Updates use `git pull --ff-only` to safely fast-forward
-- Claude Code automatically discovers plugins and skills in `~/.claude/`
+- Claude Code automatically discovers plugins in `~/.claude/plugins/`, skills in `~/.claude/skills/`, and commands in `~/.claude/commands/`
 - Restart Claude Code after installing or removing plugins/skills
 
 ## Requirements

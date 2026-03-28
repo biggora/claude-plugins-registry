@@ -13,11 +13,13 @@ export async function list() {
 
   console.log(chalk.bold(`\n  ${skills.length} skill${skills.length === 1 ? '' : 's'} installed\n`));
 
-  const rows = skills.map(({ name, meta, location }) => {
-    const type = location === 'plugins' ? chalk.cyan('plugin') : chalk.dim('skill');
-    return [name, truncate(meta.description, 45), type, truncate(meta.repository, 35)];
+  const rows = skills.map(({ name, meta }) => {
+    const cmds = meta.commands.length
+      ? meta.commands.map((c) => `/${c}`).join(', ')
+      : '';
+    return [name, truncate(meta.description, 45), cmds, truncate(meta.repository, 35)];
   });
 
-  formatTable(rows, ['Name', 'Description', 'Type', 'Repository']);
+  formatTable(rows, ['Name', 'Description', 'Commands', 'Repository']);
   console.log();
 }
