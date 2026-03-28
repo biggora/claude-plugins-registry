@@ -27,10 +27,7 @@ Install a specific skill directly from a Git repository:
 
 ```bash
 # Install a single skill from a repository
-npx @biggora/claude-plugins skills add https://github.com/biggora/claude-plugins-registry --skill commafeed-api
-
-# Short form
-claude-plugins skills add https://github.com/biggora/claude-plugins-registry --skill n8n-api
+npx skills add https://github.com/biggora/claude-plugins-registry --skill test-web-ui
 ```
 
 ### Manage Installed Skills
@@ -66,6 +63,8 @@ claude-plugins skills remove commafeed-api
 | `tm-search` | workflow | Search, validate, and check availability of US trademarks via USPTO APIs — keyword search, batch validation, and status lookup |
 | `wp-rest-api` | workflow | Build, extend, and debug WordPress REST API endpoints — routes, controllers, schema validation, authentication, and custom fields |
 | `youtube-search` | workflow | Search YouTube for videos, channels, playlists and extract metadata, transcripts, and analytics via multiple API methods |
+| `tailwindcss-best-practices` | frontend | Tailwind CSS v4.x best practices — utility classes, responsive layouts, @theme variables, dark mode, custom utilities, and v3-to-v4 migration |
+| `vite-best-practices` | frontend | Vite 8 build tool best practices — configuration, Rolldown/Oxc migration, plugin API, SSR, library mode, and virtual modules |
 | `youtube-thumbnail` | other | Generates professional YouTube thumbnails in 11 strategic styles with auto-detection of AI image backends and Pillow compositing |
 
 #### Install Examples
@@ -85,6 +84,8 @@ npx skills add https://github.com/biggora/claude-plugins-registry --skill screen
 npx skills add https://github.com/biggora/claude-plugins-registry --skill text-to-speech
 npx skills add https://github.com/biggora/claude-plugins-registry --skill test-web-ui
 npx skills add https://github.com/biggora/claude-plugins-registry --skill test-mobile-app
+npx skills add https://github.com/biggora/claude-plugins-registry --skill tailwindcss-best-practices
+npx skills add https://github.com/biggora/claude-plugins-registry --skill vite-best-practices
 ```
 
 ## Plugins

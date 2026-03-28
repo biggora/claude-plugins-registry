@@ -1,7 +1,7 @@
 {
   "$schema": "./schema.json",
   "version": "1.0.0",
-  "updated": "2026-03-26",
+  "updated": "2026-03-28",
   "plugins": [
     {
       "name": "code-optimizer",
@@ -253,6 +253,36 @@
       "license": "MIT",
       "commands": [],
       "category": "other",
+      "type": "skill"
+    },
+    {
+      "name": "tailwindcss-best-practices",
+      "version": "1.0.0",
+      "description": "Tailwind CSS v4.x best practices — utility classes, responsive layouts, @theme variables, dark mode, custom utilities with @utility, v3-to-v4 migration, text shadows, masks, logical properties, and source detection",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/claude-plugins-registry",
+      "keywords": ["tailwindcss", "css", "utility-first", "responsive", "design-system", "frontend"],
+      "license": "MIT",
+      "commands": [],
+      "category": "frontend",
+      "type": "skill"
+    },
+    {
+      "name": "vite-best-practices",
+      "version": "1.0.0",
+      "description": "Vite 8 build tool best practices — configuration, Rolldown/Oxc migration, plugin API with hook filters, SSR, library mode, environment API, and virtual modules",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/claude-plugins-registry",
+      "keywords": ["vite", "rolldown", "oxc", "bundler", "ssr", "frontend", "build-tool"],
+      "license": "MIT",
+      "commands": [],
+      "category": "frontend",
       "type": "skill"
     }
   ]
