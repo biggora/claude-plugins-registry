@@ -284,6 +284,36 @@
       "commands": [],
       "category": "frontend",
       "type": "skill"
+    },
+    {
+      "name": "google-merchant-api",
+      "version": "1.0.0",
+      "description": "Work with Google Merchant Center APIs — Merchant API (v1) and Content API for Shopping (v2.1) for products, inventory, promotions, data sources, reports, and account management",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/claude-plugins-registry",
+      "keywords": ["google", "merchant", "shopping", "e-commerce", "products", "inventory", "feeds"],
+      "license": "MIT",
+      "commands": [],
+      "category": "workflow",
+      "type": "skill"
+    },
+    {
+      "name": "lv-aggregators-api",
+      "version": "1.0.0",
+      "description": "Generate and manage XML product feeds for Latvian price comparison platforms — Salidzini.lv and KurPirkt.lv integration, feed formats, field mappings, and validation",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/claude-plugins-registry",
+      "keywords": ["latvia", "salidzini", "kurpirkt", "price-comparison", "xml-feed", "e-commerce", "aggregator"],
+      "license": "MIT",
+      "commands": [],
+      "category": "workflow",
+      "type": "skill"
     }
   ]
 }

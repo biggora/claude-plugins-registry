@@ -65,6 +65,8 @@ claude-plugins skills remove commafeed-api
 | `youtube-search` | workflow | Search YouTube for videos, channels, playlists and extract metadata, transcripts, and analytics via multiple API methods |
 | `tailwindcss-best-practices` | frontend | Tailwind CSS v4.x best practices — utility classes, responsive layouts, @theme variables, dark mode, custom utilities, and v3-to-v4 migration |
 | `vite-best-practices` | frontend | Vite 8 build tool best practices — configuration, Rolldown/Oxc migration, plugin API, SSR, library mode, and virtual modules |
+| `google-merchant-api` | workflow | Work with Google Merchant Center APIs — Merchant API (v1) and Content API for Shopping (v2.1) for products, inventory, promotions, and reports |
+| `lv-aggregators-api` | workflow | Generate and manage XML product feeds for Latvian price comparison platforms — Salidzini.lv and KurPirkt.lv integration |
 | `youtube-thumbnail` | other | Generates professional YouTube thumbnails in 11 strategic styles with auto-detection of AI image backends and Pillow compositing |
 
 #### Install Examples
@@ -86,6 +88,8 @@ npx skills add https://github.com/biggora/claude-plugins-registry --skill test-w
 npx skills add https://github.com/biggora/claude-plugins-registry --skill test-mobile-app
 npx skills add https://github.com/biggora/claude-plugins-registry --skill tailwindcss-best-practices
 npx skills add https://github.com/biggora/claude-plugins-registry --skill vite-best-practices
+npx skills add https://github.com/biggora/claude-plugins-registry --skill google-merchant-api
+npx skills add https://github.com/biggora/claude-plugins-registry --skill lv-aggregators-api
 ```
 
 ## Plugins
