@@ -124,6 +124,88 @@ Expected Result: PASS / FAIL criteria
 
 ---
 
+## Expo / React Native — Local Backend Setup
+
+When the user's backend runs on the same machine as the development environment, the mobile app **cannot use `localhost` or `127.0.0.1`** — on a physical device or emulator, those addresses resolve to the device itself, not the host computer.
+
+### Find the host machine's IP
+
+```bash
+# macOS / Linux
+ifconfig | grep "inet " | grep -v 127.0.0.1
+
+# Windows (PowerShell)
+ipconfig
+```
+
+Use the LAN IP (e.g. `192.168.1.15`). The device and the machine must be on the same Wi-Fi network.
+
+**Android emulator shortcut:** `10.0.2.2` is a special alias that always points to the host machine, so you don't need the LAN IP when testing on the built-in Android emulator.
+
+### Configure the Expo app
+
+Expo supports `.env` files with the `EXPO_PUBLIC_` prefix:
+
+1. Create `.env.local` in the project root:
+   ```
+   EXPO_PUBLIC_API_URL=http://192.168.1.15:5000
+   ```
+2. Add `.env.local` to `.gitignore` (machine-specific setting).
+3. Use the variable in code:
+   ```js
+   const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/users`);
+   ```
+
+For multi-environment setups, use `app.config.js`:
+```js
+// app.config.js
+export default ({ config }) => ({
+  ...config,
+  extra: {
+    apiUrl: process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5000',
+  },
+});
+// Access via: Constants.expoConfig.extra.apiUrl  (expo-constants)
+```
+
+### Configure the backend
+
+Two things must be set on the server side:
+
+| Setting | Why |
+|---------|-----|
+| **Bind to `0.0.0.0`** | Default `127.0.0.1` binding rejects requests from outside the loopback interface — the device can't reach it |
+| **Allow CORS** | The app's origin differs from the server origin; use `cors` (Express/Node), `django-cors-headers` (Django), `rack-cors` (Rails), etc. |
+
+Example for Express:
+```js
+const cors = require('cors');
+app.use(cors()); // or restrict to: { origin: 'http://192.168.1.15:8081' }
+app.listen(5000, '0.0.0.0', () => console.log('listening on all interfaces'));
+```
+
+### Tunneling fallback (ngrok / Expo tunnel)
+
+If direct LAN access fails (VPN, restrictive router, office firewall), use tunneling:
+
+```bash
+# Expo built-in tunnel (wraps ngrok)
+npx expo start --tunnel
+```
+
+This creates a public HTTPS URL that forwards traffic to the local server. It's slower than LAN but works through any network. Update `EXPO_PUBLIC_API_URL` to the tunnel URL while using it.
+
+### Testing checklist for local backend scenarios
+
+- [ ] Backend bound to `0.0.0.0`, not `127.0.0.1`
+- [ ] CORS configured on the server
+- [ ] `EXPO_PUBLIC_API_URL` set to LAN IP (or `http://10.0.2.2:<port>` for Android emulator)
+- [ ] Device and machine on the same Wi-Fi (for physical device)
+- [ ] No firewall blocking the backend port on the host machine
+- [ ] API endpoints respond to direct `curl http://<host-ip>:<port>/health` from terminal before running app tests
+
+---
+
 ## Phase 4 — Test Execution
 
 ### Environment Setup
