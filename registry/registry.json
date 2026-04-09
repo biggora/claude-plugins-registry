@@ -344,6 +344,36 @@
       "commands": [],
       "category": "frontend",
       "type": "skill"
+    },
+    {
+      "name": "klix-integration",
+      "version": "1.0.0",
+      "description": "Integrate Klix (by Citadele) payment gateway — API integration, card payments, Apple Pay, Google Pay, Baltic bank transfers (PIS), Pay Later installments, recurring payments, reservations, and eCommerce plugins",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/claude-plugins-registry",
+      "keywords": ["klix", "payments", "checkout", "apple-pay", "google-pay", "baltic", "e-commerce", "citadele"],
+      "license": "MIT",
+      "commands": [],
+      "category": "workflow",
+      "type": "skill"
+    },
+    {
+      "name": "brand-guidelines",
+      "version": "1.0.0",
+      "description": "Create comprehensive brand guidelines documents (brand books) for any brand — structured interview for colors, typography, logo, voice & tone, then generates a professional self-contained HTML brand book",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/claude-plugins-registry",
+      "keywords": ["brand", "branding", "style-guide", "brand-book", "visual-identity", "design-system", "typography", "colors"],
+      "license": "Apache-2.0",
+      "commands": [],
+      "category": "other",
+      "type": "skill"
     }
   ]
 }

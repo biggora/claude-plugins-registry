@@ -70,6 +70,8 @@ claude-plugins skills remove commafeed-api
 | `typescript-expert` | code-quality | TypeScript type system, generics, utility types, advanced patterns, tsconfig, and TS 5.x features — includes `/typescript-fix` slash command |
 | `youtube-thumbnail` | other | Generates professional YouTube thumbnails in 11 strategic styles with auto-detection of AI image backends and Pillow compositing |
 | `next-best-practices` | frontend | Next.js 16 best practices — App Router, Server/Client Components, use cache, cacheTag, Server Actions, useActionState, useOptimistic, streaming, metadata/SEO, and PPR |
+| `klix-integration` | workflow | Integrate Klix payment gateway — API, card payments, Apple/Google Pay, Baltic bank transfers, Pay Later installments, recurring payments, and eCommerce plugins |
+| `brand-guidelines` | other | Create brand books for any brand — structured interview for colors, typography, logo, voice & tone, generates professional self-contained HTML brand guidelines |
 
 #### Install Examples
 
@@ -95,6 +97,8 @@ npx skills add https://github.com/biggora/claude-plugins-registry --skill lv-agg
 npx skills add https://github.com/biggora/claude-plugins-registry --skill typescript-expert
 npx skills add https://github.com/biggora/claude-plugins-registry --skill nest-best-practices
 npx skills add https://github.com/biggora/claude-plugins-registry --skill next-best-practices
+npx skills add https://github.com/biggora/claude-plugins-registry --skill klix-integration
+npx skills add https://github.com/biggora/claude-plugins-registry --skill brand-guidelines
 ```
 
 ## Plugins
