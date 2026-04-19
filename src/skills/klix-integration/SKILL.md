@@ -10,6 +10,8 @@ description: >
   "Klix by Citadele", or needs to accept payments in Latvia, Lithuania, or Estonia
   using local banks. Always use this skill for any Klix-related payment integration work,
   even if the user just says "add payments" in a Baltic-region project context.
+  Also triggers on: "@biggora/klix", "klix npm", "klix SDK", "klix TypeScript SDK",
+  "klix module", "NestJS klix", "klix client library".
 ---
 
 # Klix Payment Gateway Integration
@@ -67,13 +69,159 @@ See `references/ecommerce-plugins.md` for platform-specific setup.
 For showing monthly payment calculators on product/cart pages.
 See `references/pay-later-widget.md`.
 
-### 3. Direct API Integration (recommended for custom apps)
-Full control over payment flow. Works with any stack.
-**This is the main integration method — details below.**
+### 3. `@biggora/klix` TypeScript SDK (recommended for Node.js / TypeScript)
+Typed SDK wrapping the REST API with built-in caching, error types, signature
+verification, and first-class NestJS support. Dual ESM/CJS. Node.js 20+.
+**See the SDK section below for details.**
+
+### 4. Direct API Integration (recommended for non-Node.js stacks)
+Full control over payment flow via raw HTTP requests. Works with any language.
+**See the API Reference section below.**
 
 ---
 
-## API Reference
+## `@biggora/klix` SDK (Node.js / TypeScript)
+
+### Installation
+
+```bash
+npm install @biggora/klix
+```
+
+### Client Setup
+
+```typescript
+import { createKlixClient } from '@biggora/klix';
+
+const klix = createKlixClient({
+  apiKey: process.env.KLIX_API_KEY!,
+  brandId: process.env.KLIX_BRAND_ID!,
+});
+```
+
+### Available Resources
+
+| Resource | Methods |
+|----------|---------|
+| `klix.purchases` | `create`, `read`, `cancel`, `capture`, `charge`, `refund`, `release` |
+| `klix.balance` | `get` |
+| `klix.paymentMethods` | `list({ currency })` — 60s cache built-in |
+| `klix.clients` | `create`, `list`, `iterateAll`, `listRecurringTokens(clientId)` |
+| `klix.billing` | `sendInvoice` |
+| `klix.billingTemplates` | `create`, `list`, `addSubscriber`, `sendInvoice`, `listClients` |
+| `klix.companyStatements` | `create`, `list` |
+| `klix.webhooks` | `create`, `list`, `listDeliveries` |
+
+`brandId` is auto-injected into `paymentMethods.list()` and purchase calls.
+
+### Purchase Example
+
+```typescript
+const purchase = await klix.purchases.create({
+  currency: 'EUR',
+  reference: 'ORDER-1001',
+  client: { email: 'customer@example.com' },
+  purchase: {
+    products: [{ name: 'Pro subscription', price: 1999, quantity: 1 }],
+  },
+  success_callback: 'https://example.com/api/klix/callback',
+  success_redirect: 'https://example.com/checkout/success',
+  failure_redirect: 'https://example.com/checkout/failure',
+});
+// Redirect customer to purchase.checkout_url
+```
+
+### Error Handling
+
+```typescript
+import { KlixApiError } from '@biggora/klix';
+
+try {
+  await klix.purchases.read('invalid-id');
+} catch (err) {
+  if (err instanceof KlixApiError) {
+    console.error(err.status, err.code, err.message, err.details);
+  }
+}
+```
+
+### Signature Verification
+
+```typescript
+// Success callback verification
+const valid = await klix.verifySuccessCallback(rawBodyBuffer, signatureHeader);
+
+// Webhook payload verification
+import { verifyWebhookPayload } from '@biggora/klix';
+const valid = verifyWebhookPayload(rawBodyBuffer, signatureHeader, webhook.public_key);
+```
+
+### NestJS Integration
+
+Import from `@biggora/klix/nestjs`. Requires `rawBody: true` in NestFactory.
+
+```typescript
+import { KlixModule } from '@biggora/klix/nestjs';
+
+@Module({
+  imports: [
+    KlixModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        apiKey: config.getOrThrow('KLIX_API_KEY'),
+        brandId: config.getOrThrow('KLIX_BRAND_ID'),
+      }),
+    }),
+  ],
+})
+export class AppModule {}
+```
+
+Inject the client in services:
+
+```typescript
+import { InjectKlixClient } from '@biggora/klix/nestjs';
+import type { KlixClient } from '@biggora/klix';
+
+@Injectable()
+export class PaymentsService {
+  constructor(@InjectKlixClient() private readonly klix: KlixClient) {}
+
+  async createPayment(order: Order) {
+    return this.klix.purchases.create({ /* ... */ });
+  }
+}
+```
+
+Use `KlixSignatureVerifier` for callback verification in controllers:
+
+```typescript
+import { KlixSignatureVerifier } from '@biggora/klix/nestjs';
+
+@Controller('klix')
+export class KlixController {
+  constructor(private readonly verifier: KlixSignatureVerifier) {}
+
+  @Post('callback')
+  async callback(@Req() req: RawBodyRequest<Request>) {
+    const valid = await this.verifier.verifySuccessCallback(
+      req.rawBody ?? Buffer.alloc(0),
+      String(req.headers['x-signature'] ?? ''),
+    );
+    if (valid) {
+      // process the payment
+    }
+    return { ok: true };
+  }
+}
+```
+
+---
+
+## API Reference (Direct HTTP)
+
+> If using `@biggora/klix` SDK, these endpoints are handled automatically.
+> This section is for direct HTTP integration with non-Node.js stacks.
 
 **Base URL**: `https://portal.klix.app/api/v1/`
 
@@ -262,6 +410,31 @@ app.post('/api/klix/callback', async (req, res) => {
 });
 ```
 
+**Using `@biggora/klix` SDK:**
+```javascript
+import { createKlixClient } from '@biggora/klix';
+
+const klix = createKlixClient({
+  apiKey: process.env.KLIX_SECRET_KEY,
+  brandId: process.env.KLIX_BRAND_ID,
+});
+
+app.post('/api/klix/callback', async (req, res) => {
+  const valid = await klix.verifySuccessCallback(
+    req.rawBody, req.headers['x-signature']
+  );
+  if (valid) {
+    const purchase = await klix.purchases.read(req.body.id);
+    if (purchase.status === 'paid') {
+      await updateOrderStatus(purchase.reference, 'paid');
+    }
+  }
+  res.sendStatus(200);
+});
+```
+
+Note: enable raw body parsing (`express.raw()` or `{ rawBody: true }` in NestJS) for signature verification.
+
 ---
 
 ## Branding Guidelines
@@ -288,15 +461,25 @@ Read these for deeper details on specific topics:
 ## Common Integration Patterns
 
 ### Next.js / React
-1. Create API route for purchase creation (`POST /api/checkout`)
-2. Create API route for callback (`POST /api/klix/callback`)
-3. Redirect to `checkout_url` from client or use `router.push()`
-4. Create success/failure/cancel pages
+1. `npm install @biggora/klix`
+2. Create API route `POST /api/checkout` — use `klix.purchases.create()`, return `checkout_url`
+3. Create API route `POST /api/klix/callback` — use `klix.verifySuccessCallback()` + `klix.purchases.read()`
+4. Redirect to `checkout_url` from client via `router.push()`
+5. Create success/failure/cancel pages
 
 ### Express / Node.js
-1. `POST /checkout` — creates Klix purchase, returns `checkout_url`
-2. `POST /webhook/klix` — handles callback
-3. `GET /order/:id/status` — checks order status
+1. `npm install @biggora/klix`
+2. Initialize client: `createKlixClient({ apiKey, brandId })`
+3. `POST /checkout` — `klix.purchases.create(...)`, return `checkout_url`
+4. `POST /webhook/klix` — `klix.verifySuccessCallback()`, then `klix.purchases.read()`
+5. `GET /order/:id/status` — `klix.purchases.read(id)`
+
+### NestJS
+1. `npm install @biggora/klix`
+2. Import `KlixModule.forRootAsync()` in AppModule with `ConfigService`
+3. Inject `KlixClient` via `@InjectKlixClient()` in payment services
+4. Use `KlixSignatureVerifier` in webhook controller
+5. Enable `rawBody: true` in `NestFactory.create()`
 
 ### PHP / Laravel
 1. Use `klix/klix-sdk-php` from Packagist (official SDK)
@@ -304,5 +487,5 @@ Read these for deeper details on specific topics:
 3. Add webhook route for callback
 
 ### Any Other Stack
-1. Make HTTP requests to the API directly
+1. Make HTTP requests to the API directly (see API Reference section)
 2. Or generate a client from the OpenAPI schema: `https://portal.klix.app/api/schema/v1/`
