@@ -71,6 +71,7 @@ claude-plugins skills remove commafeed-api
 | `youtube-thumbnail` | other | Generates professional YouTube thumbnails in 11 strategic styles with auto-detection of AI image backends and Pillow compositing |
 | `next-best-practices` | frontend | Next.js 16 best practices — App Router, Server/Client Components, use cache, cacheTag, Server Actions, useActionState, useOptimistic, streaming, metadata/SEO, and PPR |
 | `klix-integration` | workflow | Integrate Klix payment gateway — API, card payments, Apple/Google Pay, Baltic bank transfers, Pay Later installments, recurring payments, and eCommerce plugins |
+| `paysera-integration` | workflow | Integrate PaySera Checkout V3 payment gateway — orders, payments, refunds, webhooks, card payments, bank transfers, e-wallets across EU, with TypeScript SDK and NestJS support |
 | `brand-guidelines` | other | Create brand books for any brand — structured interview for colors, typography, logo, voice & tone, generates professional self-contained HTML brand guidelines |
 
 #### Install Examples
@@ -98,6 +99,7 @@ npx skills add https://github.com/biggora/claude-plugins-registry --skill typesc
 npx skills add https://github.com/biggora/claude-plugins-registry --skill nest-best-practices
 npx skills add https://github.com/biggora/claude-plugins-registry --skill next-best-practices
 npx skills add https://github.com/biggora/claude-plugins-registry --skill klix-integration
+npx skills add https://github.com/biggora/claude-plugins-registry --skill paysera-integration
 npx skills add https://github.com/biggora/claude-plugins-registry --skill brand-guidelines
 ```
 

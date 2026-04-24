@@ -374,6 +374,21 @@
       "commands": [],
       "category": "other",
       "type": "skill"
+    },
+    {
+      "name": "paysera-integration",
+      "version": "1.0.0",
+      "description": "Integrate PaySera Checkout V3 payment gateway — orders, payments, refunds, webhooks, card payments, bank transfers, e-wallets across EU, with TypeScript SDK and NestJS support",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/claude-plugins-registry",
+      "keywords": ["paysera", "payments", "checkout", "orders", "refunds", "webhooks", "eu", "e-commerce", "oauth2"],
+      "license": "MIT",
+      "commands": [],
+      "category": "workflow",
+      "type": "skill"
     }
   ]
 }
