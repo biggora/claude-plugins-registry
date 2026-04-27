@@ -1,15 +1,7 @@
 ---
 name: n8n-api
-description: >
-  Use this skill whenever the user wants to interact with an n8n instance via its
-  public REST API. Triggers include: listing, creating, updating, deleting, activating
-  or deactivating workflows; viewing or managing executions; managing credentials, tags,
-  variables, users, or projects; auditing instance activity; triggering workflow runs;
-  checking execution status; or any automation task involving the n8n API. Also use for
-  requests like "show my n8n workflows", "run workflow X", "list failed executions",
-  "create a tag in n8n", "manage n8n variables", or "check n8n audit log".
-  Always use this skill for any n8n API interaction — it defines the correct endpoints,
-  authentication, and patterns.
+description: "Use this skill whenever the user wants to interact with an n8n instance via its public REST API. Triggers include: listing, creating, updating, deleting, activating or deactivating workflows; viewing or managing executions; managing credentials, tags, variables, users, or projects; auditing instance activity; triggering workflow runs; checking execution status; or any automation task involving the n8n API. Also use for requests like \"show my n8n workflows\", \"run workflow X\", \"list failed executions\", \"create a tag in n8n\", \"manage n8n variables\", or \"check n8n audit log\". Always use this skill for any n8n API interaction — it defines the correct endpoints, authentication, and patterns.
+"
 ---
 
 # n8n REST API Skill

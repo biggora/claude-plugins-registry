@@ -1,17 +1,7 @@
 ---
 name: paysera-integration
-description: >
-  Use this skill whenever the user wants to integrate PaySera payment gateway
-  into a website or application. Triggers include: adding PaySera payments,
-  PaySera Checkout V3 integration, payment processing with PaySera, card payments
-  via PaySera, bank transfers through PaySera, e-wallet payments in EU/Baltic
-  countries, PaySera order creation, PaySera webhooks, PaySera refunds, PaySera
-  payment capture, or any mention of PaySera as a payment provider. Also use when
-  the user mentions "paysera.com", "PaySera Checkout", or needs to accept payments
-  across the EU using PaySera's payment infrastructure.
-  Also triggers on: "@biggora/paysera", "paysera npm", "paysera SDK",
-  "paysera TypeScript SDK", "paysera module", "NestJS paysera",
-  "paysera client library", "PaySera Checkout V3 API", "paysera OAuth".
+description: "Use this skill whenever the user wants to integrate PaySera payment gateway into a website or application. Triggers include: adding PaySera payments, PaySera Checkout V3 integration, payment processing with PaySera, card payments via PaySera, bank transfers through PaySera, e-wallet payments in EU/Baltic countries, PaySera order creation, PaySera webhooks, PaySera refunds, PaySera payment capture, or any mention of PaySera as a payment provider. Also use when the user mentions \"paysera.com\", \"PaySera Checkout\", or needs to accept payments across the EU using PaySera's payment infrastructure. Also triggers on: \"@biggora/paysera\", \"paysera npm\", \"paysera SDK\", \"paysera TypeScript SDK\", \"paysera module\", \"NestJS paysera\", \"paysera client library\", \"PaySera Checkout V3 API\", \"paysera OAuth\".
+"
 ---
 
 # PaySera Checkout V3 Integration

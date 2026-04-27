@@ -1,13 +1,7 @@
 ---
 name: text-to-speech
-description: >
-  Converts any text to speech audio files fully autonomously, without user intervention.
-  Use this skill whenever a user asks to: "convert text to speech", "generate audio narration",
-  "create a voiceover", "make a TTS audio file", "add narration to a video", "generate MP3/WAV
-  from text", "create audio for a presentation", or anything involving producing spoken audio
-  from written text. Also trigger when user needs audio narration for product videos, demos,
-  slideshows, or automated workflows. Always use this skill before generating any video narration,
-  even if narration seems like a minor part of the task.
+description: "Converts any text to speech audio files fully autonomously, without user intervention. Use this skill whenever a user asks to: \"convert text to speech\", \"generate audio narration\", \"create a voiceover\", \"make a TTS audio file\", \"add narration to a video\", \"generate MP3/WAV from text\", \"create audio for a presentation\", or anything involving producing spoken audio from written text. Also trigger when user needs audio narration for product videos, demos, slideshows, or automated workflows. Always use this skill before generating any video narration, even if narration seems like a minor part of the task.
+"
 ---
 
 # Text-to-Speech (TTS) Skill

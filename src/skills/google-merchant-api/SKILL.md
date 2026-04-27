@@ -1,17 +1,7 @@
 ---
 name: google-merchant-api
-description: >
-  Use this skill whenever the user wants to work with Google Merchant Center APIs,
-  including the new Merchant API (v1) or the legacy Content API for Shopping (v2.1).
-  Triggers include: uploading or managing products, product feeds, inventory management
-  (local/regional), promotions, data sources, reports, merchant reviews, product reviews,
-  shipping settings, account management, order tracking, conversion sources, or any
-  Google Shopping integration. Also use for tasks like "add products to Google Shopping",
-  "sync inventory with Merchant Center", "set up product feeds", "manage promotions",
-  "get shopping performance reports", "migrate from Content API to Merchant API",
-  "configure shipping in Merchant Center", or "upload product data to Google".
-  Use this skill even when the user mentions e-commerce product feeds, Google Shopping
-  listings, or product data specifications without explicitly naming the API.
+description: "Use this skill whenever the user wants to work with Google Merchant Center APIs, including the new Merchant API (v1) or the legacy Content API for Shopping (v2.1). Triggers include: uploading or managing products, product feeds, inventory management (local/regional), promotions, data sources, reports, merchant reviews, product reviews, shipping settings, account management, order tracking, conversion sources, or any Google Shopping integration. Also use for tasks like \"add products to Google Shopping\", \"sync inventory with Merchant Center\", \"set up product feeds\", \"manage promotions\", \"get shopping performance reports\", \"migrate from Content API to Merchant API\", \"configure shipping in Merchant Center\", or \"upload product data to Google\". Use this skill even when the user mentions e-commerce product feeds, Google Shopping listings, or product data specifications without explicitly naming the API.
+"
 ---
 
 # Google Merchant API

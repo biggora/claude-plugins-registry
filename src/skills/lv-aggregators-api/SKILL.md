@@ -1,15 +1,7 @@
 ---
 name: lv-aggregators-api
-description: >
-  Use this skill whenever the user wants to work with Latvian price comparison / aggregator
-  platforms, specifically Salidzini.lv or KurPirkt.lv. Triggers include: creating or generating
-  XML product feeds, integrating an e-commerce store with Latvian aggregators, exporting product
-  catalogs for salidzini or kurpirkt, validating XML feed format, debugging feed errors,
-  setting up product data export for Latvian price comparison sites, or any mention of
-  "salidzini", "kurpirkt", "cenu salīdzināšana", "preču eksports", "XML feed Latvia",
-  "Latvian marketplace integration", or "price aggregator feed". Also use when the user mentions
-  e-commerce product feeds for the Latvian market, product data export in LV context, or wants
-  to list products on Latvian comparison shopping engines, even without naming a specific platform.
+description: "Use this skill whenever the user wants to work with Latvian price comparison / aggregator platforms, specifically Salidzini.lv or KurPirkt.lv. Triggers include: creating or generating XML product feeds, integrating an e-commerce store with Latvian aggregators, exporting product catalogs for salidzini or kurpirkt, validating XML feed format, debugging feed errors, setting up product data export for Latvian price comparison sites, or any mention of \"salidzini\", \"kurpirkt\", \"cenu salīdzināšana\", \"preču eksports\", \"XML feed Latvia\", \"Latvian marketplace integration\", or \"price aggregator feed\". Also use when the user mentions e-commerce product feeds for the Latvian market, product data export in LV context, or wants to list products on Latvian comparison shopping engines, even without naming a specific platform.
+"
 ---
 
 # Latvian Price Aggregator APIs
