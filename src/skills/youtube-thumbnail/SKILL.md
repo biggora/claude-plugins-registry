@@ -1,11 +1,6 @@
 ---
 name: youtube-thumbnail
-description: >
-  Generates professional YouTube thumbnails in 11 strategic styles with auto-detection
-  of AI image backends (A1111, ComfyUI, MCP Imagen 4, Gemini API, fal.ai FLUX, OpenAI
-  gpt-image-1) and Pillow compositing. Trigger when the user asks to create, generate,
-  or design a YouTube thumbnail, video cover, channel art, or presentation title slide.
-  Also trigger for batch thumbnail creation or YouTube visual workflow automation.
+description: "Generates professional YouTube thumbnails in 11 strategic styles with auto-detection of AI image backends (A1111, ComfyUI, MCP Imagen 4, Gemini API, fal.ai FLUX, OpenAI gpt-image-1) and Pillow compositing. Trigger when the user asks to create, generate, or design a YouTube thumbnail, video cover, channel art, or presentation title slide. Also trigger for batch thumbnail creation or YouTube visual workflow automation."
 ---
 
 # YouTube Thumbnail Generation Skill (2026 Edition)

@@ -1,16 +1,6 @@
 ---
 name: captcha
-description: >
-  Solve CAPTCHAs in automated browser sessions using third-party solving services.
-  Use this skill whenever you need to: bypass a CAPTCHA while automating a website,
-  integrate CAPTCHA solving into a Playwright or Puppeteer script, solve reCAPTCHA v2
-  or v3, hCaptcha, Cloudflare Turnstile, or image-based CAPTCHAs, automate a login or
-  form submission that's blocked by a CAPTCHA, test a page that has CAPTCHA challenges,
-  or write a script that needs to pass a CAPTCHA programmatically.
-  Also triggers for: "recaptcha", "hcaptcha", "turnstile", "captcha solving",
-  "bypass captcha", "solve captcha", "pass captcha challenge", "automate past captcha",
-  "get past robot check", "bot verification". Always use this skill for any
-  CAPTCHA-related automation — even simple cases benefit from correct token injection patterns.
+description: "Integrate third-party CAPTCHA-solving services into automated browser sessions for authorized testing, QA, and legitimate automation workflows on sites you own or have permission to access. Use this skill when the user needs to: handle CAPTCHA challenges in Playwright or Puppeteer test suites, integrate reCAPTCHA v2/v3, hCaptcha, Cloudflare Turnstile, or image-based CAPTCHA solving into approved automation, or complete CAPTCHA token injection in QA scripts. Also triggers on technical terms: \"recaptcha integration\", \"hcaptcha integration\", \"turnstile integration\", \"captcha solving service\", \"CAPTCHA token injection\", \"captcha API\". Always use this skill for any authorized CAPTCHA-related automation — even simple cases benefit from correct token injection patterns."
 ---
 
 # CAPTCHA Solver Skill

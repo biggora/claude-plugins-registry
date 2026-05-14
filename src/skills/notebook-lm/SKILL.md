@@ -1,17 +1,6 @@
 ---
 name: notebook-lm
-description: |
-  Automate Google NotebookLM via the notebooklm-py Python library. Use this skill whenever the user wants to:
-  - Create, manage, or delete NotebookLM notebooks
-  - Add sources (URLs, YouTube, PDFs, files, text, Google Drive) to a notebook
-  - Ask questions / chat with notebook content
-  - Generate content: Audio Overview (podcast), Video Overview, Quiz, Flashcards, Slide Deck, Infographic, Report, Data Table, Mind Map
-  - Download generated artifacts (MP3, MP4, PDF, PNG, CSV, JSON, Markdown)
-  - Run web/Drive research and auto-import results
-  - Manage sharing, notes, and source full-text extraction
-  - Automate any NotebookLM workflow programmatically
-
-  Trigger this skill for ANY request involving NotebookLM, notebooklm-py, Google NotebookLM automation, podcast/audio overview generation from notes, or bulk research pipelines.
+description: "Automate Google NotebookLM via the notebooklm-py Python library. Use this skill whenever the user wants to create, manage, or delete NotebookLM notebooks; add sources (URLs, YouTube, PDFs, files, text, Google Drive) to a notebook; ask questions or chat with notebook content; generate content like Audio Overview (podcast), Video Overview, Quiz, Flashcards, Slide Deck, Infographic, Report, Data Table, or Mind Map; download generated artifacts (MP3, MP4, PDF, PNG, CSV, JSON, Markdown); run web/Drive research and auto-import results; manage sharing, notes, and source full-text extraction; or automate any NotebookLM workflow programmatically. Trigger this skill for ANY request involving NotebookLM, notebooklm-py, Google NotebookLM automation, podcast/audio overview generation from notes, or bulk research pipelines."
 ---
 
 # NotebookLM Skill

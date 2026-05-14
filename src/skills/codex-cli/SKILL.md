@@ -1,15 +1,6 @@
 ---
 name: codex-cli
-description: >
-  Use this skill whenever you need to install, configure, run, or automate
-  tasks using OpenAI's Codex CLI (codex-cli). Trigger on any mention of
-  "codex cli", "openai codex", "codex exec", "codex agent", "codex terminal",
-  CI automation with Codex, approval modes (full-auto, read-only, on-request),
-  sandbox policies, or when someone wants to use an AI coding agent from the
-  terminal. Also trigger when the user wants to install codex, write codex
-  config files (config.toml), run non-interactive codex sessions, integrate
-  codex into GitHub Actions or CI pipelines, configure MCP servers for codex,
-  set up codex profiles, or troubleshoot codex sandbox and approval issues.
+description: "Use this skill whenever you need to install, configure, run, or automate tasks using OpenAI's Codex CLI (codex-cli). Trigger on any mention of \"codex cli\", \"openai codex\", \"codex exec\", \"codex agent\", \"codex terminal\", CI automation with Codex, approval modes (full-auto, read-only, on-request), sandbox policies, or when someone wants to use an AI coding agent from the terminal. Also trigger when the user wants to install codex, write codex config files (config.toml), run non-interactive codex sessions, integrate codex into GitHub Actions or CI pipelines, configure MCP servers for codex, set up codex profiles, or troubleshoot codex sandbox and approval issues."
 ---
 
 # Codex CLI Skill

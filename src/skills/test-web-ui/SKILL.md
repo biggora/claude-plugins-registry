@@ -1,16 +1,6 @@
 ---
 name: test-web-ui
-description: >
-  Automated web QA skill: analyzes a website or project, generates end-user use cases,
-  derives a structured test plan, executes tests via Playwright browser automation, and
-  produces a full HTML/Markdown QA report with screenshots and pass/fail results.
-
-  TRIGGER this skill whenever the user asks to: test a website, run QA on a web app,
-  check if a site works, find bugs on a site, validate a web project, create a test plan
-  for a website, run functional tests, check a landing page, audit a web app for issues,
-  test user flows — or any variation of "проверить сайт", "протестировать сайт",
-  "QA сайта", "тест веб-приложения", "найти баги на сайте". Even if the user just says
-  "посмотри работает ли всё нормально на сайте" — use this skill.
+description: "Automated web QA skill: analyzes a website or project, generates end-user use cases, derives a structured test plan, executes tests via Playwright browser automation, and produces a full HTML/Markdown QA report with screenshots and pass/fail results. TRIGGER this skill whenever the user asks to: test a website, run QA on a web app, check if a site works, find bugs on a site, validate a web project, create a test plan for a website, run functional tests, check a landing page, audit a web app for issues, test user flows — or any variation of \"проверить сайт\", \"протестировать сайт\", \"QA сайта\", \"тест веб-приложения\", \"найти баги на сайте\". Even if the user just says \"посмотри работает ли всё нормально на сайте\" — use this skill."
 ---
 
 # Web Tester Skill

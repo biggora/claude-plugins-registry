@@ -1,15 +1,6 @@
 ---
 name: tm-search
-description: >
-  Use this skill whenever the user wants to search, validate, or look up US trademarks, brand
-  names, or keywords in the USPTO trademark database. Triggers include: checking if a brand name
-  or word is trademarked, searching trademark registrations, validating whether a keyword is
-  available for trademark, looking up trademark status or owner, batch-checking multiple brand
-  names, or building any tool/script involving the USPTO trademark database. Also use for
-  requests like "is X trademarked?", "find trademarks for [keyword]", "check trademark
-  availability", "search USPTO for [name]", or "validate these words against USPTO trademarks."
-  Always use this skill for any trademark search or validation task — even simple lookups benefit
-  from the correct API patterns and output formats defined here.
+description: "Use this skill whenever the user wants to search, validate, or look up US trademarks, brand names, or keywords in the USPTO trademark database. Triggers include: checking if a brand name or word is trademarked, searching trademark registrations, validating whether a keyword is available for trademark, looking up trademark status or owner, batch-checking multiple brand names, or building any tool/script involving the USPTO trademark database. Also use for requests like \"is X trademarked?\", \"find trademarks for [keyword]\", \"check trademark availability\", \"search USPTO for [name]\", or \"validate these words against USPTO trademarks.\" Always use this skill for any trademark search or validation task — even simple lookups benefit from the correct API patterns and output formats defined here."
 ---
 
 # US Trademark Search Skill (tm-search)

@@ -282,7 +282,7 @@
       "keywords": ["vite", "rolldown", "oxc", "bundler", "ssr", "frontend", "build-tool"],
       "license": "MIT",
       "commands": [],
-      "category": "frontend",
+      "category": "code-quality",
       "type": "skill"
     },
     {

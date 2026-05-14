@@ -1,17 +1,6 @@
 ---
 name: klix-integration
-description: >
-  Use this skill whenever the user wants to integrate Klix payment gateway into a website
-  or application. Triggers include: adding Klix payments, checkout integration, payment
-  processing with Klix, card payments via Klix, Apple Pay/Google Pay through Klix,
-  bank payments (PIS) in Baltic countries, Klix Pay Later / installments, recurring
-  payments, payment reservations/captures, Klix widget setup, Klix API calls, or any
-  mention of Klix as a payment provider. Also use when the user mentions "klix.app",
-  "Klix by Citadele", or needs to accept payments in Latvia, Lithuania, or Estonia
-  using local banks. Always use this skill for any Klix-related payment integration work,
-  even if the user just says "add payments" in a Baltic-region project context.
-  Also triggers on: "@biggora/klix", "klix npm", "klix SDK", "klix TypeScript SDK",
-  "klix module", "NestJS klix", "klix client library".
+description: "Use this skill whenever the user wants to integrate Klix payment gateway into a website or application. Triggers include: adding Klix payments, checkout integration, payment processing with Klix, card payments via Klix, Apple Pay/Google Pay through Klix, bank payments (PIS) in Baltic countries, Klix Pay Later / installments, recurring payments, payment reservations/captures, Klix widget setup, Klix API calls, or any mention of Klix as a payment provider. Also use when the user mentions \"klix.app\", \"Klix by Citadele\", or needs to accept payments in Latvia, Lithuania, or Estonia using local banks. Always use this skill for any Klix-related payment integration work, even if the user just says \"add payments\" in a Baltic-region project context. Also triggers on: \"@biggora/klix\", \"klix npm\", \"klix SDK\", \"klix TypeScript SDK\", \"klix module\", \"NestJS klix\", \"klix client library\"."
 ---
 
 # Klix Payment Gateway Integration

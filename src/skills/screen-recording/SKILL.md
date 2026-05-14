@@ -1,14 +1,6 @@
 ---
 name: screen-recording
-description: >
-  Record the actual screen to video. Use this skill whenever a user asks to:
-  "record my screen", "capture my screen", "make a screen recording", "screencast",
-  "record what's on screen", "capture desktop", "record a video of my screen",
-  "take a video of my desktop", "screen capture to video", or anything involving
-  recording the actual display output to an MP4/video file.
-  Also supports creating synthetic demo videos programmatically when no real screen
-  capture is needed (product demos, animated presentations).
-  Always trigger this skill for any screen recording, screen capture, or video creation task.
+description: "Record the actual screen to video. Use this skill whenever a user asks to: \"record my screen\", \"capture my screen\", \"make a screen recording\", \"screencast\", \"record what's on screen\", \"capture desktop\", \"record a video of my screen\", \"take a video of my desktop\", \"screen capture to video\", or anything involving recording the actual display output to an MP4/video file. Also supports creating synthetic demo videos programmatically when no real screen capture is needed (product demos, animated presentations). Always trigger this skill for any screen recording, screen capture, or video creation task."
 ---
 
 > **Requires FFmpeg** for primary recording. Install: `choco install ffmpeg` (Windows), `brew install ffmpeg` (macOS), `apt install ffmpeg` (Linux). Python fallback available if FFmpeg is not installed (no audio/cursor).
