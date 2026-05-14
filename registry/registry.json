@@ -1,7 +1,7 @@
 {
   "$schema": "./schema.json",
   "version": "1.0.0",
-  "updated": "2026-03-28",
+  "updated": "2026-05-14",
   "plugins": [
     {
       "name": "code-optimizer",
@@ -48,7 +48,7 @@
     {
       "name": "captcha",
       "version": "1.0.0",
-      "description": "Solve CAPTCHAs in automated browser sessions — reCAPTCHA v2/v3, hCaptcha, Cloudflare Turnstile via third-party services (2captcha, CapMonster), and image grid challenges via Claude/GPT-4V vision AI",
+      "description": "Integrate third-party CAPTCHA-solving services (2captcha, CapMonster) for authorized automation — reCAPTCHA v2/v3, hCaptcha, Cloudflare Turnstile, and image grid challenges via vision AI",
       "author": {
         "name": "biggora",
         "url": "https://github.com/biggora"
@@ -57,7 +57,7 @@
       "keywords": ["captcha", "recaptcha", "hcaptcha", "turnstile", "playwright", "automation", "web-scraping"],
       "license": "MIT",
       "commands": [],
-      "category": "automation",
+      "category": "workflow",
       "type": "skill"
     },
     {
@@ -258,7 +258,7 @@
     {
       "name": "tailwindcss-best-practices",
       "version": "1.0.0",
-      "description": "Tailwind CSS v4.x best practices — utility classes, responsive layouts, @theme variables, dark mode, custom utilities with @utility, v3-to-v4 migration, text shadows, masks, logical properties, and source detection",
+      "description": "Tailwind CSS v4.x best practices — utility classes, responsive layouts, @theme variables, dark mode, custom utilities with @utility, v3-to-v4 migration, text shadows, masks, and logical properties",
       "author": {
         "name": "biggora",
         "url": "https://github.com/biggora"
@@ -267,7 +267,7 @@
       "keywords": ["tailwindcss", "css", "utility-first", "responsive", "design-system", "frontend"],
       "license": "MIT",
       "commands": [],
-      "category": "frontend",
+      "category": "code-quality",
       "type": "skill"
     },
     {
@@ -318,7 +318,7 @@
     {
       "name": "typescript-expert",
       "version": "1.0.0",
-      "description": "TypeScript language expertise — type system, generics, utility types, advanced type patterns, tsconfig configuration, and TS 5.x features with /typescript-fix slash command for auto-resolving type errors",
+      "description": "TypeScript expertise — type system, generics, utility types, advanced patterns, tsconfig, and TS 5.x features with /typescript-fix command for auto-resolving type errors",
       "author": {
         "name": "biggora",
         "url": "https://github.com/biggora"
@@ -333,7 +333,7 @@
     {
       "name": "next-best-practices",
       "version": "1.0.0",
-      "description": "Next.js 16 best practices — App Router, Server/Client Components, data fetching, use cache directive, cacheTag, cacheLife, Server Actions, useActionState, useOptimistic, streaming, metadata/SEO, and PPR",
+      "description": "Next.js 16 best practices — App Router, Server/Client Components, data fetching, use cache, cacheTag/cacheLife, Server Actions, useActionState, streaming, metadata/SEO, PPR",
       "author": {
         "name": "biggora",
         "url": "https://github.com/biggora"
@@ -342,13 +342,28 @@
       "keywords": ["nextjs", "react", "app-router", "server-components", "caching", "server-actions", "frontend"],
       "license": "MIT",
       "commands": [],
-      "category": "frontend",
+      "category": "code-quality",
+      "type": "skill"
+    },
+    {
+      "name": "nest-best-practices",
+      "version": "1.0.0",
+      "description": "NestJS v11 framework best practices — modules, controllers, services, DTOs, guards, interceptors, pipes, native JWT auth, Zod validation, Keyv caching, queues, WebSockets, and Suites testing",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/claude-plugins-registry",
+      "keywords": ["nestjs", "nodejs", "backend", "rest-api", "dependency-injection", "decorators", "typescript"],
+      "license": "MIT",
+      "commands": [],
+      "category": "code-quality",
       "type": "skill"
     },
     {
       "name": "klix-integration",
       "version": "1.0.0",
-      "description": "Integrate Klix (by Citadele) payment gateway — API integration, card payments, Apple Pay, Google Pay, Baltic bank transfers (PIS), Pay Later installments, recurring payments, reservations, and eCommerce plugins",
+      "description": "Integrate Klix (by Citadele) payment gateway — API, card payments, Apple/Google Pay, Baltic bank transfers (PIS), Pay Later, recurring payments, reservations, and eCommerce plugins",
       "author": {
         "name": "biggora",
         "url": "https://github.com/biggora"
@@ -363,7 +378,7 @@
     {
       "name": "brand-guidelines",
       "version": "1.0.0",
-      "description": "Create comprehensive brand guidelines documents (brand books) for any brand — structured interview for colors, typography, logo, voice & tone, then generates a professional self-contained HTML brand book",
+      "description": "Create comprehensive brand guidelines (brand books) — structured interview for colors, typography, logo, voice & tone, then generates a self-contained HTML brand book",
       "author": {
         "name": "biggora",
         "url": "https://github.com/biggora"
