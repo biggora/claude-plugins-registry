@@ -1,7 +1,7 @@
 {
   "$schema": "./schema.json",
   "version": "1.0.1",
-  "updated": "2026-05-14",
+  "updated": "2026-05-25",
   "plugins": [
     {
       "name": "code-optimizer",
@@ -12,9 +12,18 @@
         "url": "https://github.com/biggora"
       },
       "repository": "https://github.com/biggora/code-optimizer",
-      "keywords": ["optimization", "refactoring", "duplicates", "constants", "code-quality"],
+      "keywords": [
+        "optimization",
+        "refactoring",
+        "duplicates",
+        "constants",
+        "code-quality"
+      ],
       "license": "MIT",
-      "commands": ["/optimize", "/optimize-project"],
+      "commands": [
+        "/optimize",
+        "/optimize-project"
+      ],
       "category": "code-quality"
     },
     {
@@ -26,9 +35,18 @@
         "url": "https://github.com/biggora"
       },
       "repository": "https://github.com/biggora/github-issues-solver",
-      "keywords": ["github", "issues", "bug-fix", "automation", "workflow"],
+      "keywords": [
+        "github",
+        "issues",
+        "bug-fix",
+        "automation",
+        "workflow"
+      ],
       "license": "MIT",
-      "commands": ["/gh-solve-issue", "/gh-list-issues"],
+      "commands": [
+        "/gh-solve-issue",
+        "/gh-list-issues"
+      ],
       "category": "workflow"
     },
     {
@@ -40,9 +58,17 @@
         "url": "https://github.com/biggora"
       },
       "repository": "https://github.com/biggora/typescript-eslint-fixer",
-      "keywords": ["typescript", "eslint", "linting", "code-quality", "auto-fix"],
+      "keywords": [
+        "typescript",
+        "eslint",
+        "linting",
+        "code-quality",
+        "auto-fix"
+      ],
       "license": "MIT",
-      "commands": ["/fix-typescript-eslint"],
+      "commands": [
+        "/fix-typescript-eslint"
+      ],
       "category": "code-quality"
     },
     {
@@ -54,7 +80,15 @@
         "url": "https://github.com/biggora"
       },
       "repository": "https://github.com/biggora/claude-plugins-registry",
-      "keywords": ["captcha", "recaptcha", "hcaptcha", "turnstile", "playwright", "automation", "web-scraping"],
+      "keywords": [
+        "captcha",
+        "recaptcha",
+        "hcaptcha",
+        "turnstile",
+        "playwright",
+        "automation",
+        "web-scraping"
+      ],
       "license": "MIT",
       "commands": [],
       "category": "workflow",
@@ -69,7 +103,14 @@
         "url": "https://github.com/biggora"
       },
       "repository": "https://github.com/biggora/claude-plugins-registry",
-      "keywords": ["openai", "codex", "cli", "automation", "ci-cd", "agent"],
+      "keywords": [
+        "openai",
+        "codex",
+        "cli",
+        "automation",
+        "ci-cd",
+        "agent"
+      ],
       "license": "MIT",
       "commands": [],
       "category": "devops",
@@ -84,7 +125,14 @@
         "url": "https://github.com/biggora"
       },
       "repository": "https://github.com/biggora/claude-plugins-registry",
-      "keywords": ["rss", "commaFeed", "feed-reader", "opml", "rest-api", "automation"],
+      "keywords": [
+        "rss",
+        "commaFeed",
+        "feed-reader",
+        "opml",
+        "rest-api",
+        "automation"
+      ],
       "license": "MIT",
       "commands": [],
       "category": "workflow",
@@ -99,7 +147,14 @@
         "url": "https://github.com/biggora"
       },
       "repository": "https://github.com/biggora/claude-plugins-registry",
-      "keywords": ["gemini", "google", "cli", "automation", "mcp", "scripting"],
+      "keywords": [
+        "gemini",
+        "google",
+        "cli",
+        "automation",
+        "mcp",
+        "scripting"
+      ],
       "license": "MIT",
       "commands": [],
       "category": "devops",
@@ -114,7 +169,14 @@
         "url": "https://github.com/biggora"
       },
       "repository": "https://github.com/biggora/claude-plugins-registry",
-      "keywords": ["n8n", "automation", "workflows", "rest-api", "low-code", "integration"],
+      "keywords": [
+        "n8n",
+        "automation",
+        "workflows",
+        "rest-api",
+        "low-code",
+        "integration"
+      ],
       "license": "MIT",
       "commands": [],
       "category": "workflow",
@@ -129,7 +191,14 @@
         "url": "https://github.com/biggora"
       },
       "repository": "https://github.com/biggora/claude-plugins-registry",
-      "keywords": ["notebooklm", "google", "research", "podcast", "audio", "automation"],
+      "keywords": [
+        "notebooklm",
+        "google",
+        "research",
+        "podcast",
+        "audio",
+        "automation"
+      ],
       "license": "MIT",
       "commands": [],
       "category": "workflow",
@@ -144,7 +213,14 @@
         "url": "https://github.com/biggora"
       },
       "repository": "https://github.com/biggora/claude-plugins-registry",
-      "keywords": ["video", "screencast", "demo", "recording", "narration", "moviepy"],
+      "keywords": [
+        "video",
+        "screencast",
+        "demo",
+        "recording",
+        "narration",
+        "moviepy"
+      ],
       "license": "MIT",
       "commands": [],
       "category": "other",
@@ -159,7 +235,14 @@
         "url": "https://github.com/biggora"
       },
       "repository": "https://github.com/biggora/claude-plugins-registry",
-      "keywords": ["mobile", "appium", "android", "qa", "testing", "automation"],
+      "keywords": [
+        "mobile",
+        "appium",
+        "android",
+        "qa",
+        "testing",
+        "automation"
+      ],
       "license": "MIT",
       "commands": [],
       "category": "testing",
@@ -174,7 +257,14 @@
         "url": "https://github.com/biggora"
       },
       "repository": "https://github.com/biggora/claude-plugins-registry",
-      "keywords": ["qa", "playwright", "web-testing", "automation", "test-report", "e2e"],
+      "keywords": [
+        "qa",
+        "playwright",
+        "web-testing",
+        "automation",
+        "test-report",
+        "e2e"
+      ],
       "license": "MIT",
       "commands": [],
       "category": "testing",
@@ -189,7 +279,14 @@
         "url": "https://github.com/biggora"
       },
       "repository": "https://github.com/biggora/claude-plugins-registry",
-      "keywords": ["tts", "audio", "narration", "speech", "espeak", "voiceover"],
+      "keywords": [
+        "tts",
+        "audio",
+        "narration",
+        "speech",
+        "espeak",
+        "voiceover"
+      ],
       "license": "MIT",
       "commands": [],
       "category": "other",
@@ -204,7 +301,14 @@
         "url": "https://github.com/biggora"
       },
       "repository": "https://github.com/biggora/claude-plugins-registry",
-      "keywords": ["trademark", "uspto", "brand", "search", "validation", "legal"],
+      "keywords": [
+        "trademark",
+        "uspto",
+        "brand",
+        "search",
+        "validation",
+        "legal"
+      ],
       "license": "MIT",
       "commands": [],
       "category": "workflow",
@@ -219,7 +323,14 @@
         "url": "https://github.com/biggora"
       },
       "repository": "https://github.com/biggora/claude-plugins-registry",
-      "keywords": ["wordpress", "rest-api", "php", "endpoints", "wp-cli", "custom-post-types"],
+      "keywords": [
+        "wordpress",
+        "rest-api",
+        "php",
+        "endpoints",
+        "wp-cli",
+        "custom-post-types"
+      ],
       "license": "MIT",
       "commands": [],
       "category": "workflow",
@@ -234,7 +345,14 @@
         "url": "https://github.com/biggora"
       },
       "repository": "https://github.com/biggora/claude-plugins-registry",
-      "keywords": ["youtube", "search", "video", "metadata", "transcript", "analytics"],
+      "keywords": [
+        "youtube",
+        "search",
+        "video",
+        "metadata",
+        "transcript",
+        "analytics"
+      ],
       "license": "MIT",
       "commands": [],
       "category": "workflow",
@@ -249,7 +367,14 @@
         "url": "https://github.com/biggora"
       },
       "repository": "https://github.com/biggora/claude-plugins-registry",
-      "keywords": ["youtube", "thumbnail", "image", "design", "pillow", "ai-image"],
+      "keywords": [
+        "youtube",
+        "thumbnail",
+        "image",
+        "design",
+        "pillow",
+        "ai-image"
+      ],
       "license": "MIT",
       "commands": [],
       "category": "other",
@@ -264,7 +389,14 @@
         "url": "https://github.com/biggora"
       },
       "repository": "https://github.com/biggora/claude-plugins-registry",
-      "keywords": ["tailwindcss", "css", "utility-first", "responsive", "design-system", "frontend"],
+      "keywords": [
+        "tailwindcss",
+        "css",
+        "utility-first",
+        "responsive",
+        "design-system",
+        "frontend"
+      ],
       "license": "MIT",
       "commands": [],
       "category": "code-quality",
@@ -279,7 +411,15 @@
         "url": "https://github.com/biggora"
       },
       "repository": "https://github.com/biggora/claude-plugins-registry",
-      "keywords": ["vite", "rolldown", "oxc", "bundler", "ssr", "frontend", "build-tool"],
+      "keywords": [
+        "vite",
+        "rolldown",
+        "oxc",
+        "bundler",
+        "ssr",
+        "frontend",
+        "build-tool"
+      ],
       "license": "MIT",
       "commands": [],
       "category": "code-quality",
@@ -294,7 +434,15 @@
         "url": "https://github.com/biggora"
       },
       "repository": "https://github.com/biggora/claude-plugins-registry",
-      "keywords": ["google", "merchant", "shopping", "e-commerce", "products", "inventory", "feeds"],
+      "keywords": [
+        "google",
+        "merchant",
+        "shopping",
+        "e-commerce",
+        "products",
+        "inventory",
+        "feeds"
+      ],
       "license": "MIT",
       "commands": [],
       "category": "workflow",
@@ -309,7 +457,15 @@
         "url": "https://github.com/biggora"
       },
       "repository": "https://github.com/biggora/claude-plugins-registry",
-      "keywords": ["latvia", "salidzini", "kurpirkt", "price-comparison", "xml-feed", "e-commerce", "aggregator"],
+      "keywords": [
+        "latvia",
+        "salidzini",
+        "kurpirkt",
+        "price-comparison",
+        "xml-feed",
+        "e-commerce",
+        "aggregator"
+      ],
       "license": "MIT",
       "commands": [],
       "category": "workflow",
@@ -324,9 +480,18 @@
         "url": "https://github.com/biggora"
       },
       "repository": "https://github.com/biggora/claude-plugins-registry",
-      "keywords": ["typescript", "types", "generics", "tsconfig", "type-checking", "code-quality"],
+      "keywords": [
+        "typescript",
+        "types",
+        "generics",
+        "tsconfig",
+        "type-checking",
+        "code-quality"
+      ],
       "license": "MIT",
-      "commands": ["/typescript-fix"],
+      "commands": [
+        "/typescript-fix"
+      ],
       "category": "code-quality",
       "type": "skill"
     },
@@ -339,7 +504,15 @@
         "url": "https://github.com/biggora"
       },
       "repository": "https://github.com/biggora/claude-plugins-registry",
-      "keywords": ["nextjs", "react", "app-router", "server-components", "caching", "server-actions", "frontend"],
+      "keywords": [
+        "nextjs",
+        "react",
+        "app-router",
+        "server-components",
+        "caching",
+        "server-actions",
+        "frontend"
+      ],
       "license": "MIT",
       "commands": [],
       "category": "code-quality",
@@ -354,7 +527,15 @@
         "url": "https://github.com/biggora"
       },
       "repository": "https://github.com/biggora/claude-plugins-registry",
-      "keywords": ["nestjs", "nodejs", "backend", "rest-api", "dependency-injection", "decorators", "typescript"],
+      "keywords": [
+        "nestjs",
+        "nodejs",
+        "backend",
+        "rest-api",
+        "dependency-injection",
+        "decorators",
+        "typescript"
+      ],
       "license": "MIT",
       "commands": [],
       "category": "code-quality",
@@ -369,7 +550,16 @@
         "url": "https://github.com/biggora"
       },
       "repository": "https://github.com/biggora/claude-plugins-registry",
-      "keywords": ["klix", "payments", "checkout", "apple-pay", "google-pay", "baltic", "e-commerce", "citadele"],
+      "keywords": [
+        "klix",
+        "payments",
+        "checkout",
+        "apple-pay",
+        "google-pay",
+        "baltic",
+        "e-commerce",
+        "citadele"
+      ],
       "license": "MIT",
       "commands": [],
       "category": "workflow",
@@ -384,7 +574,16 @@
         "url": "https://github.com/biggora"
       },
       "repository": "https://github.com/biggora/claude-plugins-registry",
-      "keywords": ["brand", "branding", "style-guide", "brand-book", "visual-identity", "design-system", "typography", "colors"],
+      "keywords": [
+        "brand",
+        "branding",
+        "style-guide",
+        "brand-book",
+        "visual-identity",
+        "design-system",
+        "typography",
+        "colors"
+      ],
       "license": "Apache-2.0",
       "commands": [],
       "category": "other",
@@ -399,11 +598,44 @@
         "url": "https://github.com/biggora"
       },
       "repository": "https://github.com/biggora/claude-plugins-registry",
-      "keywords": ["paysera", "payments", "checkout", "orders", "refunds", "webhooks", "eu", "e-commerce", "oauth2"],
+      "keywords": [
+        "paysera",
+        "payments",
+        "checkout",
+        "orders",
+        "refunds",
+        "webhooks",
+        "eu",
+        "e-commerce",
+        "oauth2"
+      ],
       "license": "MIT",
       "commands": [],
       "category": "workflow",
       "type": "skill"
+    },
+    {
+      "name": "nihaixia",
+      "version": "1.1.2",
+      "description": "倪海厦（1954-2012）台湾经方派中医师视角的AI Agent Skill。覆盖伤寒论129条、金匮23篇、黄帝内经71篇、针灸教程、神农本草经345种、849医案、天纪命理、梁冬对话。",
+      "author": {
+        "name": "jangviktor-web",
+        "url": "https://github.com/jangviktor-web"
+      },
+      "repository": "https://github.com/jangviktor-web/nihaixia",
+      "keywords": [
+        "nihaixia",
+        "tcm",
+        "chinese-medicine",
+        "herbology",
+        "acupuncture",
+        "knowledge"
+      ],
+      "license": "MulanPSL-2.0",
+      "commands": [
+        "/nihaixia"
+      ],
+      "category": "knowledge"
     }
   ]
 }
