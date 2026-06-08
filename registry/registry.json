@@ -1,7 +1,7 @@
 {
   "$schema": "./schema.json",
   "version": "1.0.0",
-  "updated": "2026-05-14",
+  "updated": "2026-06-08",
   "plugins": [
     {
       "name": "code-optimizer",
@@ -403,6 +403,21 @@
       "license": "MIT",
       "commands": [],
       "category": "workflow",
+      "type": "skill"
+    },
+    {
+      "name": "seo-best-practices",
+      "version": "1.1.0",
+      "description": "Audit, review, and diagnose SEO — crawlability, indexation, Core Web Vitals, on-page, E-E-A-T, international/hreflang, search intent, content strategy, and authority/link building",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/claude-plugins-registry",
+      "keywords": ["seo", "audit", "technical-seo", "on-page-seo", "core-web-vitals", "hreflang", "search-intent", "content-strategy"],
+      "license": "MIT",
+      "commands": [],
+      "category": "other",
       "type": "skill"
     }
   ]
