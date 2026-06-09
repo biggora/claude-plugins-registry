@@ -181,6 +181,21 @@
       "type": "skill"
     },
     {
+      "name": "ui-audit",
+      "version": "1.0.0",
+      "description": "Visual-first UI/UX audit — checks layout, spacing, typography, contrast, design system, accessibility, responsiveness, and localization/translation, reporting each defect with severity and a fix",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/claude-plugins-registry",
+      "keywords": ["ui-audit", "ux-review", "design-review", "accessibility", "localization", "i18n", "visual-qa", "wcag"],
+      "license": "MIT",
+      "commands": [],
+      "category": "testing",
+      "type": "skill"
+    },
+    {
       "name": "text-to-speech",
       "version": "1.0.0",
       "description": "Converts text to speech audio files autonomously using pyttsx3, espeak-ng, Kokoro ONNX, or cloud TTS engines with multilingual support",
