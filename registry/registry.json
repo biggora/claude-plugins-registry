@@ -434,6 +434,21 @@
       "commands": [],
       "category": "other",
       "type": "skill"
+    },
+    {
+      "name": "hermes-tweet",
+      "version": "0.1.6",
+      "description": "Native Hermes Agent plugin for X/Twitter research, tweet reading, trend checks, and approval-gated social actions through Xquik automation.",
+      "author": {
+        "name": "Xquik",
+        "url": "https://github.com/Xquik-dev"
+      },
+      "repository": "https://github.com/Xquik-dev/hermes-tweet",
+      "keywords": ["hermes-agent", "twitter", "x-twitter", "social-media", "automation", "tweets", "trends", "xquik"],
+      "license": "MIT",
+      "commands": [],
+      "category": "workflow",
+      "type": "plugin"
     }
   ]
 }
