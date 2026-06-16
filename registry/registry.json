@@ -449,6 +449,21 @@
       "commands": [],
       "category": "workflow",
       "type": "skill"
+    },
+    {
+      "name": "autoresearch",
+      "version": "1.0.0",
+      "description": "Autonomous iterative optimization loop (Agent-Optimizer pattern) — the agent makes atomic mutations, measures a scalar metric, keeps improvements (git commit), discards regressions (git reset), and loops indefinitely. Universal: code speed, prompt engineering, config tuning, copy conversion, CSS/Lighthouse, SQL queries, business rules — anything with a measurable score",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/claude-plugins-registry",
+      "keywords": ["optimization", "autoresearch", "benchmark", "iteration", "autonomous", "tuning", "metrics", "experiments"],
+      "license": "MIT",
+      "commands": [],
+      "category": "workflow",
+      "type": "skill"
     }
   ]
 }

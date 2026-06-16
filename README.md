@@ -50,59 +50,66 @@ claude-plugins skills remove commafeed-api
 
 | Skill | Category | Description |
 |-------|----------|-------------|
-| `captcha` | automation | Solve reCAPTCHA v2/v3, hCaptcha, Cloudflare Turnstile via 2captcha/CapMonster, and image grid challenges via Claude/GPT-4V vision AI |
+| `autoresearch` | workflow | Autonomous iterative optimization loop (Agent-Optimizer pattern) — atomic mutations, scalar metrics, git-based checkpoints for any measurable improvement |
+| `brand-guidelines` | other | Create brand books — structured interview for colors, typography, logo, voice & tone, generates professional self-contained HTML brand guidelines |
+| `captcha` | workflow | Integrate CAPTCHA-solving services (2captcha, CapMonster) for authorized automation — reCAPTCHA v2/v3, hCaptcha, Turnstile, image grid via vision AI |
 | `codex-cli` | devops | Install, configure, and automate tasks using OpenAI Codex CLI — approval modes, sandbox policies, MCP servers, and CI integration |
 | `commafeed-api` | workflow | Manage CommaFeed RSS reader via REST API — subscriptions, categories, feeds, entries, and OPML import/export |
 | `gemini-cli` | devops | Install, configure, and script with Gemini CLI — headless prompts, MCP servers, custom slash commands, extensions, and CI automation |
+| `google-merchant-api` | workflow | Work with Google Merchant Center APIs — products, inventory, promotions, data sources, reports, and account management |
+| `klix-integration` | workflow | Integrate Klix payment gateway — API, card payments, Apple/Google Pay, Baltic bank transfers, Pay Later, recurring payments |
+| `lv-aggregators-api` | workflow | Generate XML product feeds for Latvian price comparison platforms — Salidzini.lv and KurPirkt.lv integration |
 | `n8n-api` | workflow | Build, debug, and manage n8n workflows via REST API — create workflows, manage credentials, execute and monitor runs |
+| `nest-best-practices` | code-quality | NestJS v11 best practices — modules, controllers, services, DTOs, guards, native JWT auth, Zod validation, Keyv caching, and Suites testing |
+| `next-best-practices` | code-quality | Next.js 16 best practices — App Router, Server/Client Components, use cache, cacheTag, Server Actions, streaming, metadata/SEO, PPR |
 | `notebook-lm` | workflow | Automate Google NotebookLM — create notebooks, add sources, chat, generate audio/video overviews, quizzes, reports, and mind maps |
-| `screen-recording` | other | Autonomous video creation — product demos, presentation videos, UI walkthroughs, and narrated screencasts via Pillow, MoviePy, and pyttsx3 |
-| `test-mobile-app` | testing | Automated mobile app testing — analyzes APK/source, generates use cases, runs Appium tests on emulator, and produces QA reports |
-| `test-web-ui` | testing | Automated web QA — discovers site structure, generates use cases and test plans, runs Playwright tests, and produces HTML reports |
+| `paysera-integration` | workflow | Integrate PaySera Checkout V3 — orders, payments, refunds, webhooks, card payments, bank transfers, e-wallets across EU |
+| `screen-recording` | other | Autonomous video creation — product demos, UI walkthroughs, and narrated screencasts via Pillow, MoviePy, and pyttsx3 |
+| `seo-best-practices` | other | Audit, review, and diagnose SEO — crawlability, indexation, Core Web Vitals, on-page, E-E-A-T, content strategy, and link building |
+| `tailwindcss-best-practices` | code-quality | Tailwind CSS v4.x best practices — utility classes, responsive layouts, @theme variables, dark mode, custom utilities, v3-to-v4 migration |
+| `test-mobile-app` | testing | Automated mobile app testing — analyzes APK/source, generates use cases, runs Appium tests on emulator, produces QA reports |
+| `test-web-ui` | testing | Automated web QA — discovers site structure, generates use cases and test plans, runs Playwright tests, produces HTML reports |
 | `text-to-speech` | other | Converts text to speech audio files using pyttsx3, espeak-ng, Kokoro ONNX, or cloud TTS engines with multilingual support |
 | `tm-search` | workflow | Search, validate, and check availability of US trademarks via USPTO APIs — keyword search, batch validation, and status lookup |
+| `typescript-expert` | code-quality | TypeScript type system, generics, utility types, advanced patterns, tsconfig, and TS 5.x features — includes /typescript-fix command |
+| `ui-audit` | testing | Visual-first UI/UX audit — layout, spacing, typography, contrast, design system, accessibility, responsiveness, and localization |
+| `vite-best-practices` | code-quality | Vite 8 build tool best practices — configuration, Rolldown/Oxc migration, plugin API, SSR, library mode, and virtual modules |
+| `web-mcp` | workflow | Implement WebMCP — browser-native API for exposing structured tools to AI agents. W3C standard, imperative and declarative APIs, security, cross-origin |
 | `wp-rest-api` | workflow | Build, extend, and debug WordPress REST API endpoints — routes, controllers, schema validation, authentication, and custom fields |
-| `youtube-search` | workflow | Search YouTube for videos, channels, playlists and extract metadata, transcripts, and analytics via multiple API methods |
-| `tailwindcss-best-practices` | frontend | Tailwind CSS v4.x best practices — utility classes, responsive layouts, @theme variables, dark mode, custom utilities, and v3-to-v4 migration |
-| `vite-best-practices` | frontend | Vite 8 build tool best practices — configuration, Rolldown/Oxc migration, plugin API, SSR, library mode, and virtual modules |
-| `google-merchant-api` | workflow | Work with Google Merchant Center APIs — Merchant API (v1) and Content API for Shopping (v2.1) for products, inventory, promotions, and reports |
-| `lv-aggregators-api` | workflow | Generate and manage XML product feeds for Latvian price comparison platforms — Salidzini.lv and KurPirkt.lv integration |
-| `typescript-expert` | code-quality | TypeScript type system, generics, utility types, advanced patterns, tsconfig, and TS 5.x features — includes `/typescript-fix` slash command |
-| `youtube-thumbnail` | other | Generates professional YouTube thumbnails in 11 strategic styles with auto-detection of AI image backends and Pillow compositing |
-| `next-best-practices` | frontend | Next.js 16 best practices — App Router, Server/Client Components, use cache, cacheTag, Server Actions, useActionState, useOptimistic, streaming, metadata/SEO, and PPR |
-| `klix-integration` | workflow | Integrate Klix payment gateway — API, card payments, Apple/Google Pay, Baltic bank transfers, Pay Later installments, recurring payments, and eCommerce plugins |
-| `paysera-integration` | workflow | Integrate PaySera Checkout V3 payment gateway — orders, payments, refunds, webhooks, card payments, bank transfers, e-wallets across EU, with TypeScript SDK and NestJS support |
-| `brand-guidelines` | other | Create brand books for any brand — structured interview for colors, typography, logo, voice & tone, generates professional self-contained HTML brand guidelines |
-| `web-mcp` | workflow | Implement WebMCP — browser-native API for exposing structured tools to AI agents. W3C standard (document.modelContext), imperative and declarative APIs, security, cross-origin |
+| `youtube-search` | workflow | Search YouTube for videos, channels, playlists and extract metadata, transcripts, and analytics |
+| `youtube-thumbnail` | other | Generate professional YouTube thumbnails in 11 strategic styles with AI image backends and Pillow compositing |
 
 #### Install Examples
 
 ```bash
+npx skills add https://github.com/biggora/claude-plugins-registry --skill autoresearch
+npx skills add https://github.com/biggora/claude-plugins-registry --skill brand-guidelines
 npx skills add https://github.com/biggora/claude-plugins-registry --skill captcha
 npx skills add https://github.com/biggora/claude-plugins-registry --skill codex-cli
-npx skills add https://github.com/biggora/claude-plugins-registry --skill gemini-cli
-npx skills add https://github.com/biggora/claude-plugins-registry --skill n8n-api
-npx skills add https://github.com/biggora/claude-plugins-registry --skill notebook-lm
 npx skills add https://github.com/biggora/claude-plugins-registry --skill commafeed-api
+npx skills add https://github.com/biggora/claude-plugins-registry --skill gemini-cli
+npx skills add https://github.com/biggora/claude-plugins-registry --skill google-merchant-api
+npx skills add https://github.com/biggora/claude-plugins-registry --skill klix-integration
+npx skills add https://github.com/biggora/claude-plugins-registry --skill lv-aggregators-api
+npx skills add https://github.com/biggora/claude-plugins-registry --skill n8n-api
+npx skills add https://github.com/biggora/claude-plugins-registry --skill nest-best-practices
+npx skills add https://github.com/biggora/claude-plugins-registry --skill next-best-practices
+npx skills add https://github.com/biggora/claude-plugins-registry --skill notebook-lm
+npx skills add https://github.com/biggora/claude-plugins-registry --skill paysera-integration
+npx skills add https://github.com/biggora/claude-plugins-registry --skill screen-recording
+npx skills add https://github.com/biggora/claude-plugins-registry --skill seo-best-practices
+npx skills add https://github.com/biggora/claude-plugins-registry --skill tailwindcss-best-practices
+npx skills add https://github.com/biggora/claude-plugins-registry --skill test-mobile-app
+npx skills add https://github.com/biggora/claude-plugins-registry --skill test-web-ui
+npx skills add https://github.com/biggora/claude-plugins-registry --skill text-to-speech
 npx skills add https://github.com/biggora/claude-plugins-registry --skill tm-search
+npx skills add https://github.com/biggora/claude-plugins-registry --skill typescript-expert
+npx skills add https://github.com/biggora/claude-plugins-registry --skill ui-audit
+npx skills add https://github.com/biggora/claude-plugins-registry --skill vite-best-practices
+npx skills add https://github.com/biggora/claude-plugins-registry --skill web-mcp
 npx skills add https://github.com/biggora/claude-plugins-registry --skill wp-rest-api
 npx skills add https://github.com/biggora/claude-plugins-registry --skill youtube-search
 npx skills add https://github.com/biggora/claude-plugins-registry --skill youtube-thumbnail
-npx skills add https://github.com/biggora/claude-plugins-registry --skill screen-recording
-npx skills add https://github.com/biggora/claude-plugins-registry --skill text-to-speech
-npx skills add https://github.com/biggora/claude-plugins-registry --skill test-web-ui
-npx skills add https://github.com/biggora/claude-plugins-registry --skill test-mobile-app
-npx skills add https://github.com/biggora/claude-plugins-registry --skill tailwindcss-best-practices
-npx skills add https://github.com/biggora/claude-plugins-registry --skill vite-best-practices
-npx skills add https://github.com/biggora/claude-plugins-registry --skill google-merchant-api
-npx skills add https://github.com/biggora/claude-plugins-registry --skill lv-aggregators-api
-npx skills add https://github.com/biggora/claude-plugins-registry --skill typescript-expert
-npx skills add https://github.com/biggora/claude-plugins-registry --skill nest-best-practices
-npx skills add https://github.com/biggora/claude-plugins-registry --skill next-best-practices
-npx skills add https://github.com/biggora/claude-plugins-registry --skill klix-integration
-npx skills add https://github.com/biggora/claude-plugins-registry --skill paysera-integration
-npx skills add https://github.com/biggora/claude-plugins-registry --skill brand-guidelines
-npx skills add https://github.com/biggora/claude-plugins-registry --skill web-mcp
 ```
 
 ## Plugins
