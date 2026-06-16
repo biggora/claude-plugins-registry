@@ -434,6 +434,21 @@
       "commands": [],
       "category": "other",
       "type": "skill"
+    },
+    {
+      "name": "web-mcp",
+      "version": "1.0.0",
+      "description": "Implement WebMCP — the browser-native API for exposing structured tools to AI agents. Covers W3C standard (document.modelContext, imperative and declarative APIs), security, cross-origin, and the original WebSocket bridge",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/claude-plugins-registry",
+      "keywords": ["webmcp", "mcp", "browser", "ai-agent", "tools", "w3c", "chrome", "agentic-web"],
+      "license": "MIT",
+      "commands": [],
+      "category": "workflow",
+      "type": "skill"
     }
   ]
 }

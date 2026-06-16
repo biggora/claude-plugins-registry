@@ -73,6 +73,7 @@ claude-plugins skills remove commafeed-api
 | `klix-integration` | workflow | Integrate Klix payment gateway — API, card payments, Apple/Google Pay, Baltic bank transfers, Pay Later installments, recurring payments, and eCommerce plugins |
 | `paysera-integration` | workflow | Integrate PaySera Checkout V3 payment gateway — orders, payments, refunds, webhooks, card payments, bank transfers, e-wallets across EU, with TypeScript SDK and NestJS support |
 | `brand-guidelines` | other | Create brand books for any brand — structured interview for colors, typography, logo, voice & tone, generates professional self-contained HTML brand guidelines |
+| `web-mcp` | workflow | Implement WebMCP — browser-native API for exposing structured tools to AI agents. W3C standard (document.modelContext), imperative and declarative APIs, security, cross-origin |
 
 #### Install Examples
 
@@ -101,6 +102,7 @@ npx skills add https://github.com/biggora/claude-plugins-registry --skill next-b
 npx skills add https://github.com/biggora/claude-plugins-registry --skill klix-integration
 npx skills add https://github.com/biggora/claude-plugins-registry --skill paysera-integration
 npx skills add https://github.com/biggora/claude-plugins-registry --skill brand-guidelines
+npx skills add https://github.com/biggora/claude-plugins-registry --skill web-mcp
 ```
 
 ## Plugins
