@@ -14,7 +14,7 @@ const registryData = JSON.parse(
 );
 
 const skillDirs = readdirSync(SKILLS_SRC, { withFileTypes: true })
-  .filter((e) => e.isDirectory())
+  .filter((e) => e.isDirectory() && existsSync(join(SKILLS_SRC, e.name, 'SKILL.md')))
   .map((e) => e.name);
 
 describe('embedded skills validation', () => {
@@ -37,12 +37,15 @@ describe('embedded skills validation', () => {
         assert.ok(fm && typeof fm === 'object');
       });
 
-      it('has name in frontmatter (if frontmatter present)', () => {
+      it('frontmatter name matches the directory name', () => {
         const content = readFileSync(skillMdPath, 'utf-8');
-        if (content.startsWith('---')) {
-          const fm = parseFrontmatter(content);
-          assert.ok(fm.name, `Skill "${skillName}" has frontmatter but missing name`);
-        }
+        const fm = parseFrontmatter(content);
+        assert.ok(fm.name, `Skill "${skillName}" is missing a frontmatter name`);
+        assert.equal(
+          fm.name,
+          skillName,
+          `Skill "${skillName}" frontmatter name must match its directory name`
+        );
       });
 
       it('has description in frontmatter (if frontmatter present)', () => {
@@ -84,12 +87,10 @@ describe('embedded skills validation', () => {
 
     for (const skillName of skillDirs) {
       it(`skill "${skillName}" has a registry entry`, () => {
-        if (registrySkills.length > 0) {
-          const found = registrySkills.includes(skillName);
-          if (!found) {
-            assert.ok(true, `Skill "${skillName}" not in registry (may be unpublished)`);
-          }
-        }
+        assert.ok(
+          registrySkills.includes(skillName),
+          `Skill "${skillName}" is missing a registry entry with type "skill"`
+        );
       });
     }
   });

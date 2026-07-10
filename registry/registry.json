@@ -438,7 +438,7 @@
     {
       "name": "web-mcp",
       "version": "1.0.0",
-      "description": "Implement WebMCP — the browser-native API for exposing structured tools to AI agents. Covers W3C standard (document.modelContext, imperative and declarative APIs), security, cross-origin, and the original WebSocket bridge",
+      "description": "Implement WebMCP, the browser-native API for exposing structured tools to AI agents — W3C modelContext APIs, security, cross-origin behavior, and the original WebSocket bridge",
       "author": {
         "name": "biggora",
         "url": "https://github.com/biggora"
@@ -453,7 +453,7 @@
     {
       "name": "autoresearch",
       "version": "1.0.0",
-      "description": "Autonomous iterative optimization loop (Agent-Optimizer pattern) — the agent makes atomic mutations, measures a scalar metric, keeps improvements (git commit), discards regressions (git reset), and loops indefinitely. Universal: code speed, prompt engineering, config tuning, copy conversion, CSS/Lighthouse, SQL queries, business rules — anything with a measurable score",
+      "description": "Autonomous Agent-Optimizer loop — make atomic mutations, measure a scalar metric, keep improvements, discard regressions, and iterate on any task with a measurable score",
       "author": {
         "name": "biggora",
         "url": "https://github.com/biggora"
@@ -463,6 +463,111 @@
       "license": "MIT",
       "commands": [],
       "category": "workflow",
+      "type": "skill"
+    },
+    {
+      "name": "define-done",
+      "version": "1.0.0",
+      "description": "Define implementation-ready goals, JTBD, scope, constraints, authority boundaries, release scenarios, and executable acceptance criteria",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/claude-plugins-registry",
+      "keywords": ["specification", "acceptance-criteria", "scope", "jtbd", "requirements", "definition-of-done"],
+      "license": "MIT",
+      "commands": [],
+      "category": "workflow",
+      "type": "skill"
+    },
+    {
+      "name": "delegate-bounded-work",
+      "version": "1.0.0",
+      "description": "Keep simple tasks single-agent, delegate bounded work with explicit contracts, and use independent fresh-context review when warranted",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/claude-plugins-registry",
+      "keywords": ["delegation", "subagents", "task-contracts", "fresh-context", "review", "workflow"],
+      "license": "MIT",
+      "commands": [],
+      "category": "workflow",
+      "type": "skill"
+    },
+    {
+      "name": "harden-agent-loop",
+      "version": "1.0.0",
+      "description": "Harden agent workflows with hooks, guardrails, tool contracts, traces, regression evals, and measurable harness improvements",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/claude-plugins-registry",
+      "keywords": ["agents", "guardrails", "hooks", "tool-contracts", "traces", "regression-evals", "harness"],
+      "license": "MIT",
+      "commands": [],
+      "category": "code-quality",
+      "type": "skill"
+    },
+    {
+      "name": "keep-goal",
+      "version": "1.0.0",
+      "description": "Maintain durable repository context, progress, decisions, and handoffs so long-running agent work resumes safely across sessions",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/claude-plugins-registry",
+      "keywords": ["context", "progress", "decisions", "handoff", "resume", "agent-state"],
+      "license": "MIT",
+      "commands": [],
+      "category": "workflow",
+      "type": "skill"
+    },
+    {
+      "name": "slice-vertical",
+      "version": "1.0.0",
+      "description": "Turn an approved specification into dependent, independently demonstrable vertical slices with explicit outcomes and Done when checks",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/claude-plugins-registry",
+      "keywords": ["vertical-slices", "planning", "dependencies", "delivery", "acceptance", "workflow"],
+      "license": "MIT",
+      "commands": [],
+      "category": "workflow",
+      "type": "skill"
+    },
+    {
+      "name": "tdd-red-green",
+      "version": "1.0.0",
+      "description": "Implement fixes and features with reproduction-first and RED-GREEN-REFACTOR TDD, preserving tests and producing evidence at each checkpoint",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/claude-plugins-registry",
+      "keywords": ["tdd", "red-green-refactor", "testing", "reproduction", "regression", "checkpoints"],
+      "license": "MIT",
+      "commands": [],
+      "category": "testing",
+      "type": "skill"
+    },
+    {
+      "name": "verify-before-done",
+      "version": "1.0.0",
+      "description": "Require fresh user, engineering, and operational readiness evidence before claiming completion, merging changes, or releasing",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/claude-plugins-registry",
+      "keywords": ["verification", "readiness", "evidence", "testing", "release", "quality-gates"],
+      "license": "MIT",
+      "commands": [],
+      "category": "testing",
       "type": "skill"
     }
   ]
