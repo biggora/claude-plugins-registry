@@ -2,6 +2,11 @@
 
 Use the main template for features and behavior changes. Use the bug/no-change variant when a request assumes existing behavior is defective.
 
+## Contents
+
+- [Main Template](#main-template)
+- [Bug / No-Change Variant](#bug--no-change-variant)
+
 ## Main Template
 
 ```markdown

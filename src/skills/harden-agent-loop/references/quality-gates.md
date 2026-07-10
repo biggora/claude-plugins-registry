@@ -2,6 +2,16 @@
 
 Use these patterns to design repository-specific controls. Keep the implementation native to the target harness; do not copy a tool-specific configuration merely because it resembles an example.
 
+## Contents
+
+- [1. Boundary Inventory](#1-boundary-inventory)
+- [2. Gate Design Record](#2-gate-design-record)
+- [3. Protected Files and Commands](#3-protected-files-and-commands)
+- [4. Fail-Closed Semantics](#4-fail-closed-semantics)
+- [5. Tool Contract Checklist](#5-tool-contract-checklist)
+- [6. Logging Contract](#6-logging-contract)
+- [7. Validation Checklist](#7-validation-checklist)
+
 ## 1. Boundary Inventory
 
 Record only boundaries that can change the risk or validation policy.
