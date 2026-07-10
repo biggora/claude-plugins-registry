@@ -2,6 +2,17 @@
 
 Use this workflow only after a real harness failure repeats or can be reproduced reliably. Its purpose is to replace prompt guessing with a protected measurement loop.
 
+## Contents
+
+- [1. Preserve a Sanitized Raw Artifact](#1-preserve-a-sanitized-raw-artifact)
+- [2. Define One Repeatable Failure Class](#2-define-one-repeatable-failure-class)
+- [3. Build a Protected Regression Eval](#3-build-a-protected-regression-eval)
+- [4. Record the Baseline](#4-record-the-baseline)
+- [5. Change Exactly One Harness Layer](#5-change-exactly-one-harness-layer)
+- [6. Compare and Decide](#6-compare-and-decide)
+- [7. Optional Independent Verification](#7-optional-independent-verification)
+- [8. Boundary With `autoresearch`](#8-boundary-with-autoresearch)
+
 ## 1. Preserve a Sanitized Raw Artifact
 
 Capture the evidence before adding a diagnosis:

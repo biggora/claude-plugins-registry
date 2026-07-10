@@ -40,6 +40,12 @@ const registry = JSON.parse(
 );
 const readme = readFileSync(join(ROOT, 'README.md'), 'utf-8');
 const forbiddenDirectories = ['commands', 'agents', 'scripts', 'assets', 'evals'];
+const EXPECTED_AUTHOR = Object.freeze({
+  name: 'biggora',
+  url: 'https://github.com/biggora',
+});
+const EXPECTED_REPOSITORY = 'https://github.com/biggora/claude-plugins-registry';
+const EXPECTED_LICENSE = 'MIT';
 
 function listFiles(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -193,10 +199,17 @@ describe('delivery skills contract', () => {
         assert.equal(entry.type, 'skill', `${skill.name} registry type must be skill`);
         assert.equal(entry.category, skill.category, `${skill.name} registry category mismatch`);
         assert.deepEqual(entry.commands, [], `${skill.name} registry commands must be empty`);
-        assert.ok(
-          typeof entry.repository === 'string' && entry.repository.startsWith('https://'),
-          `${skill.name} registry repository must use HTTPS`
+        assert.deepEqual(
+          entry.author,
+          EXPECTED_AUTHOR,
+          `${skill.name} registry author mismatch`
         );
+        assert.equal(
+          entry.repository,
+          EXPECTED_REPOSITORY,
+          `${skill.name} registry repository mismatch`
+        );
+        assert.equal(entry.license, EXPECTED_LICENSE, `${skill.name} registry license mismatch`);
         assert.ok(
           typeof entry.description === 'string' && entry.description.trim().length > 0,
           `${skill.name} registry description must not be empty`
@@ -237,4 +250,3 @@ describe('delivery skills contract', () => {
     }
   });
 });
-

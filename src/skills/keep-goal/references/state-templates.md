@@ -2,6 +2,15 @@
 
 Use these templates only when the repository has no established state convention. Keep placeholders until verified; never replace them with plausible guesses. Omit sections that add no useful state.
 
+## Contents
+
+- [Location Precedence](#location-precedence)
+- [Repository Context Template](#repository-context-template)
+- [Progress and Handoff Template](#progress-and-handoff-template)
+- [Decision Log Template](#decision-log-template)
+- [Specification Template](#specification-template)
+- [Task Plan Template](#task-plan-template)
+
 ## Location Precedence
 
 1. Use paths and formats required by repository instructions or existing, actively used task artifacts.
