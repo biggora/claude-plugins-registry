@@ -128,6 +128,24 @@ npx skills add https://github.com/biggora/claude-plugins-registry --skill youtub
 
 ## Plugins
 
+### Project Delivery Orchestrator
+
+Install the bundled orchestrator and its seven workflow skills (`define-done`, `slice-vertical`, `tdd-red-green`, `keep-goal`, `verify-before-done`, `delegate-bounded-work`, and `harden-agent-loop`):
+
+```bash
+claude-plugins install project-delivery-orchestrator
+```
+
+Restart Claude Code, then launch the orchestrator as the main session:
+
+```bash
+claude --agent project-delivery-orchestrator
+```
+
+Do not invoke it as `@project-delivery-orchestrator`: a nested subagent cannot delegate to its specialists. The orchestrator asks for explicit approval before commits, pushes, branch or pull request creation, publishing, releases, deployments, production or database changes, secret access or rotation, dependency installation, destructive actions, and external communication.
+
+Standard validation must pass. Strict exit 1 is accepted only for exactly one warning: `root: CLAUDE.md at the plugin root is not loaded as project context`; any additional strict diagnostic is blocking.
+
 ### Quick Start
 
 ```bash
