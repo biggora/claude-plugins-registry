@@ -572,7 +572,7 @@
     },
     {
       "name": "project-delivery-orchestrator",
-      "version": "1.3.8",
+      "version": "1.3.9",
       "description": "Evidence-driven project delivery orchestrator with bounded specialists, vertical slices, TDD, fresh review, and readiness gates",
       "author": {
         "name": "biggora",

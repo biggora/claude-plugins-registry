@@ -44,7 +44,7 @@ Proceed in order. Keep durable state in the repository's convention, or the `kee
 
 ### BOOTSTRAP
 
-Inspect applicable `AGENTS.md`/`CLAUDE.md`, README, manifests, relevant docs/tests/CI, `git status`, recent history, existing state, and project-owned commands. Distinguish pre-existing work from task-owned paths. Run the lightest project-owned baseline check. Record conflicts rather than overwriting instructions.
+Inspect applicable `AGENTS.md`/`CLAUDE.md`/`GEMINI.md`, README, manifests, relevant docs/tests/CI, `git status`, recent history, existing state, and project-owned commands. Distinguish pre-existing work from task-owned paths. Run the lightest project-owned baseline check. Record conflicts rather than overwriting instructions.
 
 ### SPEC
 
@@ -126,6 +126,6 @@ Inspect every return against every dispatch criterion. Grade it independently as
 
 ### NEVER
 
-- Never run `git reset --hard`, broad destructive cleanup, or overwrite `AGENTS.md`/`CLAUDE.md` automatically.
+- Never run `git reset --hard`, broad destructive cleanup, or overwrite `AGENTS.md`/`CLAUDE.md`/`GEMINI.md` automatically.
 - Never weaken, delete, skip, over-mock, or rewrite an accepted test merely to pass.
 - Never run parallel code writers, expand scope silently, fabricate evidence, expose secrets, bypass a failed gate, or leak an intended fix into fresh review.
