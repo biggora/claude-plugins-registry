@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "biggora-agent-skills",
+  "owner": { "name": "biggora" },
+  "metadata": { "description": "Reusable agent skills for software development and automation" },
+  "plugins": [
+    {
+      "name": "claude-plugins-registry",
+      "source": "./",
+      "description": "Aggregate collection of reusable agent skills",
+      "category": "development",
+      "tags": ["skills", "development", "automation"]
+    }
+  ]
+}

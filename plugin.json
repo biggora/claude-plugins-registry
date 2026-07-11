@@ -1,0 +1,11 @@
+{
+  "name": "claude-plugins-registry",
+  "description": "Reusable agent skills for development, testing, automation, and integrations.",
+  "version": "1.3.8",
+  "author": { "name": "biggora", "url": "https://github.com/biggora" },
+  "homepage": "https://github.com/biggora/claude-plugins-registry#readme",
+  "repository": "https://github.com/biggora/claude-plugins-registry",
+  "license": "MIT",
+  "keywords": ["agent-skills", "claude-code", "codex", "copilot"],
+  "skills": "./src/skills/"
+}

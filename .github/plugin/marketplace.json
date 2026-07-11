@@ -1,0 +1,13 @@
+{
+  "name": "biggora-agent-skills",
+  "owner": { "name": "biggora" },
+  "metadata": { "description": "Reusable agent skills for software development and automation", "version": "1.3.8" },
+  "plugins": [
+    {
+      "name": "claude-plugins-registry",
+      "description": "Aggregate collection of reusable agent skills",
+      "version": "1.3.8",
+      "source": "."
+    }
+  ]
+}

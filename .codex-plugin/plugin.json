@@ -1,0 +1,21 @@
+{
+  "name": "claude-plugins-registry",
+  "version": "1.3.8",
+  "description": "Reusable agent skills for development, testing, automation, and integrations.",
+  "author": { "name": "biggora", "url": "https://github.com/biggora" },
+  "homepage": "https://github.com/biggora/claude-plugins-registry#readme",
+  "repository": "https://github.com/biggora/claude-plugins-registry",
+  "license": "MIT",
+  "keywords": ["agent-skills", "claude-code", "codex", "copilot"],
+  "skills": "./src/skills/",
+  "interface": {
+    "displayName": "Biggora Agent Skills",
+    "shortDescription": "Development and automation skills",
+    "longDescription": "Reusable skills for development, testing, integrations, and agent workflows.",
+    "developerName": "biggora",
+    "category": "Developer Tools",
+    "capabilities": ["Instructions", "Scripts"],
+    "websiteURL": "https://github.com/biggora/claude-plugins-registry",
+    "defaultPrompt": ["Find the right skill for this task.", "Use the relevant best-practice skill.", "Show the available testing skills."]
+  }
+}

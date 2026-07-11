@@ -1,0 +1,12 @@
+{
+  "name": "biggora-agent-skills",
+  "interface": { "displayName": "Biggora Agent Skills" },
+  "plugins": [
+    {
+      "name": "claude-plugins-registry",
+      "source": { "source": "url", "url": "https://github.com/biggora/claude-plugins-registry.git", "ref": "main" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Developer Tools"
+    }
+  ]
+}
