@@ -16,23 +16,31 @@ function isCacheValid() {
   return Date.now() - stat.mtimeMs < CACHE_TTL;
 }
 
+export function readCachedRegistry(cachePath) {
+  if (!existsSync(cachePath)) return undefined;
+
+  try {
+    return JSON.parse(readFileSync(cachePath, 'utf-8'));
+  } catch {
+    return undefined;
+  }
+}
+
 export async function fetchRegistry({ force = false } = {}) {
   const cachePath = getCachePath();
 
   if (!force && isCacheValid()) {
-    try {
-      return JSON.parse(readFileSync(cachePath, 'utf-8'));
-    } catch {
-      // Cache corrupted, refetch
-    }
+    const cachedRegistry = readCachedRegistry(cachePath);
+    if (cachedRegistry) return cachedRegistry;
   }
 
   const res = await fetch(REGISTRY_URL);
   if (!res.ok) {
     // Fall back to cache if available
-    if (existsSync(cachePath)) {
+    const cachedRegistry = readCachedRegistry(cachePath);
+    if (cachedRegistry) {
       log.warn('Could not fetch registry, using cached version');
-      return JSON.parse(readFileSync(cachePath, 'utf-8'));
+      return cachedRegistry;
     }
     // Fall back to bundled registry
     const bundledPath = new URL('../registry/registry.json', import.meta.url);
