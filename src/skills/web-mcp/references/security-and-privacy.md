@@ -80,9 +80,9 @@ execute: async ({ topic }) => {
 
 Malicious agents targeting valuable tools (password reset, fund transfer, database operations). WebMCP tools may exercise different code paths than UI interactions, with potentially different validation.
 
-**Mitigation:** Apply the same authentication and authorization checks in tool handlers as in your UI code paths.
+**Mitigation:** Apply the same authentication and authorization checks in tool handlers as in your UI code paths. (spec §6.3.1.3)
 
-## Threat 2: Misrepresentation of Intent
+## Threat 2: Misrepresentation of Intent (spec §6.3.2)
 
 No verification mechanism exists to confirm a tool's actual behavior matches its description. A tool described as "Finalizes the current shopping cart" might actually trigger a purchase:
 
@@ -130,11 +130,11 @@ Sites design tools with excessive parameters to extract sensitive user data:
 
 **Risks:** Silent profiling, cross-site tracking, discrimination.
 
-## Threat 4: Same-Origin Boundary Violation
+## Threat 4: Same-Origin Boundary Violation (spec §6.3.4)
 
 Agents carrying state between origins can leak data across site boundaries. The spec's cross-origin model (`exposedTo`) exists specifically to prevent this.
 
-## Threat 5: Private Browsing Interaction
+## Threat 5: Private Browsing Interaction (spec §6.3.5)
 
 Agents exposed to private browsing activity may leak information to regular browsing sessions.
 
@@ -156,6 +156,10 @@ annotations: { untrustedContentHint: true }
 
 Tells agents the output contains data the site author doesn't vouch for — user-generated content, external API data, scraped content. Agents should apply heightened scrutiny (sanitize, spotlight, or hide untrusted parts).
 
+### Proposed: consequential-action hint (not yet shipped)
+
+The spec tracks an open issue (webmachinelearning/webmcp#176) for a third annotation flagging tools whose invocation has real-world consequences (payments, deletions, irreversible state changes) so agents can require stricter user confirmation. This is a design discussion, not part of `ToolAnnotations` today — don't rely on it being available.
+
 ## Origin Isolation
 
 WebMCP requires origin-keyed documents. Tools are invisible to other origins by default:
@@ -163,8 +167,20 @@ WebMCP requires origin-keyed documents. Tools are invisible to other origins by 
 - **Same-origin:** tools are visible
 - **Cross-origin:** requires explicit `exposedTo` on the tool + `fromOrigins` on `getTools()`
 - **Untrusted origins in `exposedTo`:** rejected with `SecurityError`
+- **BFCache:** tools registered by a document that enters the back-forward cache are retained but cannot be invoked while the document is inactive
 
 Chrome Extensions with `host_permission` can bypass this isolation — they can manipulate pages via custom JavaScript even without WebMCP.
+
+### registerTool() Error Handling
+
+`registerTool()` rejects with errors scoped to the calling page's own context — they never leak information about other origins:
+
+| Error | Condition |
+|-------|-----------|
+| `InvalidStateError` | Document is not in a valid state to register (e.g. not fully active) |
+| `NotAllowedError` | The `"tools"` permissions policy feature denies access |
+| `SecurityError` | Document is not origin-keyed, or an origin in `exposedTo` is not trustworthy |
+| `TypeError` | The tool definition is malformed (e.g. `inputSchema` can't be serialized) |
 
 ## Mitigations Summary
 
@@ -175,7 +191,7 @@ Chrome Extensions with `host_permission` can bypass this isolation — they can 
 | `readOnlyHint` annotation | Better agent confirmation decisions |
 | Origin isolation (default same-origin) | Cross-origin data leakage |
 | `exposedTo` whitelist | Controlled cross-origin access |
-| Permissions Policy `"tools"` | Iframe tool access control |
+| `"tools"` permissions policy (default `['self']`) | Iframe tool access control — iframes need explicit opt-in to access `document.modelContext` |
 | Descriptive error messages | Agent self-correction on invalid input |
 | Character budgets (500/150/30/1500) | Context window protection |
 

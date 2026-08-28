@@ -50,6 +50,19 @@ await document.modelContext.registerTool({
 });
 ```
 
+**WebIDL:**
+
+```webidl
+dictionary ModelContextRegisterToolOptions {
+  sequence<USVString> exposedTo;
+  AbortSignal signal;
+};
+
+dictionary ModelContextGetToolOptions {
+  sequence<USVString> fromOrigins;
+};
+```
+
 **Rules for `exposedTo`:**
 - Each origin must be a valid, parseable URL
 - Each origin must be potentially trustworthy (HTTPS or localhost)
@@ -71,10 +84,11 @@ const tools = await document.modelContext.getTools({
 
 ```javascript
 const tool = tools.find(t => t.name === "shared_inventory");
-const result = await document.modelContext.executeTool(
+const resultJson = await document.modelContext.executeTool(
   tool,
-  JSON.stringify({ sku: "WIDGET-42" })
+  { sku: "WIDGET-42" }   // plain object, not JSON.stringify(...)
 );
+const result = JSON.parse(resultJson); // executeTool() resolves to a JSON string
 ```
 
 ## Visibility Algorithm
@@ -91,14 +105,16 @@ tool_is_visible(tool_owner_origin, exposed_origins, target_origin):
 
 ## Default Exposure to Browser's Built-In Agent
 
-- **Top-level documents:** a tool without `exposedTo` IS exposed to the browser's built-in agent
-- **Iframes:** a tool without `exposedTo` is NOT exposed to the browser's built-in agent
-
-This means iframe-hosted tools must explicitly opt into browser agent visibility via `exposedTo`.
+The spec does **not** prescribe whether iframe-hosted tools are exposed to the browser's built-in agent by default — when and which tools a browser agent observes is implementation-defined (the spec only says observations may happen "at any time" for any top-level browsing context). Don't rely on iframe tools being hidden from the agent by default: if you need to control this, use `exposedTo` explicitly rather than assuming iframe isolation.
 
 ## Tool Change Notifications Across Origins
 
-When a tool is registered or unregistered, `toolchange` events fire on all descendant documents that can see the tool (based on visibility rules). The events propagate through the document tree asynchronously via the `webmcp task source`.
+When a tool is registered or unregistered, `toolchange` fires across the **entire traversable** (every navigable in the tool owner's tab/window — not just descendants of the tool's document), filtered by two conditions per recipient document:
+
+1. The document must be allowed to use the `"tools"` permissions policy feature (otherwise it's skipped even if visibility would allow it)
+2. The tool must pass the [visibility algorithm](#visibility-algorithm) for that document's origin
+
+The events propagate asynchronously via the `webmcp task source`.
 
 ```javascript
 // In a parent document
@@ -181,6 +197,15 @@ await document.modelContext.registerTool({
 }, { exposedTo: ["https://very-trusted-partner.com"] });
 // Only expose state-changing tools to origins you'd trust with user actions
 ```
+
+## Open Spec Issues
+
+These are under active discussion and may change:
+
+- **Cross-top-level-document execution** (#227) — not yet supported
+- **Unregistration/re-registration race** (#92) — schema-mismatch race condition between a tool being unregistered and re-registered
+- **Name/title/description size limits** (#73) — still unresolved
+- **`toolcanceled`/`toolactivated` events** (#146) — not yet fully specified
 
 ## Chrome Extensions
 

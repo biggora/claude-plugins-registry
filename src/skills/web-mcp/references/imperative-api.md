@@ -17,10 +17,10 @@ partial interface Document {
 
 [Exposed=Window, SecureContext]
 interface ModelContext : EventTarget {
-  Promise<undefined> registerTool(
-    ModelContextTool tool,
-    optional ModelContextRegisterToolOptions options = {}
-  );
+  Promise<undefined> registerTool(ModelContextTool tool, optional ModelContextRegisterToolOptions options = {});
+  Promise<sequence<RegisteredTool>> getTools(optional ModelContextGetToolOptions options = {});
+  Promise<DOMString> executeTool(RegisteredTool tool, optional object inputObject = {}, optional ModelContextExecuteToolOptions options = {});
+
   attribute EventHandler ontoolchange;
 };
 
@@ -33,16 +33,38 @@ dictionary ModelContextTool {
   ToolAnnotations annotations;
 };
 
+dictionary RegisteredTool {
+  required DOMString name;
+  DOMString title;
+  required DOMString description;
+  object inputSchema;
+  required Window window;
+  required USVString origin;
+  ToolAnnotations annotations;
+};
+
 dictionary ToolAnnotations {
   boolean readOnlyHint = false;
   boolean untrustedContentHint = false;
 };
 
-callback ToolExecuteCallback = Promise<any> (object input);
+dictionary ToolExecuteCallbackOptions {
+  required AbortSignal signal;
+};
+
+callback ToolExecuteCallback = Promise<any> (object inputObject, ToolExecuteCallbackOptions options);
 
 dictionary ModelContextRegisterToolOptions {
   AbortSignal signal;
   sequence<USVString> exposedTo;
+};
+
+dictionary ModelContextGetToolOptions {
+  sequence<USVString> fromOrigins;
+};
+
+dictionary ModelContextExecuteToolOptions {
+  AbortSignal signal;
 };
 ```
 
@@ -60,7 +82,7 @@ Registers a tool that agents can discover and invoke.
 | `title` | string | No | Human-readable label for UI. Recommended: localize to user's language |
 | `description` | string | Yes | Natural language explanation of functionality. Max ~500 chars recommended |
 | `inputSchema` | object | No | JSON Schema (2020-12) describing expected input parameters |
-| `execute` | async function | Yes | Callback invoked when agent calls the tool. Receives parsed input object, returns any value |
+| `execute` | async function | Yes | Callback invoked when agent calls the tool. Receives `(inputObject, { signal })` — `signal` is an `AbortSignal` for this specific invocation — and returns any value |
 | `annotations` | ToolAnnotations | No | Metadata hints about tool behavior |
 
 **options** (ModelContextRegisterToolOptions):
@@ -181,13 +203,14 @@ Retrieves available tools accessible to the calling document.
 
 ### Return Value
 
-Array of tool objects:
+`Promise<sequence<RegisteredTool>>` — an array of `RegisteredTool` records:
 
 | Property | Type | Description |
 |----------|------|-------------|
 | `name` | string | Tool identifier |
+| `title` | string | Human-readable label, if provided |
 | `description` | string | Tool description |
-| `inputSchema` | string | JSON-stringified schema |
+| `inputSchema` | object | JSON Schema describing expected input (not stringified) |
 | `annotations` | object | Tool annotations |
 | `origin` | string | Tool's origin |
 | `window` | Window | Reference to tool's window |
@@ -197,6 +220,14 @@ Array of tool objects:
 - By default, returns same-origin tools only
 - Cross-origin tools require `fromOrigins` on the caller AND `exposedTo` on the tool
 - Both sides must opt in
+
+### Rejection Conditions
+
+| Error | Condition |
+|-------|-----------|
+| `InvalidStateError` | Document is not fully active |
+| `SecurityError` | Document is not origin-keyed (and scheme is not `file:`), or an origin in `fromOrigins` is not parseable/trustworthy |
+| `NotAllowedError` | `"tools"` permissions policy feature is not allowed |
 
 ### Example
 
@@ -210,7 +241,7 @@ for (const tool of tools) {
 }
 ```
 
-## executeTool(tool, inputJson, options)
+## executeTool(tool, inputObject, options)
 
 Manually execute a discovered tool (from `getTools()` results).
 
@@ -218,9 +249,23 @@ Manually execute a discovered tool (from `getTools()` results).
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `tool` | object | Tool object from `getTools()` |
-| `inputJson` | string | Valid JSON string with input arguments |
+| `tool` | RegisteredTool | Tool object from `getTools()` |
+| `inputObject` | object | Plain object with input arguments — **not** a JSON string |
 | `options.signal` | AbortSignal | Allows execution cancellation |
+
+### Return Value
+
+`Promise<DOMString>` — the tool's result **as a JSON-stringified string**. Callers must `JSON.parse()` it themselves.
+
+### Rejection Conditions
+
+| Error | Condition |
+|-------|-----------|
+| `InvalidStateError` | Document is not fully active |
+| `SecurityError` | Document is not origin-keyed (and scheme is not `file:`) |
+| `NotAllowedError` | `"tools"` permissions policy feature is not allowed |
+| `NotSupportedError` | The tool's origin is invalid or opaque |
+| `UnknownError` | The tool no longer exists, is no longer exposed, or another internal execution failure occurred |
 
 ### Example
 
@@ -228,10 +273,11 @@ Manually execute a discovered tool (from `getTools()` results).
 const tools = await document.modelContext.getTools();
 const todoTool = tools.find(t => t.name === "add-todo");
 
-const result = await document.modelContext.executeTool(
+const resultJson = await document.modelContext.executeTool(
   todoTool,
-  JSON.stringify({ text: "Buy groceries" })
+  { text: "Buy groceries" }   // plain object, not JSON.stringify(...)
 );
+const result = JSON.parse(resultJson); // executeTool() resolves to a JSON string
 ```
 
 ## Events

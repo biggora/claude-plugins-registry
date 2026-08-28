@@ -74,13 +74,15 @@ await document.modelContext.registerTool({
 
 The browser auto-generates a JSON Schema tool definition from the form structure. The agent can fill and submit it.
 
-## Setup (Chrome 149+)
+## Setup (Chrome 149+, Edge 150+)
 
-**Origin trial:** Register at the Chrome origin trial page for WebMCP (feature ID `4163014905550602241`).
+**Origin trial:** Register at the Chrome origin trial page for WebMCP (feature ID `4163014905550602241`). Edge also runs an origin trial (ID `0b76fe60-b266-458e-a285-04e375c0c31a`).
 
 **Local development:** Navigate to `chrome://flags/#enable-webmcp-testing`, set to Enabled, relaunch Chrome.
 
-**Testing extension:** Install the [Model Context Tool Inspector](https://chromewebstore.google.com/detail/model-context-tool-inspec/gbpdfapgefenggkahfehlcenpd) for manual tool invocation and schema validation.
+**Testing extension:** Install the [Model Context Tool Inspector](https://chromewebstore.google.com/detail/model-context-tool-inspec/gbpdfapgefenggkahomfgkhfehlcenpd) for manual tool invocation and schema validation.
+
+**Other implementations:** ChatGPT Desktop has full support; Brave has experimental support in Leo AI chat. Firefox and Safari are still reviewing the proposal (not yet implemented).
 
 ## Architecture
 
@@ -213,7 +215,7 @@ Before deploying WebMCP tools:
 
 ## Specification Status
 
-WebMCP is a **Draft Community Group Report** (W3C Web Machine Learning Community Group, June 2026). The imperative API is stable and implemented in Chrome 149+. The declarative API is partially specified. Service Worker integration is under discussion.
+WebMCP is a **Draft Community Group Report** (W3C Web Machine Learning Community Group, 26 August 2026). The imperative API is stable and implemented in Chrome 149+ and Edge 150+. The declarative API section of the main spec is currently "entirely a TODO" — it's specified separately in [declarative-api-explainer.md](https://github.com/webmachinelearning/webmcp/blob/main/declarative-api-explainer.md), and Chrome implements a loose, trial version of it. Service Worker integration is under discussion.
 
 **Key open questions:** multimodal I/O, streaming support, output schema contracts, user consent management during tool execution (`requestUserInteraction()`).
 

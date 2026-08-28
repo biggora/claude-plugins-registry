@@ -2,7 +2,7 @@
 
 The declarative API lets you turn existing HTML `<form>` elements into WebMCP tools by adding a few attributes. The browser auto-generates JSON Schema tool definitions from the form structure.
 
-> Status: partially specified in the W3C draft. Chrome 149+ supports the core attributes.
+> Status: the declarative API section of the main W3C draft (`index.bs`) is currently "entirely a TODO" — the real source of truth is the separate [`declarative-api-explainer.md`](https://github.com/webmachinelearning/webmcp/blob/main/declarative-api-explainer.md), and several of the mechanisms it describes are themselves marked TBD/under discussion (noted inline below). Chrome 149+ implements a loose version of this for trial/testing purposes.
 
 ## HTML Attributes
 
@@ -106,6 +106,8 @@ The browser transforms the annotated form above into:
 
 `<select>` elements produce both `enum` (flat list) and `anyOf` (with `const` + `title` per option), giving agents both the valid values and human-readable labels.
 
+> The exact algorithm for reducing a form to a JSON Schema is explicitly marked TBD in the explainer — this reflects current Chromium trial behavior, not a ratified spec algorithm, and may change based on community feedback.
+
 ## Select Element Example
 
 ```html
@@ -171,25 +173,42 @@ document.querySelector("form").addEventListener("submit", (e) => {
 });
 ```
 
-## Window Events
+`respondWith()` only applies to forms that don't navigate. See below for forms that do.
+
+## Getting the Form Response Back (Navigating Forms)
+
+> Status: under active debate (webmachinelearning/webmcp#135) — not finalized.
+
+If a form submission does **not** navigate, use `SubmitEvent#respondWith()` (above). If it **does** navigate, the browser looks for the first `<script type="application/ld+json">` tag on the destination page and uses its contents as the tool's response. If no such tag is present, the destination page's full content may be sent as the response instead — this fallback is still TBD.
+
+```html
+<!-- On the destination page, after a navigating form submission -->
+<script type="application/ld+json">
+{ "status": "success", "orderId": "ORD-4821" }
+</script>
+```
+
+## Tool Activation Events
+
+> Status: fires on `document.modelContext` per the explainer's current text. Whether these should instead fire on the `<form>` element and bubble is an open question (webmachinelearning/webmcp#126) — don't assume `window` is the final target.
 
 ### toolactivated
 
 Fires when a declarative tool's form fields are pre-filled by an agent (before submission):
 
 ```javascript
-window.addEventListener("toolactivated", ({ toolName }) => {
+document.modelContext.addEventListener("toolactivated", ({ toolName }) => {
   console.log(`Agent activated tool: "${toolName}"`);
   showAgentIndicator(toolName);
 });
 ```
 
-### toolcancel
+### toolcanceled
 
-Fires when user cancels the tool invocation or `form.reset()` is called:
+Fires when the user cancels the tool invocation, `form.reset()` is called, or the form's `toolname`/`tooldescription` attributes change while an invocation is in flight:
 
 ```javascript
-window.addEventListener("toolcancel", ({ toolName }) => {
+document.modelContext.addEventListener("toolcanceled", ({ toolName }) => {
   console.log(`Tool "${toolName}" execution was cancelled.`);
   hideAgentIndicator();
 });
@@ -247,3 +266,13 @@ form.removeAttribute("toolname");
 | Auto-generated schema from form structure | Hand-crafted JSON Schema |
 | `toolautosubmit` for zero-friction flow | Custom response formatting |
 | Progressive enhancement of existing forms | Tools not tied to a form element |
+
+## Open Questions
+
+Not yet resolved in the spec/explainer — don't build hard dependencies on these:
+
+- Whether declarative tools need an explicit `outputSchema`
+- Whether/how declarative tools show up via `getTools()` / `executeTool()`
+- Whether `toolactivated`/`toolcanceled` fire on `document.modelContext`, on the `<form>`, or bubble (#126)
+- The navigating-form response mechanism — `application/ld+json` vs. full-page fallback (#135)
+- The exact form-to-JSON-Schema reduction algorithm
