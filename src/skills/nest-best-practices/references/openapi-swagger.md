@@ -41,6 +41,28 @@ bootstrap();
 
 Access Swagger UI at `http://localhost:3000/api`
 
+Keep the document factory lazy as shown. If the document is created eagerly, call `app.enableVersioning()` first or version prefixes may be absent from generated paths.
+
+## Standard Schema (NestJS 12)
+
+Schemas attached to route parameter decorators can also drive OpenAPI request bodies and parameters:
+
+```typescript
+import { z } from 'zod';
+
+const createCatSchema = z.object({
+  name: z.string(),
+  age: z.number().int().positive(),
+});
+
+@Post()
+create(@Body({ schema: createCatSchema }) body: z.infer<typeof createCatSchema>) {
+  return this.catsService.create(body);
+}
+```
+
+Libraries that expose the Standard JSON Schema extension need no additional configuration. Otherwise configure `standardSchemaConverter` in `SwaggerDocumentOptions` and narrow the schema by its `~standard.vendor` before calling a vendor-specific converter. Preserve the input/output distinction when schemas transform values.
+
 ## DTO Documentation
 
 Use `@ApiProperty()` to document DTO properties:
@@ -204,4 +226,5 @@ Source references:
 - https://docs.nestjs.com/openapi/introduction
 - https://docs.nestjs.com/openapi/types-and-parameters
 - https://docs.nestjs.com/openapi/decorators
+- https://docs.nestjs.com/openapi/introduction#standard-schema-zod-valibot
 -->

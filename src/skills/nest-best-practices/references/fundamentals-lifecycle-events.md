@@ -77,7 +77,8 @@ class DatabaseService implements OnApplicationShutdown {
 ## Key Points
 
 - Lifecycle hooks are not triggered for **request-scoped** providers
-- Execution order depends on module import order
+- NestJS 12 invokes hooks by component hierarchy level; do not rely solely on module import order
+- If initialization or teardown requires ordering between components, express it through dependencies and verify the sequence with tests
 - Windows has limited shutdown hook support (SIGINT works, SIGTERM doesn't)
 - `enableShutdownHooks` consumes memory by starting listeners
 

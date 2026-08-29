@@ -116,11 +116,26 @@ redirect() {
 ## Route Wildcards
 
 ```typescript
-@Get('abcd/*')
+@Get('abcd/*splat')
 findAll() {
   return 'Wildcard route';
 }
 ```
+
+Express 5 requires named wildcards. Use `{*splat}` when the root path must also match.
+
+## Route Conflict Diagnostics (NestJS 12)
+
+Express resolves routes in registration order, so a parameter route can shadow a later static route. Nest 12 provides opt-in diagnostics and specificity-based registration:
+
+```typescript
+const app = await NestFactory.create(AppModule, {
+  routeConflictPolicy: { duplicate: 'error', shadow: 'warn' },
+  routeResolutionStrategy: 'specificity',
+});
+```
+
+Both options preserve legacy behavior when omitted. Enable them when the application benefits from stricter route contracts, then test routes whose order may change.
 
 ## Sub-domain Routing
 
@@ -155,7 +170,7 @@ findAll(): Observable<Cat[]> {
 - Controllers must be registered in a module's `controllers` array
 - Use DTOs (Data Transfer Objects) for request body validation
 - Prefer returning values over using `@Res()` for better compatibility
-- Route parameters should be declared after static paths
+- Without specificity-based resolution, declare static paths before parameterized paths and test ambiguous routes
 - Use `@HttpCode()` to set custom status codes
 - Use `@Header()` to set custom response headers
 

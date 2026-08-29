@@ -213,7 +213,10 @@ GraphQLModule.forRootAsync<ApolloDriverConfig>({
   imports: [ConfigModule],
   useFactory: async (configService: ConfigService) => ({
     autoSchemaFile: true,
-    playground: configService.get('NODE_ENV') !== 'production',
+    graphiql:
+      configService.get('NODE_ENV') !== 'production'
+        ? { shouldPersistHeaders: true }
+        : false,
   }),
   inject: [ConfigService],
 }),
@@ -226,6 +229,7 @@ GraphQLModule.forRootAsync<ApolloDriverConfig>({
 - Use `autoSchemaFile` for code-first
 - Use `typePaths` for schema-first
 - Resolvers must be registered as providers
+- GraphiQL is the NestJS 12 default IDE; configure the `graphiql` option rather than the removed Apollo Playground flow
 
 <!--
 Source references:

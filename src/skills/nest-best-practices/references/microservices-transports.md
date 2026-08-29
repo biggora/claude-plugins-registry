@@ -53,10 +53,12 @@ npm i kafkajs
 
 Use `@MessagePattern('topic')` for Kafka topics. Event-based (fire-and-forget) by default.
 
+NestJS 12 also accepts regular expressions in Kafka `@MessagePattern()` and `@EventPattern()`. Use them only when the consumer intentionally owns a bounded topic family and cover the match set with integration tests.
+
 ## NATS
 
 ```bash
-npm i nats
+npm i @nats-io/transport-node
 ```
 
 ```typescript
@@ -70,6 +72,8 @@ npm i nats
 ```
 
 Supports wildcards: `@MessagePattern('time.us.*')` — `*` and `>` (multi-level).
+
+NestJS 12 targets NATS v3. Replace direct imports from `nats` with the corresponding `@nats-io/*` packages. Custom deserializers now receive the full NATS message and should read JSON through `msg.json()`; review serializer/deserializer tests during migration.
 
 ## RabbitMQ
 
