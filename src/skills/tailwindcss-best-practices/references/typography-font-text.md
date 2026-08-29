@@ -1,6 +1,6 @@
 ---
 name: typography-font-text
-description: Font size, weight, style, text color, line height, letter spacing, and text decoration
+description: Font size, weight, style, text color, line height, letter spacing, decoration, OpenType features, and tab size
 ---
 
 # Typography: Font & Text
@@ -119,6 +119,18 @@ Utilities for font styling, text color, line height, letter spacing, and decorat
 <p class="font-features-['smcp']">Small caps text</p>
 ```
 
+Prefer higher-level utilities such as `tabular-nums` for common OpenType features. Use `font-features-*` for font-specific feature tags or combinations that have no dedicated utility.
+
+### Tab size (v4.3+)
+
+```html
+<pre class="tab-2">Two-column tabs</pre>
+<pre class="tab-[12px]">Custom tab width</pre>
+<pre class="tab-(--editor-tab-size)">Tab width from a CSS variable</pre>
+```
+
+These utilities affect actual tab characters in preformatted content; they do not add indentation to ordinary text.
+
 ## Key Points
 
 - Font size: `text-xs` through `text-9xl`, theme scale
@@ -130,6 +142,7 @@ Utilities for font styling, text color, line height, letter spacing, and decorat
 - Overflow: `truncate` (ellipsis), `line-clamp-{n}`
 - Wrapping (v4.1): `wrap-break-word`, `wrap-anywhere`, `wrap-normal`
 - Font features (v4.2): `font-features-['tnum']`, `font-features-['smcp']`
+- Tab width (v4.3): `tab-2`, `tab-[value]`, `tab-(--property)`
 
 <!--
 Source references:
@@ -139,4 +152,6 @@ Source references:
 - https://tailwindcss.com/docs/line-height
 - https://tailwindcss.com/docs/letter-spacing
 - https://tailwindcss.com/docs/text-decoration
+- https://tailwindcss.com/docs/font-feature-settings
+- https://tailwindcss.com/docs/tab-size
 -->

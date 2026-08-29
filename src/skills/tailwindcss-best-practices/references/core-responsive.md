@@ -149,12 +149,25 @@ Name containers to target specific ones in nested structures:
 </div>
 ```
 
+### Size Containers (v4.3+)
+
+The normal `@container` utility creates an inline-size container. Use `@container-size` when queries or container units need the container's block size, such as `cqb` or `cqh`:
+
+```html
+<div class="@container-size/preview">
+  <div class="h-[50cqb] @md/preview:grid-cols-2">Content</div>
+</div>
+```
+
+Use a size container only when block-size information is required; inline-size containers remain the normal choice.
+
 ## Key Points
 
 - Mobile-first: unprefixed = mobile, prefixed = breakpoint and up
 - Use unprefixed utilities for mobile, not `sm:`
 - Stack variants for complex responsive behavior
 - Container queries enable component-based responsive design
+- `@container-size` exposes both inline and block dimensions for size queries (v4.3+)
 - Customize breakpoints with theme variables
 
 <!--

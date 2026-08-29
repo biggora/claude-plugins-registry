@@ -1,6 +1,6 @@
 ---
 name: features-functions-directives
-description: Tailwind's CSS directives (@import, @theme, @utility, @variant) and functions (--alpha, --spacing)
+description: Tailwind CSS v4 directives, compatibility directives, build-time functions, and functional utility value resolution
 ---
 
 # Functions and Directives
@@ -46,16 +46,26 @@ Explicitly specify source files for class detection:
 Add custom utilities:
 
 ```css
-@utility tab-4 {
-  tab-size: 4;
+@utility content-auto {
+  content-visibility: auto;
 }
 ```
 
 Custom utilities work with variants:
 
 ```html
-<div class="tab-4 hover:tab-8">Content</div>
+<div class="hover:content-auto">Content</div>
 ```
+
+For a reusable utility family, use `--value()` and optionally `--modifier()` to resolve theme, bare, literal, or arbitrary values. In v4.3+, `--default()` lets the bare utility resolve a fallback:
+
+```css
+@utility tab-* {
+  tab-size: --value(integer, --default(4));
+}
+```
+
+This illustrative rule matches `tab`, `tab-2`, and similar candidates. Tailwind v4.3 already ships `tab-*`; do not re-register built-in families in application code.
 
 ### @variant
 
@@ -67,6 +77,20 @@ Apply Tailwind variants to styles in your CSS:
   
   @variant dark {
     background: black;
+  }
+}
+```
+
+Tailwind v4.3 supports stacked and compound forms:
+
+```css
+.my-element {
+  @variant hover:focus {
+    color: var(--color-sky-700);
+  }
+
+  @variant disabled, aria-disabled {
+    opacity: 0.5;
   }
 }
 ```
@@ -205,6 +229,8 @@ Load a legacy JavaScript-based configuration:
 @config "../../tailwind.config.js";
 ```
 
+Legacy JavaScript configs are not detected automatically. The v3 `corePlugins`, `safelist`, and `separator` options are unsupported in v4.
+
 ### @plugin
 
 Load a legacy JavaScript-based plugin:
@@ -233,7 +259,9 @@ Access theme values using dot notation (deprecated):
 - `@custom-variant` creates custom variants
 - `@apply` inlines utilities into CSS
 - `--alpha()` and `--spacing()` are build-time functions
-- Compatibility directives support v3.x configs
+- `--value()` and `--modifier()` define functional utility APIs; `--default()` adds a fallback in v4.3+
+- `@variant` applies existing variants in CSS; `@custom-variant` defines a new variant
+- `@config` and `@plugin` are compatibility paths, not the default for new v4 projects
 
 <!--
 Source references:

@@ -7,6 +7,14 @@ description: Adding custom styles, utilities, variants, and working with arbitra
 
 Tailwind is designed to be extensible. This guide covers customizing your theme, using arbitrary values, adding custom CSS, and extending the framework.
 
+Choose the narrowest mechanism that communicates intent:
+
+1. Existing utility or component.
+2. Arbitrary value/property for a genuine one-off.
+3. `@theme` token for a repeated design decision.
+4. `@utility` for a reusable CSS capability that Tailwind does not already provide.
+5. Base/component/custom CSS when selectors, third-party overrides, or complex rules are clearer as CSS.
+
 ## Customizing Your Theme
 
 Add custom design tokens using `@theme`:
@@ -104,18 +112,32 @@ Add custom utilities with `@utility`:
 ```css
 @import "tailwindcss";
 
-@utility tab-4 {
-  tab-size: 4;
+@utility content-auto {
+  content-visibility: auto;
 }
 ```
 
 Now you can use `tab-4` utility class, and it works with variants:
 
 ```html
-<div class="tab-4 hover:tab-8">
+<div class="hover:content-auto">
   Content
 </div>
 ```
+
+Before registering a utility, check the installed Tailwind version's official utility index. For example, v4.3 includes `tab-*`, `zoom-*`, and scrollbar utilities that older projects often implemented themselves.
+
+### Functional Utilities
+
+Use `--value()` for a custom family that resolves theme keys or arbitrary values. In v4.3+, use `--default()` when the bare candidate needs a fallback:
+
+```css
+@utility elevation-* {
+  box-shadow: --value(--shadow-*, [*]);
+}
+```
+
+Only create a parallel API like `elevation-*` when it expresses a real project concept; otherwise use the built-in `shadow-*` family.
 
 ## Custom Variants
 
@@ -149,6 +171,20 @@ Apply Tailwind variants to custom CSS with `@variant`:
   
   @variant hover {
     background: gray;
+  }
+}
+```
+
+In v4.3+, stack variants or share one block across variants:
+
+```css
+.my-element {
+  @variant hover:focus {
+    background: var(--color-gray-100);
+  }
+
+  @variant disabled, aria-disabled {
+    opacity: 0.5;
   }
 }
 ```
@@ -196,6 +232,8 @@ Add component styles to the `components` layer:
 - `@utility` for custom utilities
 - `@custom-variant` for custom variants
 - `@layer` for organizing base and component styles
+- Avoid recreating utilities already shipped by the installed Tailwind version
+- Prefer components over `@apply` for repeated application UI; reserve `@apply` for CSS-only or third-party integration cases where it improves clarity
 
 <!--
 Source references:

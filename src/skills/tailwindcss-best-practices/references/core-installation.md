@@ -1,13 +1,15 @@
 ---
 name: core-installation
-description: Installing Tailwind CSS with Vite, PostCSS, CLI, or CDN
+description: Choosing and configuring the Tailwind CSS v4 build integration for Vite, PostCSS, webpack, CLI, or Play CDN
 ---
 
 # Installation
 
-How to add Tailwind CSS to a project.
+Inspect the framework and existing build pipeline before choosing an integration. Prefer the framework's official Tailwind guide when one exists, and keep all Tailwind packages on the same release line. Do not switch adapters or upgrade versions unless the task calls for it.
 
-## Vite (Recommended)
+## Vite
+
+Use the dedicated plugin for Vite-based stacks such as Vite, SvelteKit, React Router, Nuxt, SolidJS, and Laravel when their current framework guide recommends it.
 
 ```bash
 npm install tailwindcss @tailwindcss/vite
@@ -50,6 +52,10 @@ export default {
 ## Tailwind CLI
 
 ```bash
+npm install tailwindcss @tailwindcss/cli
+```
+
+```bash
 npx @tailwindcss/cli -i ./src/input.css -o ./dist/output.css --watch
 ```
 
@@ -66,12 +72,22 @@ npm install tailwindcss @tailwindcss/webpack
 
 ```js
 // webpack.config.js
-const tailwindcss = require('@tailwindcss/webpack')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 module.exports = {
-  plugins: [tailwindcss()],
+  plugins: [new MiniCssExtractPlugin()],
+  module: {
+    rules: [
+      {
+        test: /\.css$/i,
+        use: [MiniCssExtractPlugin.loader, 'css-loader', '@tailwindcss/webpack'],
+      },
+    ],
+  },
 }
 ```
+
+`@tailwindcss/webpack` is a loader, not an item in webpack's `plugins` array. Its `base` option controls the source-scan base directory, and `optimize` controls output optimization.
 
 ```css
 @import "tailwindcss";
@@ -80,20 +96,20 @@ module.exports = {
 ## Play CDN (Development only)
 
 ```html
-<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 ```
 
-Not for production: no purging, larger payload.
+Use `<style type="text/tailwindcss">` for Tailwind-aware custom CSS in a CDN prototype. The browser package is for development only, not production.
 
 ## Framework guides
 
-- **Nuxt**: `@nuxtjs/tailwindcss` module or `@tailwindcss/vite`
-- **Next.js**: Use Vite or PostCSS with `tailwind.config.js` if needed
-- **React Router / SvelteKit / SolidJS**: Use `@tailwindcss/vite`
+- **Next.js and Angular**: use the current official framework guide; current Tailwind docs use `@tailwindcss/postcss`.
+- **Vite, SvelteKit, React Router, Nuxt, SolidJS, Laravel**: the dedicated Vite plugin is usually the direct integration, subject to the framework guide.
+- **Webpack/Turbopack compatibility path**: use the dedicated webpack loader only when the project's pipeline supports it.
 
 ## Key Points
 
-- Vite: `@tailwindcss/vite` plugin + `@import "tailwindcss"` (supports Vite 8+)
+- Vite: `@tailwindcss/vite` plugin + `@import "tailwindcss"`
 - PostCSS: `@tailwindcss/postcss`
 - Webpack: `@tailwindcss/webpack` (v4.2+)
 - CLI: `npx @tailwindcss/cli`
@@ -106,4 +122,6 @@ Source references:
 - https://tailwindcss.com/docs/installation/using-postcss
 - https://tailwindcss.com/docs/installation/tailwind-cli
 - https://tailwindcss.com/docs/installation/play-cdn
+- https://tailwindcss.com/docs/installation/framework-guides
+- https://github.com/tailwindlabs/tailwindcss/tree/main/packages/@tailwindcss-webpack
 -->
