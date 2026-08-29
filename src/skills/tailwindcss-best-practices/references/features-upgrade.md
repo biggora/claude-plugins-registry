@@ -1,11 +1,11 @@
 ---
 name: features-upgrade
-description: Migrating from Tailwind CSS v3 to v4, all renamed utilities, scale shifts, config migration, and v4.1/v4.2 changes
+description: Migrating from Tailwind CSS v3 to v4, including renamed utilities, configuration compatibility, browser requirements, and additions through v4.3
 ---
 
 # Upgrade Guide (v3 → v4)
 
-Key changes when upgrading from Tailwind CSS v3 to v4. Use the automated upgrade tool when possible.
+Key changes when upgrading from Tailwind CSS v3 to v4. This reference is current through stable v4.3.3. Inspect the installed version and read the current official upgrade guide before changing a real project.
 
 ## Upgrade Tool
 
@@ -13,13 +13,13 @@ Key changes when upgrading from Tailwind CSS v3 to v4. Use the automated upgrade
 npx @tailwindcss/upgrade
 ```
 
-Requires Node.js 20+. Run in a new branch, review diff, test. Handles most migration automatically.
+Requires Node.js 20+. Run it from the project directory in a recoverable Git branch/worktree, review every change, and run the project's full relevant verification. The tool handles common migrations, not application-specific visual or browser regressions.
 
 ## Installation Changes
 
 - **PostCSS**: Use `@tailwindcss/postcss`; remove `postcss-import` and `autoprefixer` (handled by v4)
-- **Vite**: Prefer `@tailwindcss/vite` over PostCSS (supports Vite 8+ as of v4.2.2)
-- **Webpack**: Use `@tailwindcss/webpack` (new in v4.2)
+- **Vite**: Use `@tailwindcss/vite` for a Vite-based stack when the current framework guide recommends it
+- **Webpack**: Use the dedicated `@tailwindcss/webpack` loader (new in v4.2)
 - **CLI**: Use `npx @tailwindcss/cli` instead of `npx tailwindcss`
 
 ## Import Change
@@ -84,7 +84,7 @@ These are the most commonly missed renames because the entire scale shifted down
 
 | v3 Concept | v4 Equivalent |
 |------------|---------------|
-| `tailwind.config.js` | Removed. Use CSS directives. |
+| Auto-detected `tailwind.config.js` | Prefer CSS directives; load a legacy config explicitly with `@config` |
 | `darkMode: 'class'` | `@custom-variant dark (&:where(.dark, .dark *));` |
 | `darkMode: 'media'` | Default in v4 (uses `prefers-color-scheme`). No config needed. |
 | `theme.extend.colors` | `@theme { --color-*: value; }` |
@@ -94,6 +94,8 @@ These are the most commonly missed renames because the entire scale shifted down
 | `safelist: [...]` | `@source inline("classes")` (v4.1+) |
 | `@layer utilities { }` | `@utility name { }` |
 | `plugins: [...]` | `@plugin "./my-plugin.js"` |
+
+`@config` and `@plugin` are compatibility paths. The v3 `corePlugins`, `safelist`, and `separator` config options are not supported; use `@source inline()` instead of `safelist`.
 
 ## CSS Variable Syntax Change
 
@@ -145,16 +147,26 @@ v4 targets Safari 16.4+, Chrome 111+, Firefox 128+. For older browsers, stay on 
 - New variants: `details-content`, `inverted-colors`, `noscript`, `user-valid`, `user-invalid`
 - `@source not` and `@source inline()` directives
 
-### v4.2 (February 2025)
+### v4.2
 - New colors: mauve, olive, mist, taupe
-- Webpack plugin (`@tailwindcss/webpack`)
+- Dedicated webpack loader (`@tailwindcss/webpack`)
 - Block logical property utilities (`pbs-*`, `mbs-*`, `border-bs-*`, `inline-*`, `block-*`)
 - Logical inset utilities (`inset-s-*`, `inset-e-*`, `inset-bs-*`, `inset-be-*`)
 - Font feature settings (`font-features-*`)
+
+### v4.3 (May 2026)
+- Scrollbar width, color, and gutter utilities
+- Size containers with `@container-size` and named `@container-size/{name}`
+- CSS zoom utilities (`zoom-*`)
+- Tab size utilities (`tab-*`)
+- Stacked and compound `@variant` forms in CSS
+- Default values for functional utilities through `--default(...)`
 
 <!--
 Source references:
 - https://tailwindcss.com/docs/upgrade-guide
 - https://tailwindcss.com/blog/tailwindcss-v4-1
 - https://github.com/tailwindlabs/tailwindcss/releases/tag/v4.2.0
+- https://tailwindcss.com/blog/tailwindcss-v4-3
+- https://github.com/tailwindlabs/tailwindcss/releases/tag/v4.3.3
 -->

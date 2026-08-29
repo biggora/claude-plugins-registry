@@ -1,13 +1,33 @@
 ---
 name: tailwindcss-best-practices
-description: Tailwind CSS v4.x utility-first CSS framework best practices. Use when styling web applications with utility classes, building responsive layouts, customizing design systems with @theme variables, migrating from v3 to v4, configuring dark mode, creating custom utilities with @utility, or working with any Tailwind CSS v4 features. This skill covers the full v4.x line through v4.2 including text shadows, masks, logical properties, and source detection. Use this skill even for simple Tailwind questions — v4 changed many class names and configuration patterns that trip people up.
+description: Tailwind CSS v4 implementation and review guidance. Use when installing Tailwind, styling UI, building responsive or dark-mode layouts, extending CSS-first themes and utilities, diagnosing class detection, or migrating from v3. Covers stable v4.3 behavior; inspect the project's installed version before applying version-specific advice.
 ---
 
-# Tailwind CSS v4.x Best Practices
+# Tailwind CSS v4 Best Practices
 
-> Covers Tailwind CSS v4.0 through v4.2.2 (latest stable as of March 2026). Always check the official docs at https://tailwindcss.com/docs for the latest.
+> Documentation snapshot: Tailwind CSS v4.3.3, verified against the npm `latest` tag and official documentation on 2026-08-29. Recheck https://tailwindcss.com/docs and the npm tag when the user asks for the latest version.
 
-Tailwind CSS is a utility-first CSS framework. Instead of writing custom CSS, you compose designs using utility classes directly in your markup. Tailwind v4 introduced CSS-first configuration with `@theme` variables, `@utility` for custom utilities, and `@custom-variant` for custom variants — replacing the old `tailwind.config.js` approach entirely.
+Tailwind v4 is CSS-first: `@theme` defines design tokens, `@utility` registers utilities, and `@custom-variant` registers variants. Legacy JavaScript configuration is still available through `@config`, but it is not detected automatically and some v3 options are unsupported.
+
+## Working Method
+
+1. **Inspect the project before editing.** Identify the installed `tailwindcss` version, package manager, build integration, main CSS entry point, legacy config or plugins, source roots, and existing design tokens/components. Do not upgrade a project merely because this skill documents a newer version.
+2. **Choose the integration that matches the stack.** Prefer the framework's official guide when one exists. Use `@tailwindcss/vite` for Vite-based stacks, `@tailwindcss/postcss` for PostCSS-based stacks such as Next.js, `@tailwindcss/webpack` as a webpack loader, or `@tailwindcss/cli` for a standalone build. Read [installation](references/core-installation.md) before changing build configuration.
+3. **Use the smallest styling mechanism that fits.** Prefer an existing utility or component; use an arbitrary value for a true one-off; add an `@theme` token when a design value is reused; add `@utility` only for a reusable CSS capability; use custom CSS for third-party overrides or rules that are clearer as CSS.
+4. **Keep candidates statically detectable.** Map props and states to complete class strings. Do not construct fragments such as `` `bg-${color}-500` ``. Read [source detection](references/core-source-detection.md) for monorepos, external packages, exclusions, and safelists.
+5. **Preserve the existing design system.** Reuse its spacing, color, typography, radius, component, and class-merging conventions. Avoid introducing arbitrary values when a matching token already exists.
+6. **Verify the observable result.** Run the relevant build/type/lint/tests, confirm expected utilities appear in compiled CSS when detection is in question, and inspect responsive, state, dark-mode, focus, and reduced-motion behavior in the rendered UI when applicable.
+
+## v4.3 Additions
+
+| Capability | Use |
+|---|---|
+| Scrollbars | `scrollbar-auto`, `scrollbar-thin`, `scrollbar-none`, `scrollbar-thumb-*`, `scrollbar-track-*`, and `scrollbar-gutter-*`; see [scrollbars](references/effects-scrollbars.md) |
+| Size containers | `@container-size` or `@container-size/{name}` when queries or container units need block-size information; see [responsive design](references/core-responsive.md) |
+| Zoom | `zoom-*`, `zoom-[value]`, and `zoom-(--property)` for CSS `zoom`; see [transforms](references/transform-base.md) |
+| Tab size | `tab-*`, `tab-[value]`, and `tab-(--property)` for rendered tab width; see [typography](references/typography-font-text.md) |
+| Variants in CSS | `@variant hover:focus` for stacked variants and `@variant hover, focus` for a shared block |
+| Functional utilities | `--default(...)` inside `--value(...)` or `--modifier(...)` when the bare utility needs a fallback; see [functions and directives](references/features-functions-directives.md) |
 
 ## Critical v4 Migration Gotchas
 
@@ -28,7 +48,7 @@ These are the most common mistakes when working with Tailwind v4. If you're migr
 | `overflow-ellipsis` | `text-ellipsis` | Renamed for consistency |
 | `blur` | `blur-sm` | Blur scale shifted down one step |
 | `@tailwind base/components/utilities` | `@import "tailwindcss"` | Single CSS import replaces three directives |
-| `tailwind.config.js` | `@theme { }` in CSS | CSS-first configuration replaces JS config |
+| Automatically detected `tailwind.config.js` | CSS-first directives, or explicit `@config` for compatibility | JS config is no longer auto-detected |
 | `darkMode: 'class'` | `@custom-variant dark (&:where(.dark, .dark *));` | Dark mode config moves to CSS |
 | `bg-[--var]` | `bg-(--var)` | CSS variable arbitrary values use parentheses |
 | `theme(screens.xl)` | `theme(--breakpoint-xl)` | Theme function uses CSS variable names |
@@ -128,6 +148,7 @@ These are the most common mistakes when working with Tailwind v4. If you're migr
 | SVG | fill, stroke, stroke-width for SVG and icon styling | [visual-svg](references/visual-svg.md) |
 | Text Shadow | Text shadow sizes, colors, and opacity modifiers (v4.1) | [effects-text-shadow](references/effects-text-shadow.md) |
 | Mask | Composable mask utilities with gradient and radial masks (v4.1) | [effects-mask](references/effects-mask.md) |
+| Scrollbars | Width, thumb/track colors, and stable gutter utilities (v4.3) | [effects-scrollbars](references/effects-scrollbars.md) |
 
 ## Effects & Interactivity
 
@@ -168,13 +189,11 @@ These are the most common mistakes when working with Tailwind v4. If you're migr
 
 ## Key Recommendations
 
-- **Use utility classes directly in markup** — compose designs by combining utilities
-- **Customize with `@theme` directive** — define design tokens as CSS variables, not in JS config
-- **Mobile-first responsive design** — unprefixed utilities for mobile, prefixed for breakpoints
-- **Use complete class names** — never construct classes dynamically with string interpolation
-- **Leverage variants** — stack variants for complex conditional styling (`dark:md:hover:bg-blue-600`)
-- **Prefer CSS-first configuration** — use `@theme`, `@utility`, and `@custom-variant` over JavaScript configs
-- **Use oklch for custom colors** — Tailwind v4 defaults to oklch; prefer it for perceptual uniformity
-- **Use rem for custom breakpoints** — e.g., `--breakpoint-3xl: 90rem` not `1440px`
-- **Know the scale shifts** — shadow, rounded, and blur all shifted down one step in v4
-- **Use `@custom-variant`** (not `@variant`) — for defining custom variants like class-based dark mode
+- Prefer utilities and existing components over new abstraction layers.
+- Define reusable design tokens with `@theme`; use `:root` for CSS variables that should not generate utilities.
+- Treat unprefixed responsive utilities as the mobile baseline and breakpoint variants as overrides.
+- Keep full candidate strings in source; map dynamic inputs to static class lists.
+- Use `@custom-variant` to define a variant and `@variant` to apply an existing variant inside CSS.
+- Prefer CSS-first configuration for new v4 work; retain `@config` or `@plugin` only when compatibility requires it.
+- Use consistent units for breakpoints; the official defaults use `rem`, and mixed units can produce unexpected ordering.
+- Do not use Play CDN in production or add Sass/Less/Stylus in front of Tailwind v4.

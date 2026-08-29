@@ -38,7 +38,7 @@ Theme variables are organized into namespaces that map to utility classes:
 | `--color-*` | `bg-red-500`, `text-sky-300`, `border-indigo-600`, etc. |
 | `--font-*` | `font-sans`, `font-serif`, `font-mono` |
 | `--breakpoint-*` | Responsive variants like `md:`, `lg:`, `xl:` |
-| `--spacing-*` | Spacing scale for padding, margin, gap utilities |
+| `--spacing` and `--spacing-*` | Spacing scale for padding, margin, gap, and related utilities |
 | `--shadow-*` | `shadow-sm`, `shadow-md`, `shadow-lg` |
 | `--ease-*` | Transition timing functions |
 
@@ -67,7 +67,7 @@ Tailwind generates CSS variables for your theme variables, so you can reference 
 
 ```html
 <!-- Use utility classes -->
-<div class="bg-brand-500 text-display">Content</div>
+<div class="bg-brand-500 font-display">Content</div>
 
 <!-- Reference CSS variables directly -->
 <div style="background-color: var(--color-brand-500)">
@@ -88,7 +88,7 @@ When you import `tailwindcss`, it includes default theme variables:
 ```
 
 The default theme includes:
-- Color palette (red, blue, green, etc. with 50-950 shades)
+- Color palette (including the v4.2 `mauve`, `olive`, `mist`, and `taupe` neutral palettes)
 - Font families (sans, serif, mono)
 - Spacing scale
 - Shadows
@@ -101,6 +101,7 @@ The default theme includes:
 - Variables must be defined top-level, not nested
 - Tailwind generates both utilities and CSS variables
 - Default theme provides a solid starting point
+- Use `@theme inline` when a theme variable should inline a referenced CSS variable, and `@theme static` when all declared theme variables must be emitted even if unused
 
 <!--
 Source references:
