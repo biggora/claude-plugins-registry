@@ -1,6 +1,14 @@
 import { describe, it, mock, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { searchPlugins, findPlugin } from '../../src/registry.js';
+import { writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import {
+  searchPlugins,
+  findPlugin,
+  readCachedRegistry,
+} from '../../src/registry.js';
 import { MOCK_REGISTRY } from '../helpers/fixtures.js';
 
 describe('searchPlugins', () => {
@@ -75,5 +83,31 @@ describe('findPlugin', () => {
   it('returns undefined for not found', () => {
     const plugin = findPlugin(MOCK_REGISTRY, 'no-such-plugin');
     assert.equal(plugin, undefined);
+  });
+});
+
+describe('readCachedRegistry', () => {
+  it('returns a parsed registry for valid cache data', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'registry-cache-'));
+    const cachePath = join(directory, 'registry.json');
+    writeFileSync(cachePath, JSON.stringify(MOCK_REGISTRY));
+
+    try {
+      assert.deepEqual(readCachedRegistry(cachePath), MOCK_REGISTRY);
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('rejects corrupted cache data without throwing', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'registry-cache-'));
+    const cachePath = join(directory, 'registry.json');
+    writeFileSync(cachePath, '{invalid');
+
+    try {
+      assert.equal(readCachedRegistry(cachePath), undefined);
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
   });
 });
