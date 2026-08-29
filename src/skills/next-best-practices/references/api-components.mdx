@@ -27,7 +27,7 @@ export default function Navigation() {
 ### Link Props
 
 - `href`: Path or URL (required)
-- `prefetch`: Enable/disable prefetching (default: `true`)
+- `prefetch`: `false` disables prefetching; `true` requests the fullest supported prefetch; omitting it uses the router and Cache Components mode defaults
 - `replace`: Replace current history entry
 - `scroll`: Scroll to top on navigation (default: `true`)
 
@@ -120,7 +120,7 @@ export default function Page() {
 - `beforeInteractive`: Load before page becomes interactive
 - `afterInteractive`: Load after page becomes interactive (default)
 - `lazyOnload`: Load during idle time
-- `worker`: Load in a web worker
+- `worker`: Experimental, Pages Router-only worker loading; it does not yet work with App Router and requires `experimental.nextScriptWorkers`
 
 ```tsx
 <Script
@@ -220,7 +220,7 @@ export async function getUsers() {
 }
 ```
 
-Install with `npm install server-only`. Always use on modules that access databases, environment variables with secrets, or internal APIs.
+Install the `server-only` package if it is not already present. Use the guard on modules that access databases, private environment variables, or privileged internal APIs and might otherwise cross a Client Component boundary.
 
 ## Key Points
 
@@ -238,4 +238,5 @@ Source references:
 - https://nextjs.org/docs/app/api-reference/components/image
 - https://nextjs.org/docs/app/api-reference/components/script
 - https://nextjs.org/docs/app/api-reference/components/font
+- https://nextjs.org/docs/app/guides/scripts
 -->

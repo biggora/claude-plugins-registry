@@ -158,28 +158,39 @@ export default async function Page({
 }
 ```
 
-## Route Segment Config
+## Root Parameters in Next.js 16.3
 
-Control rendering behavior with route segment config:
-
-```tsx
-// Force dynamic rendering
-export const dynamic = 'force-dynamic'
-
-// Force static rendering
-export const dynamic = 'force-static'
-
-// Auto (default)
-export const dynamic = 'auto'
-```
+Use `next/root-params` only for dynamic segments that appear before a root layout. The generated getter is async and can be called from any Server Component or server-side utility under that root without prop drilling:
 
 ```tsx
-// Revalidate at intervals
-export const revalidate = 3600
+// app/[lang]/layout.tsx
+import { lang } from 'next/root-params'
 
-// Revalidate on-demand
-export const revalidate = false
+export default async function RootLayout(
+  props: LayoutProps<'/[lang]'>
+) {
+  return (
+    <html lang={await lang()}>
+      <body>{props.children}</body>
+    </html>
+  )
+}
 ```
+
+The getter name comes from the segment name, so root segment names must be valid JavaScript identifiers. Root parameter getters:
+
+- work in Server Components and normal server utilities;
+- work inside a `'use cache'` scope and participate in its cache key;
+- do not work in Client Components, Server Actions, Route Handlers, or `unstable_cache`;
+- may return `undefined` when the application has multiple root layouts and the parameter is absent from the current one.
+
+For segments below the root layout, continue using the async `params` prop.
+
+## Route Configuration Depends on Cache Components
+
+When `cacheComponents` is absent or disabled, route segment controls such as `dynamic`, `revalidate`, and `dynamicParams` remain available according to the installed version's docs.
+
+When `cacheComponents: true`, those exports are incompatible and can fail the build. Remove them and express the behavior with `'use cache'`, `cacheLife`, `<Suspense>`, and `notFound()`. Params not returned by `generateStaticParams` render on request; use `notFound()` when the resolved resource is invalid. See [cache-components](cache-components.mdx).
 
 ## Key Points
 
@@ -189,10 +200,13 @@ export const revalidate = false
 - `params` is a Promise in Next.js 15+ (use `await` or `use()`)
 - Use `generateStaticParams` to pre-render dynamic routes
 - Use `useParams` in Client Components to access params
-- Configure rendering with `dynamic` and `revalidate` exports
+- Use `next/root-params` only for root-level parameters in Server Components on Next.js 16.3+
+- Inspect `cacheComponents` before using any route segment caching configuration
 
 <!--
 Source references:
 - https://nextjs.org/docs/app/api-reference/file-conventions/dynamic-routes
 - https://nextjs.org/docs/app/api-reference/functions/generate-static-params
+- https://nextjs.org/docs/app/api-reference/functions/next-root-params
+- https://nextjs.org/docs/app/guides/migrating-to-cache-components
 -->

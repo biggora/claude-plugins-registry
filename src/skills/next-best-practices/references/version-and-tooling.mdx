@@ -1,0 +1,68 @@
+---
+name: version-and-tooling
+description: Version authority, stable Next.js 16.3 behavior, bundled docs, Turbopack defaults, and experimental feature boundaries
+---
+
+# Version and Tooling Authority
+
+## Resolve the Version Before the Pattern
+
+Read the installed `next` version from `package.json` and the lockfile. When dependencies are installed, prefer the version-matched documentation in `node_modules/next/dist/docs/` over remembered framework behavior or the latest website.
+
+Next.js 16.3 can create or maintain a managed block in root `AGENTS.md` and `CLAUDE.md` files when `next dev` detects a coding agent. Preserve project instructions outside the managed markers. Do not manually copy the entire current website docs into a repository.
+
+If local docs are unavailable, use official Markdown pages by appending `.md` to `https://nextjs.org/docs/...`. Use `/docs/llms.txt` to find the canonical page. Use canary docs only when the installed dependency is canary or the user explicitly requests canary work.
+
+## Stable Baseline
+
+This reference was checked against Next.js 16.3.3, the current stable release documented on August 25, 2026. Avoid hard-coding that patch into generated applications; install the newest patched release allowed by the project's constraints and lockfile policy.
+
+Changes in 16.3 that normally require no application code:
+
+- Turbopack memory eviction and filesystem caching for `next dev` are enabled by default.
+- Turbopack filesystem caching for `next build` is enabled by default. CI benefits only when `.next/cache` is restored between builds.
+- Small App Router prefetch responses are automatically bundled. Leave the default thresholds alone unless measurements or debugging justify an override.
+- App Router server rendering uses native Node.js streams for lower overhead.
+- The project-local TypeScript CLI is the default build checker and supports TypeScript 7 when the project installs it.
+
+Stable 16.3 APIs and behavior worth applying when the installed version supports them:
+
+- `catchError` and the `retry()` error-boundary prop are stable.
+- `next/root-params` exposes async getters for root-level dynamic segments in Server Components.
+- Turbopack supports Vite-compatible `import.meta.glob`; it is unavailable under webpack.
+- `cacheComponents` and the separate `partialPrefetching` opt-in support reusable route App Shells and instant-navigation tooling.
+
+## Do Not Confuse Defaults With Experimental Controls
+
+Some default behavior is stable even though its override lives under `experimental`:
+
+- Prefetch inlining is on by default. `experimental.prefetchInlining` only overrides or disables its thresholds and is experimental.
+- The project-local TypeScript CLI is on by default. `experimental.useTypeScriptCli` is an experimental override.
+- Turbopack filesystem cache defaults are on. Configure their experimental keys only to opt out or diagnose cache behavior.
+
+The following 16.3 features remain experimental and should not be enabled without task-specific intent and verification:
+
+- Rust-based React Compiler via `experimental.turbopackRustReactCompiler`
+- Offline retry behavior and `useOffline` via `experimental.useOffline`
+
+Record the experimental status in implementation notes and keep a rollback path for any enabled flag.
+
+## Runtime Verification for Agents
+
+Prefer the running framework's evidence:
+
+- Reuse an existing `next dev` process instead of starting a duplicate.
+- Read terminal-forwarded browser warnings and compilation errors.
+- When available, use the Next.js development MCP endpoint for routes, logs, and compilation issues.
+- Inspect the rendered route and browser console after edits.
+- Use `next build --debug-prerender` when a minified production prerender error lacks a useful source frame.
+
+<!--
+Source references:
+- https://nextjs.org/docs/app/guides/ai-agents
+- https://nextjs.org/blog/next-16-3
+- https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopackFileSystemCache
+- https://nextjs.org/docs/app/api-reference/config/next-config-js/prefetchInlining
+- https://nextjs.org/docs/app/api-reference/config/next-config-js/useTypeScriptCli
+- https://nextjs.org/docs/app/api-reference/turbopack
+-->

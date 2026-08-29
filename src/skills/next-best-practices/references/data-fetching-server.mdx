@@ -73,7 +73,7 @@ import { revalidateTag } from 'next/cache'
 
 export async function updatePost() {
   // Update post...
-  revalidateTag('posts')
+  revalidateTag('posts', 'max')
 }
 ```
 
