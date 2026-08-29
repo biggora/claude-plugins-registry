@@ -136,7 +136,7 @@ export const metadata: Metadata = {
 
 ## JSON-LD Structured Data
 
-Add JSON-LD structured data in page components. Note: this is safe because `JSON.stringify` produces valid JSON that cannot contain executable scripts:
+Add JSON-LD structured data in a `page.tsx` or `layout.tsx`. `JSON.stringify` does **not** sanitize attacker-controlled strings: a value containing `</script>` can break out of the script element. At minimum, replace `<` with its Unicode escape, and follow the project's stronger sanitization policy when one exists.
 
 ```tsx
 export default async function Page({
@@ -162,8 +162,9 @@ export default async function Page({
     <>
       <script
         type="application/ld+json"
-        // Safe: JSON.stringify output cannot contain script injection
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c'),
+        }}
       />
       <article>
         <h1>{post.title}</h1>
@@ -249,11 +250,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 - Export `viewport` separately from `metadata`
 - Title templates in layouts propagate to child pages
 - Use `robots.ts` and `sitemap.ts` file conventions for SEO files
-- Add JSON-LD structured data directly in page components using `JSON.stringify`
+- Sanitize JSON-LD before injecting it; `JSON.stringify` alone does not prevent script injection
 
 <!--
 Source references:
 - https://nextjs.org/docs/app/getting-started/metadata-and-og-images
 - https://nextjs.org/docs/app/api-reference/functions/generate-metadata
 - https://nextjs.org/docs/app/api-reference/file-conventions/metadata
+- https://nextjs.org/docs/app/guides/json-ld
 -->

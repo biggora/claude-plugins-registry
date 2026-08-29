@@ -16,11 +16,12 @@ Add the `"use server"` directive to mark a function as a Server Action:
 'use server'
 
 export async function createPost(formData: FormData) {
-  const title = formData.get('title')
-  const content = formData.get('content')
+  const session = await requireUser()
+  const input = parsePost(formData)
 
-  // Update database
-  await db.post.create({ data: { title, content } })
+  await db.post.create({
+    data: { ...input, authorId: session.user.id },
+  })
 
   // Revalidate cache
   revalidatePath('/posts')
@@ -57,6 +58,31 @@ export default function Page() {
 }
 ```
 
+## Treat Every Action as an Untrusted Entry Point
+
+A Server Action is reachable as a POST request by anyone who can reproduce the request. Hiding a button or gating the page render is not authorization. Inside every action:
+
+1. Authenticate the caller.
+2. Authorize the operation against the target resource.
+3. Validate `FormData` and every client-controlled argument.
+4. Re-read ownership and trusted fields from the server; do not accept a whole database record from the client.
+5. Return only the data the UI needs, because action results are serialized to the client.
+
+```ts
+'use server'
+
+export async function deletePost(postId: string) {
+  const session = await requireUser()
+  if (!(await canDeletePost(session.user.id, postId))) {
+    throw new Error('Forbidden')
+  }
+
+  await db.post.delete({ where: { id: postId } })
+}
+```
+
+Next.js supplies CSRF origin checks, action-body limits, action-ID encryption, and closure encryption, but those framework protections do not replace application-level authorization. Self-hosted multi-instance deployments must use a stable `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` shared by all instances.
+
 ## Using Server Actions in Forms
 
 Pass Server Actions to form `action` prop:
@@ -81,10 +107,12 @@ export function Form() {
 'use server'
 
 export async function createPost(formData: FormData) {
-  const title = formData.get('title') as string
-  const content = formData.get('content') as string
+  const session = await requireUser()
+  const input = parsePost(formData)
 
-  await db.post.create({ data: { title, content } })
+  await db.post.create({
+    data: { ...input, authorId: session.user.id },
+  })
   revalidatePath('/posts')
 }
 ```
@@ -99,9 +127,11 @@ Use `formAction` prop on buttons:
 import { deletePost } from './actions'
 
 export function DeleteButton({ id }: { id: string }) {
+  const deletePostWithId = deletePost.bind(null, id)
+
   return (
     <form>
-      <button formAction={() => deletePost(id)}>Delete</button>
+      <button formAction={deletePostWithId}>Delete</button>
     </form>
   )
 }
@@ -190,24 +220,28 @@ export function Post({ post }: { post: Post }) {
 
 ## Error Handling
 
-Handle errors in Server Actions:
+Model expected failures such as validation and rejected input as return values for `useActionState`. Reserve thrown errors for unexpected failures or authorization boundaries that should be handled by an error boundary.
 
 ```ts
 'use server'
 
-export async function createPost(formData: FormData) {
-  try {
-    const title = formData.get('title') as string
-    if (!title) {
-      return { error: 'Title is required' }
-    }
+export async function createPost(
+  _previousState: { error?: string },
+  formData: FormData
+) {
+  const session = await requireUser()
+  const title = formData.get('title')
 
-    await db.post.create({ data: { title } })
-    revalidatePath('/posts')
-    return { success: true }
-  } catch (error) {
-    return { error: 'Failed to create post' }
+  if (typeof title !== 'string' || title.trim() === '') {
+    return { error: 'Title is required' }
   }
+
+  await db.post.create({
+    data: { title, authorId: session.user.id },
+  })
+
+  revalidatePath('/posts')
+  return {}
 }
 ```
 
@@ -221,13 +255,17 @@ Use `redirect` to navigate after mutations:
 import { redirect } from 'next/navigation'
 
 export async function createPost(formData: FormData) {
+  const session = await requireUser()
+  const input = parsePost(formData)
   const post = await db.post.create({
-    data: { title: formData.get('title') as string },
+    data: { ...input, authorId: session.user.id },
   })
 
   redirect(`/posts/${post.id}`)
 }
 ```
+
+`redirect()` throws a framework control-flow exception. Call revalidation APIs before it and do not place it inside a broad `try`/`catch` that would swallow the redirect.
 
 ## Revalidating Cache
 
@@ -239,9 +277,15 @@ Revalidate cache after mutations:
 import { revalidatePath, revalidateTag } from 'next/cache'
 
 export async function updatePost(id: string, formData: FormData) {
+  const session = await requireUser()
+  if (!(await canEditPost(session.user.id, id))) {
+    throw new Error('Forbidden')
+  }
+
+  const input = parsePostUpdate(formData)
   await db.post.update({
     where: { id },
-    data: { title: formData.get('title') as string },
+    data: input,
   })
 
   // Revalidate specific path
@@ -255,6 +299,7 @@ export async function updatePost(id: string, formData: FormData) {
 ## Key Points
 
 - Server Actions are async functions with `"use server"` directive
+- Treat every action as an untrusted POST entry point; authenticate, authorize, and validate inside it
 - Can be used in forms (`action` prop) and buttons (`formAction` prop)
 - Can be invoked from event handlers in Client Components
 - Use `useActionState` for pending states
@@ -266,6 +311,8 @@ export async function updatePost(id: string, formData: FormData) {
 
 <!--
 Source references:
-- https://nextjs.org/docs/app/getting-started/updating-data
+- https://nextjs.org/docs/app/getting-started/mutating-data
+- https://nextjs.org/docs/app/guides/server-actions
+- https://nextjs.org/docs/app/guides/data-security
 - https://nextjs.org/docs/app/api-reference/directives/use-server
 -->

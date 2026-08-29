@@ -7,6 +7,8 @@ description: Caching strategies and revalidation in Next.js
 
 Next.js provides multiple APIs for caching and revalidating data: `fetch`, `cacheTag`, `revalidateTag`, `updateTag`, and `revalidatePath`.
 
+First inspect `next.config.*`. The fetch options and route segment examples below describe the model used when `cacheComponents` is absent or disabled. With `cacheComponents: true`, prefer `'use cache'`, `cacheLife`, `cacheTag`, and Suspense; route exports such as `dynamic`, `revalidate`, and `fetchCache` are incompatible. See [cache-components](cache-components.mdx).
+
 ## Fetch Caching
 
 By default, `fetch` requests are not cached, but Next.js pre-renders routes and caches the HTML.
@@ -88,11 +90,10 @@ import { updateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
 
 export async function createPost(formData: FormData) {
+  const session = await requireUser()
+  const input = parsePost(formData)
   const post = await db.post.create({
-    data: {
-      title: formData.get('title'),
-      content: formData.get('content'),
-    },
+    data: { ...input, authorId: session.user.id },
   })
 
   // Immediately expire cache so new post is visible
@@ -129,26 +130,9 @@ Revalidate all paths under a route:
 revalidatePath('/blog', 'layout') // Revalidate all /blog/* routes
 ```
 
-## Using unstable_cache (Legacy)
+## Legacy `unstable_cache`
 
-> **Note**: `unstable_cache` is experimental. Prefer Cache Components with `use cache` directive.
-
-Cache database queries and other async functions:
-
-```tsx
-import { unstable_cache } from 'next/cache'
-
-const getCachedUser = unstable_cache(
-  async (id: string) => {
-    return db.user.findUnique({ where: { id } })
-  },
-  [userId], // Cache key
-  {
-    tags: ['user'],
-    revalidate: 3600, // Revalidate after 1 hour
-  }
-)
-```
+Existing projects without Cache Components may still use `unstable_cache`; do not rewrite it incidentally. For new Cache Components code, use `'use cache'` and `cacheTag`. Root parameter getters from `next/root-params` cannot run inside `unstable_cache`.
 
 ## Cache Strategies
 
@@ -167,7 +151,7 @@ export default async function Page() {
 
 ### Dynamic Rendering
 
-Force dynamic rendering:
+When Cache Components is off, force dynamic rendering with a route segment export:
 
 ```tsx
 export const dynamic = 'force-dynamic'
@@ -182,7 +166,7 @@ export default async function Page() {
 
 ### Incremental Static Regeneration (ISR)
 
-Revalidate at intervals:
+When Cache Components is off, revalidate at intervals with a route segment export:
 
 ```tsx
 export const revalidate = 3600 // Revalidate every hour
@@ -192,6 +176,8 @@ export default async function Page() {
   return <div>{/* ... */}</div>
 }
 ```
+
+With Cache Components enabled, replace the route-level `revalidate` export with `'use cache'` and `cacheLife` at the relevant data or component scope. Dynamic routes omitted from `generateStaticParams` can serve an App Shell on first visit and upgrade to cached full content in the background.
 
 ## Key Points
 
@@ -203,6 +189,7 @@ export default async function Page() {
 - Use `updateTag` in Server Actions for immediate expiration
 - Use `revalidatePath` to revalidate specific routes
 - Prefer Cache Components over `unstable_cache`
+- Do not use route segment caching exports when `cacheComponents: true`
 
 <!--
 Source references:
@@ -211,4 +198,6 @@ Source references:
 - https://nextjs.org/docs/app/api-reference/functions/revalidateTag
 - https://nextjs.org/docs/app/api-reference/functions/updateTag
 - https://nextjs.org/docs/app/api-reference/functions/revalidatePath
+- https://nextjs.org/docs/app/guides/migrating-to-cache-components
+- https://nextjs.org/docs/app/guides/incremental-static-regeneration-cache-components
 -->

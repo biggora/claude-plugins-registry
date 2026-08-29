@@ -1,185 +1,127 @@
 ---
 name: core-navigation
-description: Navigation, linking, prefetching, and client-side transitions in Next.js
+description: Navigation, Link prefetching, App Shells, Partial Prefetching, and instant-navigation verification in Next.js 16.3
 ---
 
-# Navigation and Linking
+# Navigation and Prefetching
 
-Next.js provides optimized navigation with prefetching, streaming, and client-side transitions using the `<Link>` component.
+Use `<Link>` from `next/link` for ordinary internal navigation and `useRouter` from `next/navigation` for navigation triggered by non-link interactions. Do not replace a semantic link with a button plus `router.push()`.
 
-## Using the Link Component
+## Read the Configuration First
 
-Use Next.js `<Link>` component for client-side navigation:
+`<Link>` prefetch behavior depends on the project mode:
+
+| Mode | Default link behavior |
+|------|-----------------------|
+| Cache Components off | Static routes are fully prefetched. Dynamic routes are skipped or partially prefetched when a `loading.tsx` boundary exists. |
+| `cacheComponents: true` | The cached page render is prefetched. A legacy `prefetch={true}` may also request dynamic content. |
+| `cacheComponents: true`, `partialPrefetching: true` | Every link loads one reusable App Shell per route. URL-specific content streams after navigation unless a link intentionally uses `prefetch={true}`. |
+
+In Next.js 16.3, small prefetch responses are inlined automatically to reduce request count while large shared segments remain separately reusable. Do not add `experimental.prefetchInlining` unless measurements or debugging justify changing the default.
+
+## Partial Prefetching
+
+Partial Prefetching is separate from Cache Components and requires it:
+
+```ts
+import type { NextConfig } from 'next'
+
+const nextConfig: NextConfig = {
+  cacheComponents: true,
+  partialPrefetching: true,
+}
+
+export default nextConfig
+```
+
+The App Shell contains route output that does not depend on a link's URL. It is reused by links to different dynamic URLs for the same route. Reads of `params` and `searchParams` are URL-specific; place them in a child behind `<Suspense>` so the rest of the route can remain in the shell.
 
 ```tsx
-import Link from 'next/link'
+import { Suspense } from 'react'
 
-export default function Navigation() {
+export default function Page({ params }: PageProps<'/products/[slug]'>) {
   return (
-    <nav>
-      <Link href="/">Home</Link>
-      <Link href="/about">About</Link>
-      <Link href="/blog">Blog</Link>
-    </nav>
+    <ProductLayout>
+      <Suspense fallback={<DetailsSkeleton />}>
+        <ProductDetails params={params} />
+      </Suspense>
+    </ProductLayout>
   )
 }
-```
 
-## Prefetching
-
-Next.js automatically prefetches routes linked with `<Link>` when they enter the viewport:
-
-```tsx
-import Link from 'next/link'
-
-export default function Layout({ children }: { children: React.ReactNode }) {
-  return (
-    <nav>
-      {/* Automatically prefetched */}
-      <Link href="/blog">Blog</Link>
-      {/* Not prefetched */}
-      <a href="/contact">Contact</a>
-    </nav>
-  )
+async function ProductDetails({
+  params,
+}: Pick<PageProps<'/products/[slug]'>, 'params'>) {
+  const { slug } = await params
+  return <Details product={await getProduct(slug)} />
 }
 ```
 
-Prefetching behavior:
-- **Static routes**: Full route is prefetched
-- **Dynamic routes**: Prefetching is skipped or partial (if `loading.tsx` exists)
+Audit every existing `<Link prefetch={true}>` before enabling Partial Prefetching:
 
-## Disabling Prefetching
+- Remove it when the destination is static or already part of the App Shell.
+- Keep it when deliberately prefetching cached URL-specific content.
+- Remove it for real-time request data that would be stale by click time.
+- Keep `prefetch={false}` when prefetching is intentionally disabled.
 
-Disable prefetching for specific links:
+Per-link URL-data prefetching costs a server invocation for each prefetchable link. Use it selectively, not as a blanket performance fix.
 
-```tsx
-<Link href="/dashboard" prefetch={false}>
-  Dashboard
-</Link>
-```
+## Making Navigation Instant
 
-## Streaming with loading.tsx
+An instant route must have meaningful UI ready at click time. Provide that UI by:
 
-Create `loading.tsx` to enable streaming for dynamic routes:
+- caching stable work with `'use cache'`, or
+- moving request-time work behind `<Suspense>` with a useful fallback.
 
-```tsx
-// app/dashboard/loading.tsx
-export default function Loading() {
-  return <div>Loading dashboard...</div>
-}
-```
+With Cache Components enabled, development diagnostics offer three explicit trade-offs:
 
-This allows:
-- Immediate navigation feedback
-- Partial prefetching of layouts and loading states
-- Better Core Web Vitals (TTFB, FCP, TTI)
+- **stream** — add a Suspense boundary and show fallback UI immediately;
+- **cache** — cache the work when sharing or staleness is acceptable;
+- **block** — export `const instant = false` when the route is intentionally allowed to wait.
 
-## Client-Side Transitions
-
-`<Link>` performs client-side transitions:
-- No full page reload
-- Preserves React state
-- Updates URL without server roundtrip
-- Works with browser back/forward buttons
+`instant = false` is an adoption escape hatch, not a performance improvement and not a replacement for dynamic rendering configuration.
 
 ## Programmatic Navigation
-
-Use `useRouter` hook in Client Components:
 
 ```tsx
 'use client'
 
 import { useRouter } from 'next/navigation'
 
-export default function Button() {
+export function SaveButton() {
   const router = useRouter()
 
-  return (
-    <button onClick={() => router.push('/dashboard')}>
-      Go to Dashboard
-    </button>
-  )
+  return <button onClick={() => router.replace('/dashboard')}>Done</button>
 }
 ```
 
-Navigation methods:
-- `router.push(href)` - Navigate to route
-- `router.replace(href)` - Replace current route
-- `router.back()` - Go back
-- `router.forward()` - Go forward
-- `router.refresh()` - Refresh current route
+Available methods include `push`, `replace`, `back`, `forward`, `refresh`, and `prefetch`. Never pass untrusted or unsanitized URLs to `push` or `replace`; `javascript:` URLs execute in page context.
 
-## Dynamic Routes
+## Verification
 
-Link to dynamic routes:
+Prefetching is disabled in development, so a normal dev navigation does not prove the production shell is ready. Use the Next.js Navigation Inspector to pause at the shell, and use `instant()` from `@next/playwright` for a regression test when click-time UI matters:
 
-```tsx
-<Link href={`/blog/${post.slug}`}>
-  {post.title}
-</Link>
+```ts
+import { expect, test } from '@playwright/test'
+import { instant } from '@next/playwright'
+
+test('product shell is ready at click time', async ({ page }) => {
+  await page.goto('/products/shoes')
+
+  await instant(page, async () => {
+    await page.click('a[href="/products/hats"]')
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Hats')
+    await expect(page.getByText('Checking inventory...')).toBeVisible()
+  })
+})
 ```
-
-Or use template literals:
-
-```tsx
-<Link href={`/shop/${category}/${item}`}>
-  View Item
-</Link>
-```
-
-## Search Parameters
-
-Link with search parameters:
-
-```tsx
-<Link href="/search?q=nextjs&sort=date">
-  Search
-</Link>
-```
-
-Or use URL object:
-
-```tsx
-<Link
-  href={{
-    pathname: '/search',
-    query: { q: 'nextjs', sort: 'date' },
-  }}
->
-  Search
-</Link>
-```
-
-## Hash Links
-
-Link to hash fragments:
-
-```tsx
-<Link href="/about#team">About Team</Link>
-```
-
-## Scroll Behavior
-
-Control scroll behavior:
-
-```tsx
-<Link href="/about" scroll={false}>
-  About (no scroll)
-</Link>
-```
-
-## Key Points
-
-- Use `<Link>` for all internal navigation
-- Prefetching happens automatically for static routes
-- Use `loading.tsx` for better dynamic route navigation
-- Client-side transitions preserve state and are faster
-- `useRouter` provides programmatic navigation
-- Links support dynamic routes, search params, and hashes
 
 <!--
 Source references:
 - https://nextjs.org/docs/app/getting-started/linking-and-navigating
 - https://nextjs.org/docs/app/api-reference/components/link
-- https://nextjs.org/docs/app/api-reference/functions/use-router
+- https://nextjs.org/docs/app/api-reference/config/next-config-js/partialPrefetching
+- https://nextjs.org/docs/app/guides/adopting-partial-prefetching
+- https://nextjs.org/docs/app/guides/instant-navigation
+- https://nextjs.org/docs/app/api-reference/config/next-config-js/prefetchInlining
 -->

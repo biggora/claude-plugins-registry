@@ -1,102 +1,73 @@
 ---
 name: next-best-practices
-description: Next.js best practices for App Router, Server/Client Components, data fetching, caching, Server Actions, and performance optimization. Use this skill whenever working with Next.js applications — including routing, layouts, data fetching, forms, mutations, caching strategies, streaming, metadata/SEO, image/font optimization, or any React Server Component patterns. Also use when upgrading Next.js, debugging hydration errors, or deciding between server and client rendering. Even if the task seems simple, consult this skill to ensure modern Next.js 16 patterns are used instead of outdated approaches.
+description: Apply current Next.js App Router practices for routing, Server and Client Components, data access, caching, mutations, navigation, metadata, and performance. Use when implementing, reviewing, debugging, or upgrading a Next.js application. Inspect the installed Next.js version and Cache Components mode before choosing APIs; do not apply 16.3-only behavior to older projects.
 ---
 
 # Next.js Best Practices
 
-Modern Next.js (v16+) with App Router, React Server Components, and Cache Components. This skill ensures you use current APIs instead of deprecated patterns like `unstable_cache`, `getServerSideProps`, or `useFormState`.
+Use the project's installed Next.js version as the source of truth. This skill is baselined against the latest stable documentation for Next.js 16.3.3, but project-local, version-matched docs take precedence.
 
-## Critical Modern Patterns
+## Start With the Project's Mode
 
-These patterns differentiate production-quality Next.js code from outdated approaches. Prioritize them in every implementation:
+Before proposing code:
 
-| Pattern | What | Why it matters |
-|---------|------|---------------|
-| `'use cache'` directive | Cache any async computation (not just `fetch`) | Replaces `unstable_cache`. Enables PPR. |
-| `useActionState` | Form pending states + error handling | Replaces `useFormState`. React 19 standard. |
-| `useOptimistic` | Instant UI updates before server responds | Critical for perceived performance. |
-| `updateTag` | Immediate cache expiration in Server Actions | Read-your-own-writes. Use instead of `revalidateTag` after mutations the user should see immediately. |
-| `import 'server-only'` | Prevent accidental client import of server code | Protects secrets, reduces bundle. Always use on DB/auth modules. |
-| Async request APIs | `params`, `searchParams`, `cookies()`, `headers()` are all `Promise` in Next.js 15+ | Must `await` in server components, `use()` in client components. |
-| Proxy (formerly Middleware) | `middleware.ts` renamed: export `proxy()` function instead of `middleware()` | Next.js 16 rename. Same functionality, new name. |
+1. Read `package.json`, the lockfile, `next.config.*`, and the relevant `app/` or `pages/` files.
+2. If present, follow the Next.js-managed block in the repository's `AGENTS.md` and read the matching docs in `node_modules/next/dist/docs/`.
+3. Confirm whether `cacheComponents` and `partialPrefetching` are enabled. They materially change caching, prerendering, and `<Link>` behavior.
+4. Preserve the existing router. Do not migrate from Pages Router to App Router unless the task requests it.
+5. Treat canary and `experimental.*` features as opt-in. Do not enable them merely because they exist in the latest docs.
 
-## Core References
+For version detection, bundled docs, Turbopack defaults, and the stable-versus-experimental boundary in 16.3, read [version-and-tooling](references/version-and-tooling.mdx).
 
-Read these for foundational patterns. The routing and component model references are essential for any Next.js work.
+## Cache Components Mode Gate
 
-| Topic | When to read | Reference |
-|-------|-------------|-----------|
-| File-System Routing | Setting up routes, layouts, nested routes, route groups | [core-routing](references/core-routing.mdx) |
-| Server and Client Components | Deciding where to place `'use client'` boundaries, composing server + client | [core-server-client-components](references/core-server-client-components.mdx) |
-| Navigation | Links, prefetching, programmatic navigation, `useRouter` | [core-navigation](references/core-navigation.mdx) |
+| Mode | Correct model |
+|------|---------------|
+| `cacheComponents` absent or `false` | Existing route segment options such as `dynamic`, `revalidate`, and `fetchCache` remain valid. Apply the project's version-matched caching docs. |
+| `cacheComponents: true` | Data is dynamic by default. Use `<Suspense>` for request-time work and `'use cache'` plus `cacheLife`/`cacheTag` for cached work. Remove `dynamic`, `revalidate`, and `fetchCache`; they fail config validation in this mode. Cache Components requires the Node.js runtime. |
+| `cacheComponents: true`, `partialPrefetching: true` | Each route gets a reusable App Shell. URL-specific work using `params` or `searchParams` belongs behind `<Suspense>` unless a link intentionally prefetches it. Audit existing `<Link prefetch={true}>` calls before adopting. |
 
-## Data Fetching & Mutations
+Read [cache-components](references/cache-components.mdx) before changing caching mode and [core-navigation](references/core-navigation.mdx) before changing prefetch behavior.
 
-These references cover how to get data in and out of the application.
+## Current Decision Rules
 
-| Topic | When to read | Reference |
-|-------|-------------|-----------|
-| Server Data Fetching | Fetching in Server Components with `fetch`, ORMs, databases | [data-fetching-server](references/data-fetching-server.mdx) |
-| Client Data Fetching | `use` hook, SWR, React Query, streaming promises to client | [data-fetching-client](references/data-fetching-client.mdx) |
-| Server Actions | Forms, mutations, `useActionState`, `useOptimistic`, `updateTag`, redirects | [server-actions](references/server-actions.mdx) |
-| Streaming | `loading.tsx`, `<Suspense>`, parallel/sequential streaming, preloading | [data-streaming](references/data-streaming.mdx) |
+- Prefer Server Components. Add `'use client'` only at the smallest boundary that needs state, effects, event handlers, or browser APIs.
+- Keep secrets and privileged data access in server-only modules. Server Actions are reachable POST entry points: authenticate, authorize, and validate inside every action.
+- Await `params`, `searchParams`, `cookies()`, and `headers()` in Server Components. In Client Components, unwrap promise props with React `use()` where appropriate.
+- Use `useActionState` for action results and pending state, and `useOptimistic` for reversible optimistic UI.
+- Use `updateTag` in a Server Action for read-your-own-writes. Use `revalidateTag(tag, 'max')` for stale-while-revalidate.
+- In 16.3, prefer `retry()` in `error.tsx`; use stable `catchError` from `next/error` for component-level boundaries. Use `reset()` only when re-fetching Server Component output is intentionally unnecessary.
+- Use `next/root-params` only for parameters above a root layout and only from Server Components. Continue using the async `params` prop for ordinary dynamic segments.
+- Do not tune defaults without evidence. Next.js 16.3 already enables small prefetch-response inlining, Turbopack build caching, dev caching, and memory eviction.
 
-## Caching & Revalidation
+## References
 
-Modern Next.js has a layered caching system. Read these when implementing any caching strategy.
+Read only the references relevant to the task.
 
-| Topic | When to read | Reference |
-|-------|-------------|-----------|
-| Caching Strategies | `fetch` caching, `revalidateTag`, `updateTag`, `revalidatePath`, ISR | [caching-revalidation](references/caching-revalidation.mdx) |
-| Cache Components & PPR | `'use cache'` directive, `cacheLife`, `cacheTag`, `'use cache: remote/private'`, `connection()`, `cacheComponents` config | [cache-components](references/cache-components.mdx) |
+| Topic | Reference |
+|-------|-----------|
+| Version authority, 16.3 changes, Turbopack, TypeScript 7 | [version-and-tooling](references/version-and-tooling.mdx) |
+| Routes, layouts, and route groups | [core-routing](references/core-routing.mdx) |
+| Server and Client Component boundaries | [core-server-client-components](references/core-server-client-components.mdx) |
+| Links, App Shells, Partial Prefetching, instant navigation | [core-navigation](references/core-navigation.mdx) |
+| Server-side data fetching | [data-fetching-server](references/data-fetching-server.mdx) |
+| Client-side data fetching | [data-fetching-client](references/data-fetching-client.mdx) |
+| Suspense and streaming | [data-streaming](references/data-streaming.mdx) |
+| Server Actions, forms, validation, optimistic UI | [server-actions](references/server-actions.mdx) |
+| Revalidation APIs and legacy caching mode | [caching-revalidation](references/caching-revalidation.mdx) |
+| Cache Components, `'use cache'`, cache variants, PPR | [cache-components](references/cache-components.mdx) |
+| Dynamic segments, `generateStaticParams`, root params | [file-conventions-dynamic-routes](references/file-conventions-dynamic-routes.mdx) |
+| Loading, route errors, `catchError`, not found | [file-conventions-loading-error](references/file-conventions-loading-error.mdx) |
+| Metadata, Open Graph, JSON-LD, sitemap | [metadata-seo](references/metadata-seo.mdx) |
+| Link, Image, Script, Font, Form, server-only | [api-components](references/api-components.mdx) |
 
-## File Conventions & Metadata
+## Verification
 
-| Topic | When to read | Reference |
-|-------|-------------|-----------|
-| Dynamic Routes | `[slug]`, `[...slug]`, `[[...slug]]`, `generateStaticParams`, async params | [file-conventions-dynamic-routes](references/file-conventions-dynamic-routes.mdx) |
-| Loading, Error, Not Found | `loading.tsx`, `error.tsx`, `not-found.tsx`, `global-error.tsx` | [file-conventions-loading-error](references/file-conventions-loading-error.mdx) |
-| Metadata & SEO | `generateMetadata`, static metadata, `viewport`, Open Graph, JSON-LD | [metadata-seo](references/metadata-seo.mdx) |
+Use the project's package manager and existing scripts. In proportion to the change:
 
-## Built-in Components & Optimization
+1. Run the narrow test or type check first.
+2. Read `next dev` or `next build` diagnostics; Cache Components errors offer distinct stream, cache, or block fixes with different trade-offs.
+3. Exercise the affected route in a real browser. Verify loading, error, navigation, and mutation states, not only compilation.
+4. For instant-navigation work, validate the intended click-time UI in development and add an `instant()` Playwright regression test when the project already uses the 16.3 tooling.
 
-| Topic | When to read | Reference |
-|-------|-------------|-----------|
-| Link, Image, Script, Font, Form | `next/link`, `next/image`, `next/script`, `next/font`, `next/form`, `server-only` | [api-components](references/api-components.mdx) |
-
-## Common Gotchas
-
-- **All request APIs are async in Next.js 15+**: `params`, `searchParams`, `cookies()`, `headers()` all return Promises. Always `await` them. Using them synchronously will throw.
-- **Middleware → Proxy**: In Next.js 16, `middleware.ts` exports `proxy()` instead of `middleware()`. The `config.matcher` pattern stays the same.
-- **`unstable_cache` is deprecated**: Use `'use cache'` + `cacheTag` instead. See [cache-components](references/cache-components.mdx).
-- **`useFormState` is deprecated**: Use `useActionState` from `react` (not `react-dom`).
-- **`revalidateTag(tag)` without profile**: Legacy immediate expiration. Use `revalidateTag(tag, 'max')` for stale-while-revalidate, or `updateTag(tag)` for read-your-own-writes.
-
-## Decision Guide
-
-Use this to quickly decide which pattern fits your use case:
-
-**Data fetching:**
-- Need data on the server? → Server Component with `async/await` (read [data-fetching-server](references/data-fetching-server.mdx))
-- Need data on the client with interactivity? → `use` hook or SWR/React Query (read [data-fetching-client](references/data-fetching-client.mdx))
-- Need to cache a DB query or computation? → `'use cache'` + `cacheTag` (read [cache-components](references/cache-components.mdx))
-
-**Mutations:**
-- Simple form submission? → Server Action with `action={...}` prop
-- Form with pending/error states? → `useActionState` + Server Action
-- Need instant UI feedback? → `useOptimistic` + `useTransition`
-- User must see their own write immediately? → `updateTag` (not `revalidateTag`)
-- Background revalidation OK? → `revalidateTag(tag, 'max')` (stale-while-revalidate)
-
-**Caching:**
-- Cache a `fetch` call? → `next: { tags: ['...'] }` or `cache: 'force-cache'`
-- Cache a DB query / computation? → `'use cache'` + `cacheTag('...')`
-- Per-user cached data? → `'use cache: private'`
-- Shared runtime cache (not build-time)? → `'use cache: remote'`
-- Need PPR (partial prerendering)? → `cacheComponents: true` in next.config.js
-
-**Components:**
-- Needs state, effects, or browser APIs? → Client Component (`'use client'`)
-- Everything else? → Server Component (default, no directive needed)
-- Want to keep server component inside client boundary? → Pass as `children` prop
+Do not report a navigation as instant from code inspection alone: prefetching is disabled in development and the production loading shell must be inspected or tested explicitly.
