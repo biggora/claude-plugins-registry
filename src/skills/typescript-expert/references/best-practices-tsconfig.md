@@ -1,242 +1,188 @@
-# tsconfig.json Configuration
+# TypeScript Project Configuration
 
-## Recommended Base Configuration
+There is no universal “strict tsconfig”. Start from the runtime, module loader or bundler, whether TypeScript emits files, and whether the project publishes declarations. Preserve framework-generated settings and inspect every `extends` layer.
 
-```jsonc
-{
-  "compilerOptions": {
-    // Type Checking — always enable strict
-    "strict": true,
-    "noUncheckedIndexedAccess": true,
-    "noFallthroughCasesInSwitch": true,
-    "forceConsistentCasingInFileNames": true,
+## Inspect the Effective Configuration
 
-    // Modules
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "verbatimModuleSyntax": true,
+Use the project's local compiler and configuration path:
 
-    // Emit
-    "target": "ES2022",
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "outDir": "./dist",
-
-    // Interop
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "skipLibCheck": true
-  },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist"]
-}
+```bash
+npm exec -- tsc --version
+npm exec -- tsc --showConfig -p tsconfig.json
 ```
 
-## What `strict` Enables
+Adapt the invocation to the detected package manager. `--showConfig` is useful for inherited options, but it does not explain framework-specific transforms or an alternative checker such as `vue-tsc`.
 
-`"strict": true` is a shorthand for all of these:
+Check together:
 
-| Flag | What it does | Why it matters |
-|------|-------------|----------------|
-| `strictNullChecks` | `null`/`undefined` not assignable to other types | Prevents null reference errors |
-| `noImplicitAny` | Error on inferred `any` | Prevents silent type safety holes |
-| `strictFunctionTypes` | Strict function parameter checking | Catches unsound function assignments |
-| `strictBindCallApply` | Type-check `bind`, `call`, `apply` | Prevents runtime argument mismatches |
-| `strictPropertyInitialization` | Class properties must be initialized | Prevents undefined property access |
-| `noImplicitThis` | Error on `this` with implicit `any` type | Prevents `this` context bugs |
-| `alwaysStrict` | Emits `"use strict"` | JavaScript strict mode |
-| `useUnknownInCatchVariables` | `catch(e)` gives `e: unknown` not `any` | Forces error type checking |
-| `exactOptionalPropertyTypes` | `?:` means "may be missing", not "may be undefined" | More precise optional semantics |
+- the exact TypeScript/checker version;
+- `files`, `include`, `exclude`, references, and inferred `rootDir`;
+- runtime and package `type`;
+- `module`, `moduleResolution`, `target`, and `lib`;
+- `noEmit` versus JavaScript/declaration emit;
+- the bundler, test runner, framework plugin, and path-alias implementation.
 
-## Module Resolution Strategies
+## Choose Module Settings by Runtime
 
-### `"moduleResolution": "bundler"` (Recommended for apps)
+| Runtime/toolchain | Typical starting point | Important constraint |
+|---|---|---|
+| Bundled app | `module: "preserve"`, `moduleResolution: "bundler"`, `noEmit: true` | Bundler owns resolution and emit |
+| Direct Node.js | `module: "nodenext"` | Relative ESM imports and package `type` follow Node rules |
+| Node.js 20 pinned semantics | `module: "node20"` (TS 5.9+) | Stable model; unlike `nodenext`, it does not float |
+| Declaration-emitting library | Match consumers; often `nodenext` | Validate emitted `.d.ts` and package exports |
+| Runtime type stripping | Runtime-specific settings plus `erasableSyntaxOnly` | TypeScript syntax must not require transformation |
 
-Use when a bundler (Vite, webpack, esbuild, Turbopack) handles module resolution. Supports:
-- Extensionless imports (`import "./utils"` resolves to `./utils.ts`)
-- `package.json` `exports` field
-- Conditional `imports`
+Do not pair `moduleResolution: "bundler"` with direct Node execution just to make extensionless imports pass. Do not copy `module` and `moduleResolution` independently from unrelated templates.
 
-### `"moduleResolution": "node16"` / `"nodenext"` (For libraries/Node.js)
+## Example Starting Points
 
-Use when targeting Node.js directly or publishing a library. Requires:
-- File extensions in relative imports (`import "./utils.js"`)
-- `.mts`/`.cts` for ESM/CJS files
-- Correct `package.json` `type` and `exports`
+These are decision examples, not drop-in replacements.
 
-### `"moduleResolution": "node"` (Legacy)
-
-The old Node.js resolution. Doesn't understand `exports` or conditional imports. Avoid for new projects.
-
-## `verbatimModuleSyntax` (TS 5.0+)
-
-Replaces the older `importsNotUsedAsValues` and `preserveValueImports`. Forces you to be explicit about type-only imports:
-
-```typescript
-// With verbatimModuleSyntax: true
-import type { User } from "./types";  // Erased at runtime
-import { processUser } from "./utils"; // Kept at runtime
-
-// Mixed import — type and value from same module
-import { type User, processUser } from "./module";
-```
-
-This prevents accidentally including type-only imports in your runtime bundle.
-
-## Common Configurations by Project Type
-
-### Next.js App
-
-```jsonc
-{
-  "compilerOptions": {
-    "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "jsx": "preserve",
-    "strict": true,
-    "noEmit": true,
-    "incremental": true,
-    "plugins": [{ "name": "next" }],
-    "paths": { "@/*": ["./src/*"] }
-  },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules"]
-}
-```
-
-### Node.js Library (ESM)
+### Bundled application
 
 ```jsonc
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "nodenext",
-    "strict": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "outDir": "./dist",
-    "rootDir": "./src"
-  },
-  "include": ["src"]
-}
-```
-
-### React SPA (Vite)
-
-```jsonc
-{
-  "compilerOptions": {
-    "target": "ES2020",
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "preserve",
     "moduleResolution": "bundler",
     "jsx": "react-jsx",
-    "strict": true,
     "noEmit": true,
-    "skipLibCheck": true
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true
   },
   "include": ["src"]
 }
 ```
 
-### NestJS Backend
+Choose `target` and `lib` from deployed browsers/runtimes, not from the newest TypeScript release.
+
+### Node.js ESM library
 
 ```jsonc
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "declaration": true,
-    "removeComments": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "target": "ES2021",
-    "sourceMap": true,
-    "outDir": "./dist",
-    "baseUrl": "./",
-    "incremental": true,
+    "target": "ES2022",
+    "module": "nodenext",
     "strict": true,
-    "strictNullChecks": true,
-    "noImplicitAny": true,
-    "strictBindCallApply": true,
-    "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": true
+    "verbatimModuleSyntax": true,
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true
+  },
+  "include": ["src"]
+}
+```
+
+Also inspect `package.json#type`, `exports`, file extensions, and a representative consumer. Source compilation alone cannot prove that a published package resolves correctly.
+
+### Runtime type stripping
+
+```jsonc
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "nodenext",
+    "noEmit": true,
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true,
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true
   }
 }
 ```
 
-## Path Aliases
+Confirm the runtime's actual type-stripping and module support. `erasableSyntaxOnly` rejects enums, namespaces with runtime values, parameter properties, and other syntax requiring transformation.
+
+## Strictness
+
+Keep `strict: true` explicit in shared configurations even though TypeScript 6 and 7 default it to true. Explicit configuration avoids behavior changing when a different compiler line or tool reads the project.
+
+`strict` enables the strict-mode family, including `strictNullChecks`, `noImplicitAny`, `strictFunctionTypes`, `strictBindCallApply`, `strictPropertyInitialization`, `noImplicitThis`, and `useUnknownInCatchVariables`.
+
+These useful checks are separate and must be evaluated deliberately:
+
+- `noUncheckedIndexedAccess`
+- `exactOptionalPropertyTypes`
+- `noPropertyAccessFromIndexSignature`
+- `noImplicitReturns`
+- `noFallthroughCasesInSwitch`
+- `noUncheckedSideEffectImports`
+
+Do not claim `exactOptionalPropertyTypes` is part of `strict`. Enable stricter flags separately, understand the new errors, and migrate without masking them with assertions.
+
+## TypeScript 6 and 7 Configuration Changes
+
+TypeScript 6 changed important defaults: `strict`, `module`, `target`, `noUncheckedSideEffectImports`, `rootDir`, and `types`. TypeScript 7 adopts those defaults and removes deprecated behavior.
+
+Before moving to 7:
+
+- add an explicit `rootDir` when output layout depends on it;
+- list required ambient packages in `types` instead of relying on every visible `@types` package;
+- replace `moduleResolution: "node"`/`"node10"` or `"classic"` with `nodenext` or `bundler` according to the runtime;
+- remove `baseUrl` and make `paths` targets relative to the tsconfig;
+- replace legacy module outputs and `outFile`;
+- do not disable `esModuleInterop`, `allowSyntheticDefaultImports`, or strict-mode semantics;
+- move off an ES5 target.
+
+Read [modern TypeScript releases](modern-typescript-releases.md) for the full migration boundary, including TypeScript 7's lack of a stable programmatic API.
+
+## Path Mapping and Import Rewriting
+
+`paths` changes TypeScript's resolution; it does not rewrite emitted JavaScript or teach the runtime/bundler the alias.
 
 ```jsonc
 {
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@components/*": ["./src/components/*"],
       "@utils/*": ["./src/utils/*"]
     }
   }
 }
 ```
 
-Note: Path aliases require bundler support (Vite, webpack) or a runtime resolver (`tsconfig-paths`). TypeScript only resolves types — it doesn't rewrite paths in emitted JS.
+TypeScript 6 deprecates `baseUrl`; it is no longer needed for `paths`. Configure the same aliases in the runtime/bundler or use package `imports` where appropriate.
 
-## Project References (Monorepos)
+`rewriteRelativeImportExtensions` is narrower: it rewrites explicit relative TypeScript extensions during emit. It does not rewrite aliases, package names, extensionless imports, or arbitrary dynamic-import expressions.
 
-For monorepos with multiple packages:
+## File Selection and Project References
+
+For monorepos, keep a solution config with references and build with the existing `tsc --build` command:
 
 ```jsonc
-// Root tsconfig.json
 {
   "files": [],
   "references": [
     { "path": "./packages/core" },
-    { "path": "./packages/api" },
-    { "path": "./packages/web" }
+    { "path": "./packages/api" }
   ]
-}
-
-// packages/core/tsconfig.json
-{
-  "compilerOptions": {
-    "composite": true,
-    "outDir": "./dist",
-    "rootDir": "./src"
-  },
-  "include": ["src"]
-}
-
-// packages/api/tsconfig.json
-{
-  "compilerOptions": {
-    "composite": true,
-    "outDir": "./dist",
-    "rootDir": "./src"
-  },
-  "references": [{ "path": "../core" }],
-  "include": ["src"]
 }
 ```
 
-Build with `tsc --build` for incremental compilation across packages.
+Each referenced project that emits should normally own an explicit `rootDir`, `outDir`, and `composite: true`. Do not add a broad `**/*` include that pulls generated files, tests, or sibling packages into the wrong project.
 
-## Key Flags Reference
+## Performance Flags Are Trade-offs
 
-| Flag | Purpose | Recommended |
-|------|---------|-------------|
-| `strict` | All strict checks | Always `true` |
-| `noUncheckedIndexedAccess` | Index access returns `T \| undefined` | `true` for safety |
-| `noEmit` | Don't emit JS (use external compiler) | `true` with bundlers |
-| `skipLibCheck` | Skip type-checking `.d.ts` files | `true` (faster builds) |
-| `isolatedModules` | Ensure each file can be transpiled alone | `true` (required by most bundlers) |
-| `incremental` | Cache type-check results | `true` for faster rebuilds |
-| `composite` | Enable project references | Required for monorepos |
-| `declaration` | Emit `.d.ts` files | `true` for libraries |
-| `erasableSyntaxOnly` | Only erasable TS syntax (5.8+) | `true` for Node `--strip-types` |
+- `incremental` and project references can reduce repeated work, but verify cache paths and CI behavior.
+- `skipLibCheck` skips checking declaration-file internals; it can improve speed but may hide duplicate or incompatible library declarations. Use it as an explicit trade-off, not a universal default.
+- `isolatedModules` checks compatibility with per-file transforms; it does not perform isolated transpilation itself.
+- `noEmit` is correct only when another tool owns emit or the task is type-check-only.
+- TypeScript 7 parallelism controls are experimental. Measure before changing `checkers`, `builders`, or `singleThreaded`.
+
+## Validation Matrix
+
+| Project | Required evidence |
+|---|---|
+| App with bundler | Existing type-check, production build, tests |
+| Direct Node app | Type-check/build plus start or focused runtime smoke test |
+| Library | Build, declaration emit, package exports, representative consumer |
+| Composite monorepo | Root build and affected package checks |
+| Framework/embedded language | Framework checker; plain `tsc` is not an equivalent substitute |
+| Version upgrade | Baseline comparison, release-note migration, all checks above |

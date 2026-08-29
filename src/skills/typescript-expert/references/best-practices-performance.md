@@ -1,6 +1,6 @@
 # Type-Level Performance
 
-When TypeScript becomes slow, it's usually because complex types cause the compiler to do excessive work. This guide covers how to diagnose and fix type-level performance issues.
+TypeScript performance can be dominated by the file graph, module resolution, declaration libraries, project layout, plugins, emit, or complex types. Measure the actual command before changing types or compiler flags.
 
 ## Diagnosing Slow Types
 
@@ -22,6 +22,12 @@ The trace output can be loaded in Chrome DevTools (Performance tab) or `@typescr
 ```bash
 npx @typescript/analyze-trace ./trace-output
 ```
+
+Record the TypeScript/checker version and compare the same command under the same cold/warm-cache conditions. A framework checker and plain `tsc` are not interchangeable benchmarks.
+
+### TypeScript 7
+
+TypeScript 7 parallelizes parsing, checking, and emit and has a rebuilt watch implementation. It also exposes experimental `--checkers` and `--builders` tuning plus `--singleThreaded` for debugging or constrained environments. Keep defaults until repository measurements identify a specific bottleneck; experimental controls are not generic speed-up switches.
 
 ### Common Symptoms
 
@@ -96,9 +102,9 @@ type Reverse<T extends any[], Acc extends any[] = []> =
     : Acc;
 ```
 
-### 4. Use `skipLibCheck: true`
+### 4. Evaluate `skipLibCheck`
 
-Skip type-checking `.d.ts` files from `node_modules`. This dramatically speeds up compilation:
+`skipLibCheck` skips checking declaration-file internals and can reduce work in dependency-heavy projects:
 
 ```jsonc
 {
@@ -107,6 +113,8 @@ Skip type-checking `.d.ts` files from `node_modules`. This dramatically speeds u
   }
 }
 ```
+
+It can also hide duplicate or incompatible library declarations. Measure its benefit and document the trade-off; do not enable it solely to make dependency diagnostics disappear.
 
 ### 5. Use Project References for Monorepos
 
@@ -163,22 +171,22 @@ type AsyncMethods<T> = {
 
 ## When to Give Up on Types
 
-Sometimes the cost of perfect types outweighs the benefit:
+Sometimes the cost of a perfectly computed type outweighs its benefit:
 
-1. **Cast at the boundary**: Type complex external data at the edges and trust it internally
-2. **Use `as` strategically**: A well-placed assertion is better than a deep recursive type
-3. **Simplify to branded strings/numbers**: When template literal types create too many members
-4. **Use `// @ts-expect-error`**: For known type system limitations (with a comment explaining why)
+1. Validate external data at the boundary, then expose a simpler validated type internally.
+2. Replace combinatorial template-literal or recursive types with a documented branded type and runtime constructor.
+3. Use overloads for a small finite API instead of a deferred conditional return type.
+4. If an assertion is unavoidable, keep it at one proved boundary; do not spread `any` through the API.
 
-The goal is to catch real bugs, not to prove theorems. If a type takes 500ms to check and catches a bug once a year, simplify it.
+The goal is to catch real bugs with maintainable diagnostics, not to encode every runtime computation in the type system.
 
 ## Quick Performance Checklist
 
 - [ ] `strict: true` (catches bugs without complex types)
-- [ ] `skipLibCheck: true` (skip `.d.ts` checking)
-- [ ] `incremental: true` (cache between builds)
+- [ ] `skipLibCheck` measured and its diagnostic trade-off accepted
+- [ ] `incremental` or project references measured with correct cache handling
 - [ ] Interfaces over intersections for object types
-- [ ] Union types under ~50 members
+- [ ] Large generated unions and cross-products avoided
 - [ ] Recursive types use accumulator pattern
 - [ ] No deeply nested conditional types in generic functions
 - [ ] Project references for monorepos

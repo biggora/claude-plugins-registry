@@ -126,21 +126,21 @@ type Handlers = EventHandlers<Component>;
 ### Conditional Return Types
 
 ```typescript
-// Function overload via conditional types
-function process<T extends string | number>(
-  value: T
-): T extends string ? string[] : number {
+// Prefer overloads when the call surface has a small finite set of cases.
+function process(value: string): string[];
+function process(value: number): number;
+function process(value: string | number): string[] | number {
   if (typeof value === "string") {
-    return value.split("") as any;
+    return value.split("");
   }
-  return (value * 2) as any;
+  return value * 2;
 }
 
 const a = process("hello");  // string[]
 const b = process(42);        // number
 ```
 
-Note: Conditional return types often require `as any` inside the implementation because TypeScript can't narrow generic types. This is one of the few legitimate uses of `as any`.
+An unresolved generic conditional type is not narrowed just because its runtime value was narrowed. Do not respond with `as any` by default. For finite cases use overloads; for a genuinely generic relationship, keep any unavoidable assertion narrow and document the runtime invariant that makes it sound.
 
 ### Type-Level Assertions
 
@@ -185,6 +185,6 @@ type MyReturnType<T extends (...args: any) => any> =
    type X = Test<any>;  // "yes" | "no"
    ```
 
-3. **Depth limits**: TypeScript has a recursion depth limit (~50 levels). Deep recursive types may hit it.
+3. **Depth limits**: Deep or expanding recursive types can hit TypeScript's instantiation limits. The practical limit depends on the type's shape and compiler version, so do not rely on a fixed depth.
 
 4. **Assignability of conditional types**: TypeScript often can't resolve conditional types involving unresolved generics. Inside a generic function, `T extends X ? A : B` remains unresolved.

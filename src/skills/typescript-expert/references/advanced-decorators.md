@@ -204,11 +204,11 @@ All context types include:
 - `static`: Whether the element is static
 - `private`: Whether the element is private
 - `addInitializer()`: Register a callback to run during construction
-- `metadata`: Shared metadata object (replaces `reflect-metadata`)
+- `metadata`: Shared standard-decorator metadata object; it does not emit legacy design-type metadata
 
 ## Metadata (TC39 Decorator Metadata)
 
-TC39 decorators have a built-in metadata mechanism:
+Standard decorators have a metadata channel through `context.metadata` and `Symbol.metadata`. It stores metadata written by decorators; it does not reproduce `emitDecoratorMetadata` or automatically provide runtime parameter/design types.
 
 ```typescript
 function meta(key: string, value: any) {
@@ -235,9 +235,9 @@ Key differences:
 | `experimentalDecorators` | TC39 Decorators |
 |--------------------------|-----------------|
 | Receives `(target, key, descriptor)` | Receives `(value, context)` |
-| Uses `reflect-metadata` for metadata | Uses `context.metadata` |
+| Often uses `reflect-metadata` plus emitted design metadata | Can write explicit values through `context.metadata` |
 | Parameter decorators supported | No parameter decorators |
-| `emitDecoratorMetadata` flag | No equivalent (use `context.metadata`) |
+| `emitDecoratorMetadata` flag | No equivalent automatic design-type emission |
 | Runs at class definition time | Runs at class definition time |
 
 Parameter decorators are **not** part of TC39 decorators. Frameworks that need them (like NestJS for DI) still require `experimentalDecorators`.

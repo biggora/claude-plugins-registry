@@ -1,65 +1,74 @@
 ---
-description: Run TypeScript type-checking and resolve all errors using the typescript-expert skill
+description: Run the project's TypeScript checker, diagnose root causes, apply minimal type-safe fixes, and verify with the same command
 allowed-tools: ["Read", "Edit", "Write", "Glob", "Grep", "Bash"]
 ---
 
-You are a TypeScript expert with deep expertise in advanced typing patterns, modern JavaScript (ES6+), and enterprise-grade development practices. You specialize in building reliable, maintainable, and performant TypeScript solutions for complex business problems, with a solid understanding of JavaScript fundamentals and code quality tools.
+Use the `typescript-expert` skill. Preserve the user's scope and the project's runtime behavior.
 
-Use the `typescript-expert` skill for reference when resolving complex type issues — it covers generics, conditional types, mapped types, utility types, type guards, discriminated unions, and TypeScript 5.x features.
+## 1. Discover the Actual Checker
 
-## Step 1: Detect the Project Setup
+Inspect:
 
-Read `package.json` to determine:
-- The package manager in use (`npm`, `pnpm`, `yarn`, or `bun`) — check for lock files (`pnpm-lock.yaml`, `yarn.lock`, `bun.lockb`, `package-lock.json`)
-- Whether a `typecheck` script exists in `scripts` (e.g., `"typecheck": "tsc --noEmit"`)
-- The TypeScript version installed
-- Any relevant type-checking plugins (e.g., `vue-tsc`, `astro check`)
+- `package.json`, workspaces, and the lockfile to identify the package manager;
+- all relevant `tsconfig*.json` files and their `extends` chains;
+- the installed TypeScript version;
+- existing `typecheck`/build scripts and framework checkers such as `vue-tsc`, `svelte-check`, Angular, Astro, or MDX tooling;
+- the current working-tree diff so unrelated user changes are preserved.
 
-Read `tsconfig.json` (and any extended configs like `tsconfig.app.json`) to understand:
-- The `strict` settings in effect
-- The `include`/`exclude` paths
-- Module resolution strategy
-- Any path aliases
+If TypeScript 7 is installed or proposed, check whether the toolchain imports the Compiler API or requires the TypeScript 6 compatibility line. Do not upgrade dependencies unless the user requested an upgrade.
 
-## Step 2: Run Type-Checking
+## 2. Establish the Baseline
 
-Run the appropriate command based on what you found:
+Run the repository's existing type-check script. If none exists, invoke the local compiler through the detected package manager; do not use a command that can silently download a different TypeScript version.
 
-1. **If a `typecheck` script exists**: `npm run typecheck` / `pnpm run typecheck` / `yarn typecheck`
-2. **If no script but `tsc` is available**: `npx tsc --noEmit`
-3. **For monorepos**: Check if there's a root-level typecheck or per-package scripts
+Examples:
 
-Capture the full output. If there are no errors, report success and stop.
+```bash
+npm exec -- tsc --noEmit
+pnpm exec tsc --noEmit
+yarn exec tsc --noEmit
+bun run tsc --noEmit
+```
 
-## Step 3: Analyze and Categorize Errors
+Do not force `--noEmit` when the project validates declarations, uses project references/build mode, or relies on emit. Capture the command, compiler/checker version, exit code, and complete diagnostics.
 
-Group errors by category before fixing:
+If the baseline is clean, report it and stop. If the command cannot run for an environmental reason, report `BLOCKED` rather than editing from guessed diagnostics.
 
-- **Missing types**: `Cannot find module` or `Could not find a declaration file` — need `@types/*` packages or declaration files
-- **Strict null violations**: `Object is possibly 'null' or 'undefined'` — need null checks or non-null assertions
-- **Type mismatches**: `Type 'X' is not assignable to type 'Y'` — need type corrections, guards, or generics
-- **Missing properties**: `Property 'X' does not exist on type 'Y'` — need interface extensions or type narrowing
-- **Import issues**: `Module has no exported member` — need import corrections or type augmentation
-- **Generic constraints**: `Type 'T' does not satisfy the constraint` — need constraint adjustments
+## 3. Find Root Causes
 
-## Step 4: Fix Errors Systematically
+Group related diagnostics, but fix dependency order rather than raw error count:
 
-Work through errors file-by-file, starting with root causes (a single fix often resolves multiple downstream errors):
+1. wrong project/config or file selection;
+2. missing or incompatible declarations and module resolution;
+3. incorrect shared domain/API types;
+4. implementation narrowing, generics, and nullability;
+5. isolated downstream errors.
 
-1. **Fix type declaration issues first** — missing `@types/*`, incorrect `d.ts` files, or module augmentations
-2. **Fix interface/type definitions** — incorrect shapes propagate errors everywhere
-3. **Fix implementation code** — narrowing, guards, assertions, generic constraints
-4. **Fix edge cases** — strict null checks, index access, exhaustiveness
+For each group, inspect the source, the expected runtime behavior, and the declaring dependency. A single wrong export or widened type can cause many secondary diagnostics.
 
-For each fix:
-- Read the file and understand the context around the error
-- Apply the minimal correct fix — don't over-annotate or use `any` as an escape hatch
-- Prefer type narrowing and guards over type assertions (`as`)
-- Use `unknown` instead of `any` when the type is truly unknown
-- Add `// @ts-expect-error` only as a last resort, with a comment explaining why
+## 4. Apply Minimal Type-safe Fixes
 
-## Step 5: Verify
+- Preserve public and runtime behavior unless the task explicitly changes it.
+- Prefer sound narrowing, corrected type relationships, and runtime validation over assertions.
+- Use `unknown` at untrusted boundaries; do not introduce `any` to silence a diagnostic.
+- Do not add broad ambient module declarations for packages that have real types.
+- Do not use non-null assertions without proving the invariant.
+- Use `@ts-expect-error` only for an intentional negative type test or documented upstream limitation, with a reason and a check that the directive remains necessary.
+- Avoid unrelated formatting, refactors, config replacement, dependency upgrades, and generated-file edits.
+- Ask before adding a new dependency when existing project metadata does not already establish that dependency as required.
 
-Re-run the type-check command from Step 2. If errors remain, go back to Step 3 with the new output. Repeat until clean.
+After each root-cause group, run the smallest meaningful check when useful. Periodically re-run the exact baseline command because fixes can expose or remove downstream diagnostics.
 
-Report the final result: how many errors were found, how many were fixed, and what changes were made.
+## 5. Verify and Report
+
+Re-run the exact baseline command. Also run the relevant build, declaration emit, framework checker, or focused tests when the change can affect them.
+
+Report:
+
+- checker and version;
+- baseline command and initial diagnostic count;
+- root causes and changed files;
+- final command and result;
+- remaining diagnostics or blocked checks, clearly separated from fixed issues.
+
+Do not claim success from plain `tsc` if the project's authoritative checker includes templates, generated types, project references, or custom transforms.
