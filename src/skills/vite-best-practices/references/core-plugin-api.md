@@ -1,138 +1,112 @@
 ---
 name: vite-plugin-api
-description: Vite plugin authoring with Rolldown hooks and Vite-specific hooks (Vite 8)
+description: Vite 8.2 plugin authoring with Vite-specific hooks, Rolldown hook filters, virtual modules, and compatibility guidance
 ---
 
 # Vite Plugin API
 
-Vite plugins extend Rolldown's plugin interface with Vite-specific hooks. Refer to Rolldown's plugin documentation for the base API.
+Vite plugins extend Rolldown's plugin interface with Vite-specific hooks. Start with the smallest hook set that solves the use case and test both dev and build: the dev server and production bundler do not execute every hook identically.
 
 ## Basic Structure
 
 ```ts
 import type { Plugin } from 'vite'
 
-function myPlugin(): Plugin {
+export function myPlugin(): Plugin {
   return {
     name: 'my-plugin',
-    // hooks...
   }
 }
 ```
 
-## Vite-Specific Hooks
+Use a factory when options or per-config state are needed. Keep mutable state inside the factory so multiple plugin instances and builds do not leak into each other.
 
-### config
+## Vite-specific Hooks
 
-Modify config before resolution:
+### `config` and `configResolved`
 
-```ts
-const plugin = () => ({
-  name: 'add-alias',
-  config: () => ({
-    resolve: {
-      alias: { foo: 'bar' },
-    },
-  }),
-})
-```
-
-### configResolved
-
-Access final resolved config:
+Return partial config from `config`; do not mutate the raw config object. Read final normalized values in `configResolved`:
 
 ```ts
-const plugin = () => {
+import type { Plugin, ResolvedConfig } from 'vite'
+
+export function inspectConfig(): Plugin {
   let config: ResolvedConfig
+
   return {
-    name: 'read-config',
-    configResolved(resolvedConfig) {
-      config = resolvedConfig
+    name: 'inspect-config',
+    config: () => ({ define: { __FEATURE__: 'true' } }),
+    configResolved(resolved) {
+      config = resolved
     },
     transform(code, id) {
-      if (config.command === 'serve') { /* dev */ }
+      if (config.command === 'serve') {
+        // dev-only behavior
+      }
     },
   }
 }
 ```
 
-### configureServer
-
-Add custom middleware to dev server:
-
-```ts
-const plugin = () => ({
-  name: 'custom-middleware',
-  configureServer(server) {
-    server.middlewares.use((req, res, next) => {
-      // handle request
-      next()
-    })
-  },
-})
-```
-
-Return function to run **after** internal middlewares:
+### `configureServer`
 
 ```ts
 configureServer(server) {
+  server.middlewares.use((req, res, next) => {
+    next()
+  })
+
   return () => {
-    server.middlewares.use((req, res, next) => {
-      // runs after Vite's middlewares
-    })
+    // install middleware after Vite's internal middleware
   }
 }
 ```
 
-### transformIndexHtml
+The returned callback runs after Vite installs its internal middleware. A `configureServer` hook is not called in production build; guard any stored server reference accordingly.
 
-Transform HTML entry files:
+### `transformIndexHtml`
 
-```ts
-const plugin = () => ({
-  name: 'html-transform',
-  transformIndexHtml(html) {
-    return html.replace(/<title>(.*?)<\/title>/, '<title>New Title</title>')
-  },
-})
-```
-
-Inject tags:
+Prefer structured tag injection over string replacement when adding tags:
 
 ```ts
 transformIndexHtml() {
   return [
-    { tag: 'script', attrs: { src: '/inject.js' }, injectTo: 'body' },
+    {
+      tag: 'script',
+      attrs: { src: '/inject.js' },
+      injectTo: 'body',
+    },
   ]
 }
 ```
 
-### handleHotUpdate
-
-Custom HMR handling:
+### `handleHotUpdate`
 
 ```ts
-handleHotUpdate({ server, modules, timestamp }) {
-  server.ws.send({ type: 'custom', event: 'special-update', data: {} })
-  return [] // empty = skip default HMR
+handleHotUpdate({ server, modules }) {
+  server.ws.send({ type: 'custom', event: 'my:update', data: {} })
+  return modules
 }
 ```
 
+Returning an empty array suppresses the default affected-module update. Vite is planning an Environment-aware `hotUpdate` replacement, but the official Vite 8.2 guidance does **not** recommend migrating away from `handleHotUpdate` yet.
+
 ## Virtual Modules
 
-Serve virtual content without files on disk:
+Use `virtual:` for the user-facing id and prefix the internal resolved id with `\0`:
 
 ```ts
 import { exactRegex } from '@rolldown/pluginutils'
+import type { Plugin } from 'vite'
 
-const plugin = () => {
-  const virtualModuleId = 'virtual:my-module'
-  const resolvedId = '\0' + virtualModuleId
+export function virtualModule(): Plugin {
+  const publicId = 'virtual:my-module'
+  const resolvedId = `\0${publicId}`
 
   return {
     name: 'virtual-module',
     resolveId: {
-      filter: { id: exactRegex(virtualModuleId) },
+      filter: { id: exactRegex(publicId) },
       handler() {
         return resolvedId
       },
@@ -140,155 +114,88 @@ const plugin = () => {
     load: {
       filter: { id: exactRegex(resolvedId) },
       handler() {
-        return `export const msg = "from virtual module"`
+        return 'export const message = "from virtual module"'
       },
     },
   }
 }
 ```
 
-Usage:
+The `\0` prefix prevents other resolvers from treating the id as a filesystem path. Do not use it for virtual modules that are derived from real files, such as single-file-component submodules, because it interferes with sourcemaps.
+
+## Hook Filters
+
+Rolldown hook filters avoid unnecessary Rust-to-JavaScript hook calls:
 
 ```ts
-import { msg } from 'virtual:my-module'
-```
+export function transformJs(): Plugin {
+  const jsFile = /\.js$/
 
-Convention: prefix user-facing path with `virtual:`, prefix resolved id with `\0`.
-
-**Note:** The older function-based syntax (`resolveId(id) { ... }`) still works — the filter-based syntax above is the newer, more performant pattern from Rolldown.
-
-## Hook Filters (Vite 8 / Rolldown)
-
-Hook filters reduce overhead by letting plugins declare which files they care about, so hooks are only called when relevant:
-
-```ts
-{
-  name: 'transform-ts',
-  transform: {
-    filter: { id: /\.(ts|tsx)$/ },
-    handler(code, id) {
-      // Only called for .ts/.tsx files
-      return { code: transform(code), map: null }
+  return {
+    name: 'transform-js',
+    transform: {
+      filter: { id: jsFile },
+      handler(code, id) {
+        if (!jsFile.test(id)) return null
+        return { code: transformCode(code), map: null }
+      },
     },
-  },
-}
-```
-
-## moduleType in load/transform (Vite 8)
-
-When converting non-JS content to JavaScript, you must specify `moduleType: 'js'` so Rolldown interprets the output correctly:
-
-```ts
-{
-  name: 'txt-loader',
-  load(id) {
-    if (id.endsWith('.txt')) {
-      const content = fs.readFileSync(id, 'utf-8')
-      return {
-        code: `export default ${JSON.stringify(content)}`,
-        moduleType: 'js',
-      }
-    }
-  },
-}
-```
-
-## Plugin Ordering
-
-Use `enforce` to control execution order:
-
-```ts
-{
-  name: 'pre-plugin',
-  enforce: 'pre',  // runs before core plugins
-}
-
-{
-  name: 'post-plugin',
-  enforce: 'post', // runs after build plugins
-}
-```
-
-Order: Alias → `enforce: 'pre'` → Core → User (no enforce) → Build → `enforce: 'post'` → Post-build
-
-## Conditional Application
-
-```ts
-{
-  name: 'build-only',
-  apply: 'build',  // or 'serve'
-}
-
-// Function form:
-{
-  apply(config, { command }) {
-    return command === 'build' && !config.build.ssr
   }
 }
 ```
 
-## Universal Hooks (from Rolldown)
+Filters are supported by Vite 6.3+ and Rollup 4.38+. Keep the check inside the handler when the plugin claims compatibility with older hosts that ignore hook filters. `@rolldown/pluginutils` and `rolldown/filter` provide helpers such as `exactRegex` and `prefixRegex`.
 
-These work in both dev and build:
+## Module Types
 
-- `resolveId(id, importer)` — Resolve import paths
-- `load(id)` — Load module content
-- `transform(code, id)` — Transform module code
+Rolldown infers module type from the resolved id. When a `load` or `transform` hook converts a non-JavaScript extension into JavaScript, return `moduleType: 'js'`:
 
 ```ts
-transform(code, id) {
-  if (id.endsWith('.custom')) {
-    return { code: compile(code), map: null }
+load(id) {
+  if (!id.endsWith('.txt')) return null
+
+  const content = fs.readFileSync(id, 'utf8')
+  return {
+    code: `export default ${JSON.stringify(content)}`,
+    moduleType: 'js',
   }
 }
 ```
 
-**Note:** `moduleParsed` hook is NOT called during dev in Vite 8.
+## Ordering and Scope
 
-## Detecting Rolldown at Runtime
+- `enforce: 'pre'` runs before Vite core plugins; `enforce: 'post'` runs after build plugins.
+- `apply: 'serve'` and `apply: 'build'` restrict a plugin to the relevant command.
+- Prefer a functional `apply` check when SSR or other config state matters.
+- `moduleParsed` is not called during dev. A plugin that requires full-bundle graph analysis should usually be build-only.
 
-```ts
-transform(code, id) {
-  if (this.meta.rolldownVersion) {
-    // Running on Rolldown-powered Vite (8+)
-  }
-}
-```
+## Rolldown and Rollup Compatibility
 
-## Client-Server Communication
+Many Rollup plugins work with Rolldown, but compatibility is not guaranteed merely because the hook names match. Check for unsupported output formats, mutable `bundle` assumptions, Rollup-only internals, and build-only hooks. Test the plugin against the oldest and newest host versions it declares.
 
-Server to client:
+Use `this.meta.rolldownVersion` only for narrow runtime compatibility decisions; prefer capability checks when possible.
 
-```ts
-configureServer(server) {
-  server.ws.send('my:event', { msg: 'hello' })
-}
-```
-
-Client side:
+## Client-server Communication
 
 ```ts
-if (import.meta.hot) {
-  import.meta.hot.on('my:event', (data) => {
-    console.log(data.msg)
-  })
-}
-```
-
-Client to server:
-
-```ts
-// Client
-import.meta.hot.send('my:from-client', { msg: 'Hey!' })
-
-// Server
-server.ws.on('my:from-client', (data, client) => {
-  client.send('my:ack', { msg: 'Got it!' })
+// plugin / server
+server.ws.send('my:event', { message: 'hello' })
+server.ws.on('my:request', (data, client) => {
+  client.send('my:response', { ok: true })
 })
+
+// client
+if (import.meta.hot) {
+  import.meta.hot.on('my:event', (data) => console.log(data.message))
+  import.meta.hot.send('my:request', {})
+}
 ```
+
+Namespace event names to avoid collisions and validate untrusted payloads before using them in filesystem, process, or network operations.
 
 <!--
-Source references:
+Official sources (verified at vite v8.2.2):
 - https://vite.dev/guide/api-plugin
 - https://vite.dev/guide/migration
+- https://vite.dev/changes/hotupdate-hook
 -->

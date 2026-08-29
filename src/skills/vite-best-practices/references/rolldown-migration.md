@@ -1,242 +1,208 @@
 ---
-name: vite-rolldown
-description: Vite 8 Rolldown bundler and Oxc transformer migration from Vite 7
+name: vite-rolldown-migration
+description: Migrate Vite 7 or rolldown-vite projects to stable Vite 8.2 with Rolldown and Oxc
 ---
 
-# Rolldown Migration (Vite 8)
+# Vite 8 Migration
 
-Vite 8 (stable March 2026) replaces esbuild+Rollup with Rolldown, a unified Rust-based bundler. Performance gains of 10-30x for production builds are typical.
+This guide was verified against stable `vite@8.2.2`. Vite 8 replaces the esbuild + Rollup split with Rolldown-based dependency optimization/builds, Oxc transforms and JavaScript minification, and Lightning CSS minification. The Vite team reported up to 10–30x faster production builds in its Vite 8 announcement; treat that as an upper reported result, not a guaranteed project-wide improvement.
 
-## What Changed
+## Migration Sequence
 
-| Before (Vite 7) | After (Vite 8) | Compat Layer |
-|-----------------|----------------|--------------|
-| esbuild (dev transform) | Oxc Transformer | `esbuild` auto-converts to `oxc` |
-| esbuild (dep pre-bundling) | Rolldown | `esbuildOptions` auto-converts |
-| esbuild (JS minification) | Oxc Minifier | `minify: 'esbuild'` = fallback |
-| esbuild (CSS minification) | Lightning CSS | `cssMinify: 'esbuild'` = fallback |
-| Rollup (production build) | Rolldown | `rollupOptions` auto-converts |
-| `rollupOptions` | `rolldownOptions` | deprecated, auto-converts |
-| `esbuild` option | `oxc` option | deprecated, auto-converts |
+1. Confirm Node.js `20.19+` or `22.12+`, the package manager, installed Vite/plugin versions, framework support, and the current build/test baseline.
+2. Upgrade Vite and official/framework plugins within their documented peer ranges. Do not force Vite 8 through package-manager overrides when the framework has not declared support.
+3. Run the existing config and build before renaming compatibility options. This separates dependency/plugin failures from config migration failures.
+4. Replace deprecated options using the mappings below; do not blindly rename nested objects.
+5. Test dev startup/HMR, production output, SSR/library paths, and plugins that use build hooks or CommonJS interop.
 
-**Important:** A compatibility layer auto-converts old config names, so many projects upgrade with zero config changes. However, both `esbuild` and `rollupOptions` are deprecated and will be removed in a future version. Always use the new names in new code.
+## Gradual Rolldown Test
 
-## Config Migration
+For a large Vite 7 project, the official intermediate path is to alias the `vite` package to `rolldown-vite`, keeping source imports unchanged:
 
-### rollupOptions → rolldownOptions
-
-Direct rename. Internal structure (`external`, `output.globals`) stays the same:
-
-```ts
-// Before (Vite 7)
-export default defineConfig({
-  build: {
-    rollupOptions: {
-      external: ['vue'],
-      output: { globals: { vue: 'Vue' } },
-    },
-  },
-})
-
-// After (Vite 8)
-export default defineConfig({
-  build: {
-    rolldownOptions: {
-      external: ['vue'],
-      output: { globals: { vue: 'Vue' } },
-    },
-  },
-})
+```json
+{
+  "devDependencies": {
+    "vite": "npm:rolldown-vite@7.2.2"
+  }
+}
 ```
 
-Also applies to `worker.rollupOptions` → `worker.rolldownOptions`.
+Continue importing from `vite`:
 
-### esbuild → oxc (JavaScript Transforms)
+```ts
+import { defineConfig } from 'vite'
+```
 
-Complete mapping of esbuild JSX options to Oxc:
+After resolving Rolldown-only issues, replace the alias with a supported Vite 8 range and review the remaining Vite 8 migration changes. Skip this intermediate step when the project is small or already has reliable build/runtime coverage.
 
-| esbuild | oxc equivalent |
-|---------|---------------|
-| `jsx: 'transform'` | `jsx: { runtime: 'classic' }` |
-| `jsx: 'automatic'` | `jsx: { runtime: 'automatic' }` |
+## Configuration Renames
+
+### Rollup to Rolldown
+
+```ts
+// Vite 7
+build: {
+  rollupOptions: {
+    external: ['vue'],
+    output: { globals: { vue: 'Vue' } },
+  },
+}
+
+// Vite 8
+build: {
+  rolldownOptions: {
+    external: ['vue'],
+    output: { globals: { vue: 'Vue' } },
+  },
+}
+```
+
+Also rename `worker.rollupOptions` to `worker.rolldownOptions`. The old names are converted for compatibility and deprecated.
+
+### esbuild Transforms to Oxc
+
+| esbuild option | Oxc option |
+|----------------|------------|
+| `jsxInject` | `jsxInject` |
+| `include` / `exclude` | `include` / `exclude` |
 | `jsx: 'preserve'` | `jsx: 'preserve'` |
-| `jsxFactory: 'h'` | `jsx.pragma: 'h'` |
-| `jsxFragment: 'Fragment'` | `jsx.pragmaFrag: 'Fragment'` |
-| `jsxImportSource: 'react'` | `jsx.importSource: 'react'` |
+| `jsx: 'automatic'` | `jsx: { runtime: 'automatic' }` |
+| `jsx: 'transform'` | `jsx: { runtime: 'classic' }` |
+| `jsxFactory` | `jsx.pragma` |
+| `jsxFragment` | `jsx.pragmaFrag` |
+| `jsxImportSource` | `jsx.importSource` |
 | `jsxDev` | `jsx.development` |
 | `jsxSideEffects` | `jsx.pure` |
-| `jsxInject` | `jsxInject` (same) |
-| `include`/`exclude` | `include`/`exclude` (same) |
-| `define` | `define` (same) |
-
-**Not supported in Oxc:** `esbuild.supported` option.
-
-**Not supported:** Native decorator lowering — use Babel or SWC plugins.
-
-**Example — Preact classic JSX:**
+| `define` | `define` |
 
 ```ts
-// Before (Vite 7)
-export default defineConfig({
-  esbuild: {
-    jsxFactory: 'h',
-    jsxFragment: 'Fragment',
-  },
-})
+// Vite 7
+esbuild: {
+  jsxFactory: 'h',
+  jsxFragment: 'Fragment',
+}
 
-// After (Vite 8)
-export default defineConfig({
-  oxc: {
-    jsx: {
-      runtime: 'classic',
-      pragma: 'h',
-      pragmaFrag: 'Fragment',
-    },
+// Vite 8
+oxc: {
+  jsx: {
+    runtime: 'classic',
+    pragma: 'h',
+    pragmaFrag: 'Fragment',
   },
-})
+}
 ```
 
-**Example — React automatic:**
+`esbuild.supported` has no Oxc equivalent. `esbuild.banner` and `esbuild.footer` require a custom transform plugin. Native decorator lowering is not supported by Oxc; use an appropriate Babel or SWC plugin when the project requires it. This is distinct from Vite's support for TypeScript `emitDecoratorMetadata`.
 
-```ts
-export default defineConfig({
-  oxc: {
-    jsx: {
-      runtime: 'automatic',
-      importSource: 'react',
-    },
-  },
-})
-```
+If a plugin still calls deprecated `transformWithEsbuild`, install `esbuild` explicitly until the plugin migrates to `transformWithOxc`.
 
-### optimizeDeps.esbuildOptions → optimizeDeps.rolldownOptions
+### Dependency Optimization
 
-Auto-converted options:
+`optimizeDeps.esbuildOptions` is converted to `optimizeDeps.rolldownOptions` for compatibility. Important shape changes include:
 
-| esbuildOptions | rolldownOptions equivalent |
-|---------------|--------------------------|
+| esbuild option | Rolldown option |
+|----------------|-----------------|
 | `minify` | `output.minify` |
 | `treeShaking` | `treeshake` |
 | `define` | `transform.define` |
 | `loader` | `moduleTypes` |
-| `preserveSymlinks` | `!resolve.symlinks` |
+| `preserveSymlinks` | inverse of `resolve.symlinks` |
 | `resolveExtensions` | `resolve.extensions` |
 | `mainFields` | `resolve.mainFields` |
 | `conditions` | `resolve.conditionNames` |
 | `keepNames` | `output.keepNames` |
 | `platform` | `platform` |
-| `plugins` | `plugins` (partial support) |
+| `plugins` | `plugins` with partial compatibility |
 
-### Minification
-
-```ts
-// Vite 8 default: Oxc minifier
-build: { minify: true }  // uses Oxc
-
-// Fallback to esbuild (requires installing esbuild)
-build: { minify: 'esbuild' }
-
-// CSS: Lightning CSS is default
-build: { cssMinify: true }           // uses Lightning CSS
-build: { cssMinify: 'esbuild' }     // fallback (requires esbuild)
-```
-
-**Not supported by Oxc minifier:** `mangleProps`, `reserveProps`, `mangleQuoted`, `mangleCache`.
-
-### esbuild.banner/footer
-
-No direct equivalent. Use a custom plugin with the `transform` hook instead.
-
-## Breaking Changes
-
-### manualChunks
-
-- Object form **removed**
-- Function form **deprecated** → use `codeSplitting` option instead
-
-### CommonJS Interop
-
-The `default` import from CJS modules follows new rules. If the importer is `.mjs`/`.mts`, or the closest `package.json` has `"type": "module"`, or `module.exports.__esModule` is not true, then `default` = `module.exports` (not `module.exports.default`).
-
-Temporary workaround: `legacy.inconsistentCjsInterop: true`.
-
-### Format Sniffing Removed
-
-Vite no longer sniffs file content to choose between `browser` and `module` fields. `resolve.mainFields` order is always respected.
-
-### build() Error Handling
-
-`build()` now throws `BundleError` (not raw error) with `.errors?: RolldownError[]` array.
-
-### Removed Config Options
-
-| Removed | Replacement |
-|---------|-------------|
-| `build.commonjsOptions` | No-op (Rolldown handles CJS natively) |
-| `build.dynamicImportVarsOptions.warnOnError` | No-op |
-| `resolve.alias[].customResolver` | Use custom plugin with `resolveId` hook |
-| `rollupOptions.output.manualChunks` (object form) | Use function form or `codeSplitting` |
-| `rollupOptions.watch.chokidar` | `rolldownOptions.watch.watcher` |
-
-### Unsupported Output Formats
-
-`'system'` and `'amd'` output formats are not supported by Rolldown.
-
-### Node.js Requirements
-
-Node.js 20.19+ or 22.12+ required (same as Vite 7).
-
-## Plugin Compatibility
-
-Most Vite/Rollup plugins work unchanged because Rolldown supports the Rollup plugin API. If a plugin only works during build:
+Inspect the resolved configuration when conversion is non-trivial:
 
 ```ts
-{
-  ...rollupPlugin(),
-  enforce: 'post',
-  apply: 'build',
+const inspectCompatibility = {
+  name: 'inspect-vite-config',
+  configResolved(config) {
+    console.log(config.oxc)
+    console.log(config.optimizeDeps.rolldownOptions)
+  },
 }
 ```
 
-**Note:** `moduleParsed` hook is NOT called during dev. Plugins relying on it need adjustment.
+Remove diagnostic logging after migration.
 
-Detect Rolldown at runtime: `this.meta.rolldownVersion`.
+## Minification
 
-## Gradual Migration
-
-For large projects, migrate via `rolldown-vite` first:
-
-```bash
-# Step 1: Test with rolldown-vite (still Vite 7)
-pnpm add -D rolldown-vite
-
-# Replace vite import in config
-import { defineConfig } from 'rolldown-vite'
-
-# Step 2: Once stable, upgrade to Vite 8
-pnpm add -D vite@8
-
-# Revert the import
-import { defineConfig } from 'vite'
+```ts
+export default defineConfig({
+  build: {
+    minify: 'oxc',
+    cssMinify: 'lightningcss',
+  },
+})
 ```
 
-## Overriding Vite in Frameworks
+These are client-build defaults, so explicit config is normally unnecessary. SSR builds default to no JavaScript minification. The deprecated `'esbuild'` fallback requires installing `esbuild` yourself.
 
-When framework depends on older Vite:
+Oxc does not support esbuild property-mangling options such as `mangleProps`, `reserveProps`, `mangleQuoted`, or `mangleCache`. Migrate only after checking whether those options are semantically required.
 
-```json
-{
-  "pnpm": {
-    "overrides": {
-      "vite": "8.0.0"
-    }
+## Breaking Behavior to Audit
+
+### Chunking
+
+The object form of `output.manualChunks` is removed and the function form is deprecated. Move intentional manual splitting to `build.rolldownOptions.output.codeSplitting`. Re-test execution order and side effects after changing chunk boundaries.
+
+### CommonJS Interop
+
+Default imports from CommonJS now follow consistent rules across dev and build. A default import resolves to `module.exports` when the importer is `.mjs`/`.mts`, its nearest package is `type: module`, or the imported CommonJS module does not set `__esModule: true`; otherwise it resolves to `module.exports.default`.
+
+`legacy.inconsistentCjsInterop: true` is a temporary deprecated escape hatch. Prefer fixing or patching the affected package/import.
+
+Externalized `require()` calls now remain `require()` calls. If conversion to imports is required, use Vite's exported `esmExternalRequirePlugin` with a narrow external list.
+
+### Module Resolution and Output
+
+- Vite no longer sniffs package file contents to choose between `browser` and `module`; `resolve.mainFields` order is respected.
+- `import.meta.url` is replaced with `undefined` in UMD/IIFE output unless explicitly handled.
+- Rolldown does not support `system` or `amd` output formats.
+- `resolve.alias[].customResolver` is removed; use a custom `resolveId` plugin with `enforce: 'pre'`.
+- `build.rollupOptions.watch.chokidar` becomes `build.rolldownOptions.watch.watcher`.
+- `build.commonjsOptions` and `build.dynamicImportVarsOptions.warnOnError` are no-ops.
+
+### Plugin Module Types
+
+Rolldown infers module type from the resolved extension. A plugin that transforms a non-JavaScript file into JavaScript may need `moduleType: 'js'`:
+
+```ts
+load(id) {
+  if (!id.endsWith('.txt')) return null
+
+  return {
+    code: `export default ${JSON.stringify(readText(id))}`,
+    moduleType: 'js',
   }
 }
 ```
 
+`moduleParsed` is not called in dev. Audit plugins that depend on a complete bundle graph or mutate the `bundle` object directly.
+
+### JavaScript API Errors
+
+`build()` throws `BundleError`, which may contain individual Rolldown errors in `.errors`. Preserve the outer error and surface details without assuming every thrown value has that property.
+
+## Vite 8.1 and 8.2 Follow-up
+
+After migration is green, consider stable improvements only when they solve an existing need:
+
+- top-level `input` in 8.2 for shared dev/build/library/SSR entry declarations;
+- `resolve.tsconfigPaths` for TypeScript aliases;
+- `import.meta.glob(..., { caseSensitive: false })` when intentionally needed;
+- direct Wasm ESM imports and `html.additionalAssetSources`.
+
+Keep bundled dev mode, chunk import maps, full Lightning CSS transformation, Devtools integration, and Environment API experiments out of the migration itself unless they are separately requested and tested.
+
 <!--
-Source references:
-- https://vite.dev/blog/announcing-vite8
+Official sources (verified at vite v8.2.2):
 - https://vite.dev/guide/migration
-- https://vite.dev/config/shared-options#oxc
+- https://vite.dev/blog/announcing-vite8
+- https://vite.dev/blog/announcing-vite8-1
+- https://vite.dev/config/shared-options
+- https://vite.dev/config/build-options
 -->
