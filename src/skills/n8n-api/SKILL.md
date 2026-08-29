@@ -1,614 +1,117 @@
 ---
 name: n8n-api
-description: "Use this skill whenever the user wants to interact with an n8n instance via its public REST API. Triggers include: listing, creating, updating, deleting, activating or deactivating workflows; viewing or managing executions; managing credentials, tags, variables, users, or projects; auditing instance activity; triggering workflow runs; checking execution status; or any automation task involving the n8n API. Also use for requests like \"show my n8n workflows\", \"run workflow X\", \"list failed executions\", \"create a tag in n8n\", \"manage n8n variables\", or \"check n8n audit log\". Always use this skill for any n8n API interaction — it defines the correct endpoints, authentication, and patterns."
+description: "Use for authenticated work with an n8n instance through its public REST API: discover capabilities, inspect or manage workflows and executions, credentials, tags, variables, projects, folders, data tables, users, audits, insights, source-control pulls, and supported instance settings. Do not use for ordinary workflow design with no API calls, undocumented internal /rest endpoints, or webhook handling alone."
 ---
 
-# n8n REST API Skill
+# n8n Public REST API
 
-Interact with an n8n automation platform instance via its public REST API v1.
+Use the public `/api/v1` API in a version-aware, least-privilege way. This skill was validated against stable n8n `2.36.8` on 2026-08-29, but the target instance's discovery response and OpenAPI document are authoritative.
 
-## Environment Variables (REQUIRED)
+## Required inputs
 
-Before making any API calls, ensure these environment variables are set:
+Establish these before calling the API:
 
-| Variable | Description | Example |
-|---|---|---|
-| `N8N_HOST` | n8n instance hostname (with protocol, no trailing slash) | `https://n8n.example.com` |
-| `N8N_API_KEY` | API key generated in n8n UI (Settings > API) | `n8n_api_...` |
+- the instance base URL, including any configured path prefix and excluding a trailing slash
+- an API key available through an environment variable or secret manager
+- the intended operation and exact target resource
+- explicit authorization for any mutation, especially publish, retry, stop, delete, package, settings, or source-control operations
 
-```bash
-export N8N_HOST="https://n8n.example.com"
-export N8N_API_KEY="your-api-key-here"
-```
+Do not ask the user to paste an API key into chat. Do not print, log, commit, or persist the key. If no key is available, explain how to create one in **Settings > n8n API** and let the user place it in the environment.
 
-If these are not set, **ask the user** to provide them before proceeding.
+Use `N8N_BASE_URL` and `N8N_API_KEY` in examples. If the user's environment already uses `N8N_HOST`, preserve it rather than renaming configuration unnecessarily.
 
-## Authentication
+## Workflow
 
-All requests require the `X-N8N-API-KEY` header:
+### 1. Classify the request
 
-```bash
-curl -H "X-N8N-API-KEY: $N8N_API_KEY" "$N8N_HOST/api/v1/workflows"
-```
+- Read-only inspection can proceed once the target instance is known and credentials are available.
+- A write requires the user's requested outcome to clearly authorize that write.
+- Bulk changes, execution retries, workflow publication, source-control pulls, and destructive operations require a preview of the exact scope before execution.
+- If the user asks only for code or instructions, do not call their instance.
 
-Every request pattern below assumes:
-- Base URL: `$N8N_HOST/api/v1`
-- Header: `X-N8N-API-KEY: $N8N_API_KEY`
-- Content-Type: `application/json` (for POST/PUT/PATCH)
+### 2. Discover what this instance and key support
 
----
-
-## API Endpoints
-
-### Workflows
-
-| Method | Path | Description |
-|---|---|---|
-| GET | `/workflows` | List all workflows (supports `?active=true/false`, `?tags=tagId`, `?limit=N`, `?cursor=`) |
-| GET | `/workflows/{id}` | Get a single workflow by ID |
-| POST | `/workflows` | Create a new workflow |
-| PUT | `/workflows/{id}` | Update an existing workflow (full replace) |
-| DELETE | `/workflows/{id}` | Delete a workflow |
-| POST | `/workflows/{id}/activate` | Activate a workflow |
-| POST | `/workflows/{id}/deactivate` | Deactivate a workflow |
-| POST | `/workflows/{id}/transfer` | Transfer workflow to another project |
-
-#### List workflows
+Prefer capability discovery over a memorized endpoint list:
 
 ```bash
-curl -s -H "X-N8N-API-KEY: $N8N_API_KEY" \
-  "$N8N_HOST/api/v1/workflows?limit=50" | jq .
-```
-
-Query parameters:
-- `active` (boolean) — filter by active/inactive status
-- `tags` (string) — filter by tag ID
-- `name` (string) — filter by name (partial match)
-- `limit` (number) — results per page (default 10, max 250)
-- `cursor` (string) — pagination cursor from previous response
-
-#### Get a workflow
-
-```bash
-curl -s -H "X-N8N-API-KEY: $N8N_API_KEY" \
-  "$N8N_HOST/api/v1/workflows/{id}" | jq .
-```
-
-#### Create a workflow
-
-```bash
-curl -s -X POST \
+curl --silent --show-error --fail-with-body \
+  -H "Accept: application/json" \
   -H "X-N8N-API-KEY: $N8N_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "My Workflow",
-    "nodes": [],
-    "connections": {},
-    "settings": {
-      "executionOrder": "v1"
-    }
-  }' \
-  "$N8N_HOST/api/v1/workflows" | jq .
+  "$N8N_BASE_URL/api/v1/discover?resource=workflow&include=schemas"
 ```
 
-Request body fields:
-- `name` (string, required) — workflow name
-- `nodes` (array, required) — array of node objects
-- `connections` (object, required) — node connections map
-- `settings` (object) — workflow settings
-- `staticData` (object) — static data for the workflow
-- `tags` (array of objects) — tags to assign `[{"id": "tagId"}]`
+`GET /discover` returns the scopes, resources, operations, endpoint paths, and a `specUrl` visible to the current API key. Use `resource` and `operation` filters to keep the response focused. Add `include=schemas` when constructing a request body.
 
-#### Update a workflow
+For self-hosted instances, the built-in Swagger UI is at `/api/v1/docs`. It operates on live data. The hosted documentation playground proxies calls through Scalar; never enter a production key there. Use a limited-scope test key and test data if a playground is necessary.
+
+If discovery is unavailable on an older instance, use that instance's `/api/v1/docs` or the official endpoint reference. Never fall back to undocumented `/rest/*` routes.
+
+### 3. Resolve the exact endpoint and schema
+
+- Confirm the method, path, query parameters, request schema, required scope, and feature availability from discovery/OpenAPI.
+- Treat IDs and cursors as opaque strings. URL-encode path and query values.
+- Do not assume Cloud, Community, Business, and Enterprise instances expose identical capabilities.
+- Do not infer that a `403` means an endpoint is absent; check API-key scopes, project role, ownership, license, and instance configuration.
+- For credential payloads, retrieve `/credentials/schema/{credentialTypeName}` instead of guessing fields.
+
+Read [references/public-api.md](references/public-api.md) for the stable-version capability map, migration notes, and high-risk operation rules.
+
+### 4. Read before writing
+
+For an existing resource, fetch its current state and verify its ID, project, name, and relevant version before mutation. Build the smallest valid body from the discovered request schema.
+
+- Do not send a GET response back unchanged as a create/update body: remove read-only fields and preserve only supported writable fields.
+- A workflow update is a structural operation. Preserve `nodes`, `connections`, and required `settings` unless the requested change intentionally replaces them.
+- On current n8n versions, updating a published workflow republishes it by default. Use `publishIfActive=false` when the user wants a draft and the target schema supports it.
+- Credential reads omit secret data. Never treat a metadata response as a restorable credential backup.
+- A webhook URL is not an authenticated public-API endpoint. Its authentication and payload contract come from the workflow's trigger configuration.
+
+### 5. Execute safely
+
+Use the API key only in the `X-N8N-API-KEY` header and send `Accept: application/json`. Add `Content-Type: application/json` only when sending JSON.
 
 ```bash
-curl -s -X PUT \
+curl --silent --show-error --fail-with-body \
+  -X POST \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
   -H "X-N8N-API-KEY: $N8N_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Updated Workflow",
-    "nodes": [...],
-    "connections": {...},
-    "settings": {...}
-  }' \
-  "$N8N_HOST/api/v1/workflows/{id}" | jq .
+  --data-binary @payload.json \
+  "$N8N_BASE_URL/api/v1/<discovered-path>"
 ```
 
-> **Note:** If the workflow is active, the updated version is automatically re-published.
+Avoid verbose HTTP tracing around secrets or credential payloads. Set reasonable connect and request timeouts in unattended code. Retry only idempotent reads automatically; do not blindly retry creates, retries, imports, pulls, or other side-effecting requests.
 
-#### Activate / Deactivate
+### 6. Paginate completely
 
-```bash
-# Activate
-curl -s -X POST -H "X-N8N-API-KEY: $N8N_API_KEY" \
-  "$N8N_HOST/api/v1/workflows/{id}/activate" | jq .
+List endpoints use cursor pagination. The documented default page size is 100 and the maximum is 250. Follow `nextCursor` until it is absent/null, preserving all original filters and URL-encoding the cursor. Do not silently report a first page as the complete result.
 
-# Deactivate
-curl -s -X POST -H "X-N8N-API-KEY: $N8N_API_KEY" \
-  "$N8N_HOST/api/v1/workflows/{id}/deactivate" | jq .
-```
+### 7. Verify the outcome
 
-#### Delete a workflow
+After a successful mutation:
 
-```bash
-curl -s -X DELETE -H "X-N8N-API-KEY: $N8N_API_KEY" \
-  "$N8N_HOST/api/v1/workflows/{id}" | jq .
-```
+- read the affected resource or use a filtered list call
+- verify the requested state, project/folder placement, and publish/archive status as applicable
+- for execution actions, verify the resulting execution ID and status without dumping execution data unnecessarily
+- for data-table writes, verify the affected row count or returned rows
+- for source-control pull, inspect the returned file list and publication result
 
----
+Report partial success explicitly. A `2xx` response proves request acceptance, not necessarily the user's end-to-end outcome.
 
-### Executions
+## Current terminology and boundaries
 
-| Method | Path | Description |
-|---|---|---|
-| GET | `/executions` | List executions (supports filters) |
-| GET | `/executions/{id}` | Get a single execution |
-| DELETE | `/executions/{id}` | Delete an execution |
-| POST | `/executions/{id}/stop` | Stop a running execution |
+- Prefer **publish/unpublish**. The legacy `/activate` and `/deactivate` workflow endpoints are deprecated on current stable n8n.
+- The public API doesn't provide a generic "run any workflow" operation. Trigger a production webhook only when the workflow exposes one and the user authorizes the run. `/webhook-test` works only while the editor is listening. Evaluation test-run endpoints are a separate feature.
+- Use the public API, not the internal editor API. Session cookies and undocumented endpoints are outside this skill.
+- n8n API availability, scoped keys, projects, source control, log streaming, SSO, and other capabilities vary by hosting plan, license, role, and configuration.
 
-#### List executions
+## Error handling
 
-```bash
-curl -s -H "X-N8N-API-KEY: $N8N_API_KEY" \
-  "$N8N_HOST/api/v1/executions?limit=20&status=error" | jq .
-```
+- `400`: inspect the discovered schema and rejected fields.
+- `401`: missing, expired, or invalid API key.
+- `403`: insufficient API-key scope, project permission, ownership, license, or policy restriction.
+- `404`: wrong base path/ID, inaccessible resource, unsupported endpoint, or hidden resource.
+- `409`: state conflict; inspect the response and current resource state before deciding whether to retry.
+- `429` or transient `5xx`: honor `Retry-After` when present and use bounded exponential backoff only where replay is safe.
 
-Query parameters:
-- `workflowId` (string) — filter by workflow ID
-- `status` (string) — `error`, `success`, `waiting`, `running`
-- `limit` (number) — results per page (default 10, max 250)
-- `cursor` (string) — pagination cursor
-- `includeData` (boolean) — include full execution data (default false)
-
-#### Get execution details
-
-```bash
-curl -s -H "X-N8N-API-KEY: $N8N_API_KEY" \
-  "$N8N_HOST/api/v1/executions/{id}?includeData=true" | jq .
-```
-
-Response includes:
-- `id` — execution ID
-- `finished` — boolean
-- `mode` — trigger mode (manual, webhook, trigger, etc.)
-- `startedAt` / `stoppedAt` — timestamps
-- `workflowId` — associated workflow
-- `status` — success/error/waiting/running
-- `data` — full execution data (when `includeData=true`)
-
-#### Stop a running execution
-
-```bash
-curl -s -X POST -H "X-N8N-API-KEY: $N8N_API_KEY" \
-  "$N8N_HOST/api/v1/executions/{id}/stop" | jq .
-```
-
----
-
-### Credentials
-
-| Method | Path | Description |
-|---|---|---|
-| GET | `/credentials` | List all credentials |
-| POST | `/credentials` | Create new credential |
-| DELETE | `/credentials/{id}` | Delete a credential |
-| POST | `/credentials/{id}/transfer` | Transfer credential to another project |
-
-#### List credentials
-
-```bash
-curl -s -H "X-N8N-API-KEY: $N8N_API_KEY" \
-  "$N8N_HOST/api/v1/credentials?limit=50" | jq .
-```
-
-Query parameters:
-- `limit` (number) — results per page
-- `cursor` (string) — pagination cursor
-
-#### Create credential
-
-```bash
-curl -s -X POST \
-  -H "X-N8N-API-KEY: $N8N_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "My API Key",
-    "type": "httpHeaderAuth",
-    "data": {
-      "name": "Authorization",
-      "value": "Bearer token123"
-    }
-  }' \
-  "$N8N_HOST/api/v1/credentials" | jq .
-```
-
-Request body:
-- `name` (string, required) — credential name
-- `type` (string, required) — credential type (e.g., `httpHeaderAuth`, `oAuth2Api`, `httpBasicAuth`)
-- `data` (object, required) — credential-specific data
-
-> **Security note:** The API does not return credential secrets in GET responses. Only metadata (id, name, type, createdAt, updatedAt) is returned.
-
----
-
-### Tags
-
-| Method | Path | Description |
-|---|---|---|
-| GET | `/tags` | List all tags |
-| GET | `/tags/{id}` | Get a single tag |
-| POST | `/tags` | Create a new tag |
-| PUT | `/tags/{id}` | Update a tag |
-| DELETE | `/tags/{id}` | Delete a tag |
-
-#### List tags
-
-```bash
-curl -s -H "X-N8N-API-KEY: $N8N_API_KEY" \
-  "$N8N_HOST/api/v1/tags?limit=100" | jq .
-```
-
-#### Create tag
-
-```bash
-curl -s -X POST \
-  -H "X-N8N-API-KEY: $N8N_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"name": "production"}' \
-  "$N8N_HOST/api/v1/tags" | jq .
-```
-
-#### Update tag
-
-```bash
-curl -s -X PUT \
-  -H "X-N8N-API-KEY: $N8N_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"name": "staging"}' \
-  "$N8N_HOST/api/v1/tags/{id}" | jq .
-```
-
----
-
-### Variables
-
-| Method | Path | Description |
-|---|---|---|
-| GET | `/variables` | List all variables |
-| POST | `/variables` | Create a variable |
-| PUT | `/variables/{id}` | Update a variable |
-| DELETE | `/variables/{id}` | Delete a variable |
-
-#### List variables
-
-```bash
-curl -s -H "X-N8N-API-KEY: $N8N_API_KEY" \
-  "$N8N_HOST/api/v1/variables" | jq .
-```
-
-#### Create variable
-
-```bash
-curl -s -X POST \
-  -H "X-N8N-API-KEY: $N8N_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"key": "API_ENDPOINT", "value": "https://api.example.com"}' \
-  "$N8N_HOST/api/v1/variables" | jq .
-```
-
-#### Update variable
-
-```bash
-curl -s -X PUT \
-  -H "X-N8N-API-KEY: $N8N_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"key": "API_ENDPOINT", "value": "https://api-v2.example.com"}' \
-  "$N8N_HOST/api/v1/variables/{id}" | jq .
-```
-
----
-
-### Users
-
-| Method | Path | Description |
-|---|---|---|
-| GET | `/users` | List all users |
-| GET | `/users/{id}` | Get user by ID (or `email:{email}`) |
-
-#### List users
-
-```bash
-curl -s -H "X-N8N-API-KEY: $N8N_API_KEY" \
-  "$N8N_HOST/api/v1/users?limit=50" | jq .
-```
-
-Query parameters:
-- `limit` (number) — results per page
-- `cursor` (string) — pagination cursor
-- `includeRole` (boolean) — include role in response
-
----
-
-### Projects
-
-| Method | Path | Description |
-|---|---|---|
-| GET | `/projects` | List all projects |
-| GET | `/projects/{id}` | Get project by ID |
-| POST | `/projects` | Create a project |
-| PUT | `/projects/{id}` | Update a project |
-| DELETE | `/projects/{id}` | Delete a project |
-
-#### List projects
-
-```bash
-curl -s -H "X-N8N-API-KEY: $N8N_API_KEY" \
-  "$N8N_HOST/api/v1/projects" | jq .
-```
-
-#### Create project
-
-```bash
-curl -s -X POST \
-  -H "X-N8N-API-KEY: $N8N_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"name": "Marketing Automations"}' \
-  "$N8N_HOST/api/v1/projects" | jq .
-```
-
----
-
-### Audit
-
-| Method | Path | Description |
-|---|---|---|
-| POST | `/audit` | Generate a security audit report |
-
-#### Generate audit
-
-```bash
-curl -s -X POST \
-  -H "X-N8N-API-KEY: $N8N_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"additionalOptions": {"categories": ["credentials", "nodes", "instance"]}}' \
-  "$N8N_HOST/api/v1/audit" | jq .
-```
-
-Audit categories: `credentials`, `nodes`, `database`, `filesystem`, `instance`.
-
----
-
-### Source Control
-
-| Method | Path | Description |
-|---|---|---|
-| GET | `/source-control/preferences` | Get source control preferences |
-| POST | `/source-control/preferences` | Set source control preferences |
-| POST | `/source-control/pull` | Pull changes from remote |
-| POST | `/source-control/push` | Push changes to remote |
-| GET | `/source-control/status` | Get modified resources status |
-| POST | `/source-control/disconnect` | Disconnect from source control |
-
-#### Get status
-
-```bash
-curl -s -H "X-N8N-API-KEY: $N8N_API_KEY" \
-  "$N8N_HOST/api/v1/source-control/status" | jq .
-```
-
-#### Pull from remote
-
-```bash
-curl -s -X POST \
-  -H "X-N8N-API-KEY: $N8N_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"force": false}' \
-  "$N8N_HOST/api/v1/source-control/pull" | jq .
-```
-
----
-
-## Pagination
-
-The n8n API uses **cursor-based pagination**. Responses include:
-
-```json
-{
-  "data": [...],
-  "nextCursor": "eyJsaW1pdCI6MTAsIm9mZnNldCI6MTB9"
-}
-```
-
-To fetch the next page, pass `?cursor=<nextCursor>` on the next request. When `nextCursor` is `null`, there are no more results.
-
----
-
-## Common Patterns
-
-### List all workflows with their status
-
-```bash
-curl -s -H "X-N8N-API-KEY: $N8N_API_KEY" \
-  "$N8N_HOST/api/v1/workflows?limit=250" | \
-  jq '.data[] | {id, name, active, updatedAt}'
-```
-
-### Find failed executions for a workflow
-
-```bash
-curl -s -H "X-N8N-API-KEY: $N8N_API_KEY" \
-  "$N8N_HOST/api/v1/executions?workflowId=123&status=error&limit=50" | \
-  jq '.data[] | {id, status, startedAt, stoppedAt}'
-```
-
-### Trigger a workflow manually via webhook
-
-If a workflow has a Webhook node, you can trigger it directly:
-
-```bash
-curl -s -X POST \
-  -H "Content-Type: application/json" \
-  -d '{"key": "value"}' \
-  "$N8N_HOST/webhook/{webhook-path}"
-```
-
-> **Note:** Webhook URLs use `/webhook/` or `/webhook-test/` path, not `/api/v1/`.
-
-### Export a workflow as JSON
-
-```bash
-curl -s -H "X-N8N-API-KEY: $N8N_API_KEY" \
-  "$N8N_HOST/api/v1/workflows/{id}" | jq . > workflow-backup.json
-```
-
-### Import / restore a workflow from JSON
-
-```bash
-curl -s -X POST \
-  -H "X-N8N-API-KEY: $N8N_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d @workflow-backup.json \
-  "$N8N_HOST/api/v1/workflows" | jq .
-```
-
-### Bulk activate all workflows
-
-```bash
-# Get all inactive workflow IDs, then activate each
-curl -s -H "X-N8N-API-KEY: $N8N_API_KEY" \
-  "$N8N_HOST/api/v1/workflows?active=false&limit=250" | \
-  jq -r '.data[].id' | while read id; do
-    curl -s -X POST -H "X-N8N-API-KEY: $N8N_API_KEY" \
-      "$N8N_HOST/api/v1/workflows/$id/activate" > /dev/null
-    echo "Activated workflow $id"
-  done
-```
-
-### Delete old executions (cleanup)
-
-```bash
-# Get executions older than a specific date and delete them
-curl -s -H "X-N8N-API-KEY: $N8N_API_KEY" \
-  "$N8N_HOST/api/v1/executions?status=success&limit=100" | \
-  jq -r '.data[].id' | while read id; do
-    curl -s -X DELETE -H "X-N8N-API-KEY: $N8N_API_KEY" \
-      "$N8N_HOST/api/v1/executions/$id" > /dev/null
-    echo "Deleted execution $id"
-  done
-```
-
----
-
-## Error Handling
-
-Common HTTP status codes:
-
-| Code | Meaning |
-|---|---|
-| 200 | Success |
-| 201 | Created |
-| 400 | Bad request (invalid parameters) |
-| 401 | Unauthorized (missing or invalid API key) |
-| 403 | Forbidden (insufficient permissions) |
-| 404 | Resource not found |
-| 500 | Internal server error |
-
-Error response format:
-
-```json
-{
-  "code": 404,
-  "message": "The requested workflow was not found"
-}
-```
-
----
-
-## Implementation Notes
-
-- Always read `N8N_HOST` and `N8N_API_KEY` from environment variables — never hardcode them
-- Use `jq` for JSON processing in shell scripts
-- For Node.js scripts, use `fetch()` or `axios` with the same headers
-- Rate limiting: n8n does not enforce strict rate limits by default, but be respectful on shared instances
-- Pagination: always handle `nextCursor` for endpoints that return lists
-- Webhook URLs are separate from the API (`/webhook/` vs `/api/v1/`)
-- Execution data can be large — use `includeData=false` (default) when listing executions
-- Workflow JSON structure follows n8n's internal format (nodes + connections + settings)
-
-## Node.js Example
-
-```javascript
-const N8N_HOST = process.env.N8N_HOST;
-const N8N_API_KEY = process.env.N8N_API_KEY;
-
-async function n8nApi(method, path, body = null) {
-  const url = `${N8N_HOST}/api/v1${path}`;
-  const options = {
-    method,
-    headers: {
-      'X-N8N-API-KEY': N8N_API_KEY,
-      'Content-Type': 'application/json',
-    },
-  };
-  if (body) options.body = JSON.stringify(body);
-  const res = await fetch(url, options);
-  if (!res.ok) throw new Error(`n8n API ${res.status}: ${await res.text()}`);
-  return res.json();
-}
-
-// List workflows
-const workflows = await n8nApi('GET', '/workflows?limit=50');
-console.log(workflows.data);
-
-// Create a tag
-const tag = await n8nApi('POST', '/tags', { name: 'automated' });
-console.log(tag);
-```
-
-## Python Example
-
-```python
-import os
-import requests
-
-N8N_HOST = os.environ["N8N_HOST"]
-N8N_API_KEY = os.environ["N8N_API_KEY"]
-
-HEADERS = {
-    "X-N8N-API-KEY": N8N_API_KEY,
-    "Content-Type": "application/json",
-}
-
-def n8n_api(method, path, json=None):
-    url = f"{N8N_HOST}/api/v1{path}"
-    resp = requests.request(method, url, headers=HEADERS, json=json)
-    resp.raise_for_status()
-    return resp.json()
-
-# List workflows
-workflows = n8n_api("GET", "/workflows?limit=50")
-for wf in workflows["data"]:
-    print(f"{wf['id']}: {wf['name']} (active={wf['active']})")
-
-# Create a variable
-n8n_api("POST", "/variables", {"key": "ENV", "value": "production"})
-```
-
----
-
-## Verification
-
-After any API interaction, verify:
-- HTTP status code is 2xx
-- Response contains expected fields (`id`, `name`, etc.)
-- For workflow creation/update: check workflow appears in the list
-- For activation: check `active` field is `true`
-- For executions: check `status` matches expected outcome
-
-## Failure Modes
-
-- **401 Unauthorized**: API key is missing, invalid, or expired. Regenerate in n8n UI > Settings > API.
-- **404 Not Found**: Wrong workflow/execution ID, or the resource was deleted. Verify ID with a list call.
-- **400 Bad Request**: Invalid JSON body or missing required fields. Check request structure.
-- **Connection refused**: Wrong `N8N_HOST` or n8n instance is down. Verify URL and instance status.
-- **Empty `data` array**: No results match filters. Broaden query parameters.
+Preserve the response status and body for diagnosis, but redact secrets, credential data, webhook URLs, and sensitive execution payloads from user-facing output.
