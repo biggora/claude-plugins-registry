@@ -76,6 +76,21 @@ Output:
 }
 ```
 
+## Structured Parameters (NestJS 12)
+
+Plain objects passed after the message are structured parameters. In JSON mode they appear under `params`; set `flattenParams: true` only when the logging schema requires top-level fields.
+
+```typescript
+const logger = new Logger(UsersService.name);
+logger.log('User created', { userId: 1, tenantId: 'acme' });
+
+const app = await NestFactory.create(AppModule, {
+  logger: new ConsoleLogger({ json: true, flattenParams: true }),
+});
+```
+
+Set `structuredParams: false` only for temporary compatibility with v11 behavior. Never include passwords, tokens, session identifiers, or unnecessary personal data in structured params.
+
 ## Custom Logger
 
 Implement `LoggerService` interface:
@@ -139,6 +154,12 @@ export class CatsService {
   }
 }
 ```
+
+## Key Points
+
+- Use stable context names and structured fields so logs can be queried without parsing message text
+- Buffer bootstrap logs when replacing the application logger through dependency injection
+- Keep log verbosity environment-aware and redact sensitive values before they reach the logger
 
 <!--
 Source references:

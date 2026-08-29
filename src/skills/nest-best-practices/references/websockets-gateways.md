@@ -121,8 +121,8 @@ export class EventsGateway
     console.log(`Client connected: ${client.id}`);
   }
 
-  handleDisconnect(client: Socket) {
-    console.log(`Client disconnected: ${client.id}`);
+  handleDisconnect(client: Socket, reason?: unknown) {
+    console.log(`Client disconnected: ${client.id}`, reason);
   }
 }
 ```
@@ -186,6 +186,10 @@ handleMessage(@MessageBody() dto: CreateMessageDto) {
 export class EventsModule {}
 ```
 
+## Request-scoped Gateways (NestJS 12)
+
+Gateways can use request-scoped providers in v12, with the socket available through the `REQUEST` token. Adopt request scope only when connection-specific dependency state is required; singleton gateways remain cheaper and simpler for most event handling.
+
 ## Client Example
 
 ```typescript
@@ -208,6 +212,7 @@ socket.on('events', (data) => {
 - Guards, pipes, and interceptors work with gateways
 - Use `@ConnectedSocket()` to access the socket instance
 - Return value from handler sends acknowledgment
+- `handleDisconnect` can receive the disconnect reason in NestJS 12
 
 <!--
 Source references:

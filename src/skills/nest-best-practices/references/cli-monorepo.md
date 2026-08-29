@@ -92,12 +92,24 @@ nest start my-app
 nest start my-app --watch
 ```
 
+## NestJS 12 Builder
+
+Rspack is the default bundler for monorepo projects in Nest 12. Prefer `--builder rspack` and `--rspackPath` for new configuration. Existing custom webpack setups may remain temporarily, but `--webpack`, `--webpackPath`, `webpack`, and `webpackConfigPath` are deprecated and should be migrated deliberately.
+
+```bash
+nest build --all --parallel
+nest build my-app --builder rspack
+```
+
+Use `includeLibraryAssets` in `nest-cli.json` when library assets must be copied into an application build.
+
 ## Key Points
 
 - Monorepo: shared `node_modules`, config, build pipeline
 - Library: reusable modules, no `main.ts`
 - Path aliases auto-configured for libraries
 - Default project used when none specified
+- Do not assume the new Rspack default reproduces custom webpack behavior; verify plugins, externals, assets, and runtime output
 
 <!--
 Source references:

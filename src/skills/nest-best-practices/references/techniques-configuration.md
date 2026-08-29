@@ -92,25 +92,41 @@ ConfigModule.forRoot({
 ## Schema Validation
 
 ```typescript
-import * as Joi from 'joi';
+import { z } from 'zod';
 
 ConfigModule.forRoot({
-  validationSchema: Joi.object({
-    NODE_ENV: Joi.string()
-      .valid('development', 'production', 'test')
+  validationSchema: z.object({
+    NODE_ENV: z
+      .enum(['development', 'production', 'test'])
       .default('development'),
-    PORT: Joi.number().default(3000),
+    PORT: z.coerce.number().default(3000),
   }),
+});
+```
+
+NestJS 12 accepts any Standard Schema-compatible library. Existing Joi validation remains supported with Joi 18+; put Joi-specific settings under `validationOptions.libraryOptions`.
+
+```typescript
+ConfigModule.forRoot({
+  validationSchema: joiSchema,
+  validationOptions: {
+    libraryOptions: {
+      allowUnknown: false,
+      abortEarly: true,
+    },
+  },
 });
 ```
 
 ## Async Configuration
 
 ```typescript
+import { firstValueFrom } from 'rxjs';
+
 ConfigModule.forRootAsync({
   imports: [HttpModule],
   useFactory: async (httpService: HttpService) => {
-    const response = await httpService.get('/config').toPromise();
+    const response = await firstValueFrom(httpService.get('/config'));
     return response.data;
   },
   inject: [HttpService],
@@ -122,9 +138,10 @@ ConfigModule.forRootAsync({
 - Use `ConfigModule.forRoot()` for basic setup
 - `ConfigService` provides typed access to configuration
 - Use custom configuration files for complex setups
-- Validate configuration with Joi schemas
+- Validate configuration with a Standard Schema-compatible library
 - Make ConfigModule global to avoid repeated imports
 - Environment variables take precedence over .env files
+- Never make an external configuration call at startup without an explicit timeout and failure policy
 
 <!--
 Source references:

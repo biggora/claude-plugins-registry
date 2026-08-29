@@ -67,35 +67,22 @@ export class ValidationPipe implements PipeTransform {
 }
 ```
 
-### Validation Pipe with Zod
+### Standard Schema Validation (NestJS 12)
 
 ```typescript
-import { PipeTransform, ArgumentMetadata, BadRequestException } from '@nestjs/common';
-import { ZodSchema } from 'zod';
+import { StandardSchemaValidationPipe } from '@nestjs/common';
 
-export class ZodValidationPipe implements PipeTransform {
-  constructor(private schema: ZodSchema) {}
+app.useGlobalPipes(new StandardSchemaValidationPipe({ transform: true }));
 
-  transform(value: unknown, metadata: ArgumentMetadata) {
-    try {
-      const parsedValue = this.schema.parse(value);
-      return parsedValue;
-    } catch (error) {
-      throw new BadRequestException('Validation failed');
-    }
-  }
-}
-```
-
-Usage:
-
-```typescript
 @Post()
-@UsePipes(new ZodValidationPipe(createCatSchema))
-async create(@Body() createCatDto: CreateCatDto) {
+async create(
+  @Body({ schema: createCatSchema }) createCatDto: CreateCatDto,
+) {
   this.catsService.create(createCatDto);
 }
 ```
+
+Prefer the built-in Standard Schema pipe for Zod, Valibot, ArkType, and compatible schemas. Keep a custom schema pipe only when maintaining an older Nest major or when the built-in contract cannot express a demonstrated requirement.
 
 ### Validation Pipe with class-validator
 

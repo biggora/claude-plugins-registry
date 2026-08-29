@@ -1,11 +1,11 @@
 ---
 name: serialization
-description: Response serialization with class-transformer
+description: Response serialization with class-transformer or Standard Schema
 ---
 
 # Serialization
 
-Serialization transforms objects before sending responses, using `class-transformer` decorators.
+Choose one response-shaping model per endpoint: `ClassSerializerInterceptor` for class-transformer entities, or `StandardSchemaSerializerInterceptor` for Standard Schema-driven responses.
 
 ## Basic Usage
 
@@ -126,6 +126,27 @@ Apply globally:
 export class AppModule {}
 ```
 
+## Standard Schema Serialization (NestJS 12)
+
+Use schema-driven serialization when the response contract already lives in Zod, Valibot, ArkType, or another Standard Schema library:
+
+```typescript
+import {
+  SerializeOptions,
+  StandardSchemaSerializerInterceptor,
+  UseInterceptors,
+} from '@nestjs/common';
+
+@Get(':id')
+@UseInterceptors(StandardSchemaSerializerInterceptor)
+@SerializeOptions({ schema: userResponseSchema })
+findOne(@Param('id') id: string) {
+  return this.usersService.findOne(id);
+}
+```
+
+The interceptor validates and transforms outgoing data according to the schema. Treat a serialization failure as a server-side contract violation and cover it with tests.
+
 ## Groups
 
 Expose different fields based on groups:
@@ -151,6 +172,7 @@ findForAdmin() {}
 - Works with WebSockets and Microservices
 - `@Exclude()` and `@Expose()` from `class-transformer`
 - Use `excludeExtraneousValues: true` to only include `@Expose()` fields
+- Use `StandardSchemaSerializerInterceptor` instead of class-transformer when the response contract is schema-first
 
 <!--
 Source references:

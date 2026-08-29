@@ -162,12 +162,32 @@ options: {
 },
 ```
 
+## Exception Status Mapping (NestJS 12)
+
+Register `GrpcExceptionFilter` and throw a status-specific exception so clients receive the intended gRPC status instead of `UNKNOWN`:
+
+```typescript
+import {
+  GrpcAlreadyExistsException,
+  GrpcExceptionFilter,
+} from '@nestjs/microservices';
+
+app.useGlobalFilters(new GrpcExceptionFilter());
+
+if (this.heroes.has(data.id)) {
+  throw new GrpcAlreadyExistsException('Hero already exists');
+}
+```
+
+For a dynamic status, use `GrpcException` with `GrpcStatus`. Keep transport-level exceptions at the controller boundary when domain services should remain transport-independent.
+
 ## Key Points
 
 - Use `ClientGrpc.getService()` not `ClientProxy`
 - Methods are lowerCamelCase in TypeScript
 - Set `loader.keepCase: true` for underscore field names
 - Streaming handlers must return `Observable` for full-duplex
+- Register `GrpcExceptionFilter` when using v12 gRPC exception classes
 
 <!--
 Source references:

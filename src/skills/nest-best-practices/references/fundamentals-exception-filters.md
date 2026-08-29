@@ -34,6 +34,16 @@ throw new HttpException({
 }, HttpStatus.FORBIDDEN);
 ```
 
+## Machine-readable Error Codes (NestJS 12)
+
+Use `HttpExceptionOptions.errorCode` when clients need a stable identifier. Messages remain human-readable and may change; clients should not parse them.
+
+```typescript
+throw new BadRequestException('Password is too weak', {
+  errorCode: 'WEAK_PASSWORD',
+});
+```
+
 ## Built-in HTTP Exceptions
 
 - `BadRequestException`
@@ -194,7 +204,7 @@ export class AllExceptionsFilter extends BaseExceptionFilter {
 - Filters can be method, controller, or global scoped
 - Use `HttpAdapterHost` for platform-agnostic code
 - Extend `BaseExceptionFilter` to reuse default behavior
-- Multiple filters can be chained
+- Keep error codes stable and avoid exposing sensitive internal details
 
 <!--
 Source references:

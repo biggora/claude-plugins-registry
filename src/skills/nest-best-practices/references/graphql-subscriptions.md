@@ -18,6 +18,8 @@ GraphQLModule.forRoot<ApolloDriverConfig>({
 }),
 ```
 
+The latest `@nestjs/graphql` no longer supports `subscriptions-transport-ws`. Remove its compatibility configuration and use `graphql-ws` end to end.
+
 ## Basic Subscription
 
 ```typescript
