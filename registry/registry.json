@@ -466,6 +466,21 @@
       "type": "skill"
     },
     {
+      "name": "ai-detector",
+      "version": "1.0.0",
+      "description": "Judge whether a text was written by AI or a human — chatbot artifacts, fabricated citations, style clusters, human counter-signals, and calibrated verdicts",
+      "author": {
+        "name": "biggora",
+        "url": "https://github.com/biggora"
+      },
+      "repository": "https://github.com/biggora/claude-plugins-registry",
+      "keywords": ["ai-detection", "ai-writing", "chatgpt", "llm", "gptzero", "academic-integrity", "wikipedia", "content-moderation"],
+      "license": "MIT",
+      "commands": [],
+      "category": "other",
+      "type": "skill"
+    },
+    {
       "name": "define-done",
       "version": "1.0.0",
       "description": "Define implementation-ready goals, JTBD, scope, constraints, authority boundaries, release scenarios, and executable acceptance criteria",

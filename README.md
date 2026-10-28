@@ -50,6 +50,7 @@ claude-plugins skills remove commafeed-api
 
 | Skill | Category | Description |
 |-------|----------|-------------|
+| `ai-detector` | other | Judge whether a text was written by AI or a human — chatbot artifacts, fabricated citations, style clusters, human counter-signals, and calibrated verdicts |
 | `autoresearch` | workflow | Autonomous iterative optimization loop (Agent-Optimizer pattern) — atomic mutations, scalar metrics, git-based checkpoints for any measurable improvement |
 | `brand-guidelines` | other | Create brand books — structured interview for colors, typography, logo, voice & tone, generates professional self-contained HTML brand guidelines |
 | `captcha` | workflow | Integrate CAPTCHA-solving services (2captcha, CapMonster) for authorized automation — reCAPTCHA v2/v3, hCaptcha, Turnstile, image grid via vision AI |
@@ -89,6 +90,7 @@ claude-plugins skills remove commafeed-api
 #### Install Examples
 
 ```bash
+npx skills add https://github.com/biggora/claude-plugins-registry --skill ai-detector
 npx skills add https://github.com/biggora/claude-plugins-registry --skill autoresearch
 npx skills add https://github.com/biggora/claude-plugins-registry --skill brand-guidelines
 npx skills add https://github.com/biggora/claude-plugins-registry --skill captcha
