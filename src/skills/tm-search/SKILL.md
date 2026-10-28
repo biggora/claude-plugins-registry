@@ -1,6 +1,6 @@
 ---
 name: tm-search
-description: "Use this skill whenever the user wants to search, validate, or look up US trademarks, brand names, or keywords in the USPTO trademark database. Triggers include: checking if a brand name or word is trademarked, searching trademark registrations, validating whether a keyword is available for trademark, looking up trademark status or owner, batch-checking multiple brand names, or building any tool/script involving the USPTO trademark database. Also use for requests like \"is X trademarked?\", \"find trademarks for [keyword]\", \"check trademark availability\", \"search USPTO for [name]\", or \"validate these words against USPTO trademarks.\" Always use this skill for any trademark search or validation task — even simple lookups benefit from the correct API patterns and output formats defined here."
+description: 'Use this skill whenever the user wants to search, validate, or look up US trademarks, brand names, or keywords in the USPTO trademark database. Triggers include: checking if a brand name or word is trademarked, searching trademark registrations, validating whether a keyword is available for trademark, looking up trademark status or owner, batch-checking multiple brand names, or building any tool/script involving the USPTO trademark database. Also use for requests like "is X trademarked?", "find trademarks for [keyword]", "check trademark availability", "search USPTO for [name]", or "validate these words against USPTO trademarks." Always use this skill for any trademark search or validation task — even simple lookups benefit from the correct API patterns and output formats defined here.'
 ---
 
 # US Trademark Search Skill (tm-search)
@@ -15,6 +15,7 @@ automation. However, the **TSDR details API** (case lookup by serial number) wor
 authentication and returns JSON.
 
 For **keyword search**, use one of these approaches:
+
 1. **Playwright/browser automation** — drive the tmsearch.uspto.gov web UI (most reliable)
 2. **Third-party API** — RapidAPI USPTO wrapper (requires API key, simpler to use)
 
@@ -22,12 +23,12 @@ For **case status lookup by serial number**, the built-in TSDR API works directl
 
 ## API Overview
 
-| Use Case | Approach |
-|---|---|
-| Keyword/name text search | Browser automation on tmsearch.uspto.gov **or** RapidAPI |
-| Case status by serial number | TSDR Details API (no auth, JSON) |
-| Batch keyword validation | Browser automation + delays **or** RapidAPI |
-| Case documents / images | TSDR API (requires API key since Oct 2024) |
+| Use Case                     | Approach                                                 |
+| ---------------------------- | -------------------------------------------------------- |
+| Keyword/name text search     | Browser automation on tmsearch.uspto.gov **or** RapidAPI |
+| Case status by serial number | TSDR Details API (no auth, JSON)                         |
+| Batch keyword validation     | Browser automation + delays **or** RapidAPI              |
+| Case documents / images      | TSDR API (requires API key since Oct 2024)               |
 
 ---
 
@@ -117,18 +118,18 @@ curl -s "https://tmsearch.uspto.gov/tsdr-api-v1-0-0/tsdr-api?serialNumber=787878
 
 ### Key Response Fields
 
-| Path | Description |
-|---|---|
-| `metadata.caseStatus` | Human-readable current status |
-| `metadata.statusDate` | Date of last status change |
-| `metadata.owners[].ipInfo.name` | Owner/applicant name |
-| `metadata.owners[].ipInfo.contactAddress` | Owner address |
-| `metadata.attorney.ipInfo.name` | Attorney of record |
-| `metadata.tm5Status.tm5LiveDead` | `"live"` or `"dead"` |
-| `metadata.tm5Status.tm5StatusDescriptor` | Structured status (e.g., `"LIVE/REGISTRATION/Registered"`) |
-| `metadata.classes[].classNumber` | Nice Classification codes |
-| `metadata.markDetails.isStandardCharClaimed` | Whether it's a standard character mark |
-| `prosecutionHistory[]` | Timeline of case events with document links |
+| Path                                         | Description                                                |
+| -------------------------------------------- | ---------------------------------------------------------- |
+| `metadata.caseStatus`                        | Human-readable current status                              |
+| `metadata.statusDate`                        | Date of last status change                                 |
+| `metadata.owners[].ipInfo.name`              | Owner/applicant name                                       |
+| `metadata.owners[].ipInfo.contactAddress`    | Owner address                                              |
+| `metadata.attorney.ipInfo.name`              | Attorney of record                                         |
+| `metadata.tm5Status.tm5LiveDead`             | `"live"` or `"dead"`                                       |
+| `metadata.tm5Status.tm5StatusDescriptor`     | Structured status (e.g., `"LIVE/REGISTRATION/Registered"`) |
+| `metadata.classes[].classNumber`             | Nice Classification codes                                  |
+| `metadata.markDetails.isStandardCharClaimed` | Whether it's a standard character mark                     |
+| `prosecutionHistory[]`                       | Timeline of case events with document links                |
 
 > **Note:** This API does NOT return the word mark text itself. To get the mark text, you need
 > the keyword search approach (browser automation or RapidAPI).
@@ -278,6 +279,7 @@ curl -X POST "https://uspto-trademark.p.rapidapi.com/v1/batchTrademarkSearch" \
 ```
 
 RapidAPI endpoints:
+
 - `/v1/trademarkSearch/{keyword}/{status}` — keyword search (`active`, `dead`, or `all`)
 - `/v1/trademarkAvailable/{keyword}` — simple yes/no availability
 - `/v1/ownerSearch/{owner_name}/{postcode}` — search by owner
@@ -362,6 +364,7 @@ triggering rate limits. With RapidAPI, 0.5–1s delay is sufficient.
 ## Legal Disclaimer to Include in Output
 
 Always include when providing availability results:
+
 > "This is a preliminary search only. Trademark availability is complex and depends on many
 > factors including similar marks, geographic use, and goods/services classification. Consult a
 > licensed trademark attorney before filing."

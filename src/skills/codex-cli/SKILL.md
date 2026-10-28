@@ -1,266 +1,109 @@
 ---
 name: codex-cli
-description: "Use this skill whenever you need to install, configure, run, or automate tasks using OpenAI's Codex CLI (codex-cli). Trigger on any mention of \"codex cli\", \"openai codex\", \"codex exec\", \"codex agent\", \"codex terminal\", CI automation with Codex, approval modes (full-auto, read-only, on-request), sandbox policies, or when someone wants to use an AI coding agent from the terminal. Also trigger when the user wants to install codex, write codex config files (config.toml), run non-interactive codex sessions, integrate codex into GitHub Actions or CI pipelines, configure MCP servers for codex, set up codex profiles, or troubleshoot codex sandbox and approval issues."
+description: "Install, configure, troubleshoot or automate OpenAI Codex CLI, including codex exec, authentication, permissions, MCP and built-in image generation from the terminal. Use for CLI image workflows and GitVane POD jobs; ordinary image requests use the imagegen skill directly."
 ---
 
-# Codex CLI Skill
+# Codex CLI
 
-OpenAI Codex CLI (`@openai/codex`) is a lightweight, open-source AI coding agent that runs locally in the terminal. It can read, edit, and execute code in your project directory using GPT-5 models.
+Run coding or image tasks through the installed CLI. Preserve the user's model, authentication and generation method. Updating this skill does not authorize installing software or generating images.
 
-## Quick Reference
+## Discover the installed capabilities
 
-### Installation
-```bash
-npm install -g @openai/codex
-# Authenticate (browser or API key)
-codex           # launches TUI with browser auth
-export OPENAI_API_KEY="sk-..."  # or use API key
+Reviewed **2026-09-27**: local CLI **0.157.0**, npm `latest` **0.157.1**. These are dated observations, not permanent defaults.
+
+Before using version-sensitive options, inspect the relevant installed help:
+
+```powershell
+codex --version
+codex --help
+codex exec --help
+codex login status
+codex features list
 ```
 
-### Basic Usage
-```bash
-codex                              # Interactive TUI
-codex "Fix the TypeScript errors"  # TUI with pre-filled prompt
-codex exec "Run tests and fix failures"   # Non-interactive (CI/scripts)
-codex e "Update CHANGELOG"         # Short alias for exec
+For an installation/update request, check `npm view @openai/codex version` and official release notes. Use `npm install -g @openai/codex@latest` only when installation/update is authorized. Installed help decides which flags the binary accepts; report conflicts with online examples. Retain the configured model unless the user selects another.
+
+## Choose the execution mode
+
+| Request                                | Entry point                                                    |
+| -------------------------------------- | -------------------------------------------------------------- |
+| Interactive terminal task              | `codex` or `codex "task"`                                      |
+| Scripted task                          | `codex exec` (`codex e` alias)                                 |
+| Continue a known task                  | `codex exec resume <session-id> "follow-up"`                   |
+| Generate/edit images through Codex CLI | Read [image workflows](references/image-generation.md)         |
+| Configure MCP                          | Inspect `codex mcp --help` and its add/list/get/login commands |
+| App integration                        | Inspect `codex app-server --help` and its protocol             |
+
+Use a specific session ID in automation; `resume --last` can pick an unrelated session. In 0.157, the TUI can use the shared background server; `--no-daemon` is a TUI option when needed. Do not assume every top-level option is supported by `exec`.
+
+## Authentication and permissions
+
+- Account login: `codex login`; use `codex login --device-auth` when appropriate. Check `codex login status` before automation.
+- API-key login, only when requested: pipe an existing environment variable to `codex login --with-api-key`. Never print the key or put it in command arguments/tracked files. Repair login through supported commands, not deletion of authentication files.
+- Installed 0.157.0 accepts approval policies `on-request` and `never`; confirm other policies against the target version.
+- Sandbox modes: `read-only`, `workspace-write`, `danger-full-access`. Use `--add-dir` for required external output folders. `never` suppresses prompts, not access restrictions.
+- `--approve-for-me` requests automatic approval review; a rejection does not authorize bypassing it. Do not silently switch to full access, bypass approvals or disable hook trust checks.
+
+Interactive example:
+
+```powershell
+codex -a on-request -s workspace-write "Implement the requested change"
 ```
 
----
+## Non-interactive tasks
 
-## Core Concepts
+Pass long prompts through stdin from a UTF-8 file. This preserves newlines and avoids shell interpolation of quotes, backticks and dollar signs.
 
-### Approval Modes (`-a` / `--ask-for-approval`)
-Controls when Codex pauses to ask before executing. The ONLY valid values are:
-
-| Mode | Flag | Config value | Behavior |
-|------|------|-------------|----------|
-| `untrusted` | `-a untrusted` | `approval_policy = "untrusted"` | Max caution — approves almost everything |
-| `on-request` | `-a on-request` | `approval_policy = "on-request"` | Asks on sensitive actions (default for auto) |
-| `never` | `-a never` | `approval_policy = "never"` | Never asks — runs fully automated |
-| `reject` | `-a reject` | `approval_policy = "reject"` | Blocks all tool use |
-
-Note: `--full-auto` is a CLI-only shortcut (equivalent to `-a on-request -s workspace-write`). It is NOT a valid `approval_policy` config value. Values like "suggest", "auto-edit", or "full-auto" do not exist as config values.
-
-### Sandbox Modes (`-s` / `--sandbox`)
-Controls filesystem and network access. The ONLY valid values are:
-
-| Mode | Flag | Access |
-|------|------|--------|
-| `read-only` | `-s read-only` | Read files only, no writes |
-| `workspace-write` | `-s workspace-write` | Write within working directory only |
-| `danger-full-access` | `-s danger-full-access` | Full system access (use with caution) |
-
-Note: There is no `--no-sandbox` flag or `sandbox = "none"` config option. To bypass the sandbox entirely, use `--dangerously-bypass-approvals-and-sandbox` (alias `--yolo`).
-
-### Common Combinations
-```bash
-# Safe daily development (recommended)
-codex --full-auto "task"
-# Equivalent to: -a on-request -s workspace-write
-
-# Full automation (CI/scripts)
-codex -a never -s workspace-write "task"
-
-# Audit / review only
-codex -s read-only "Review the codebase"
-
-# Unrestricted (isolated environments ONLY)
-codex --dangerously-bypass-approvals-and-sandbox "task"
-# Alias: --yolo
+```powershell
+# Run from the intended repository root.
+$codexRepoDir = (Get-Location).Path
+$codexTaskFile = Join-Path $codexRepoDir 'task.txt'
+$codexResultFile = Join-Path $codexRepoDir 'result.txt'
+$OutputEncoding = [Text.UTF8Encoding]::new($false)
+Get-Content -LiteralPath $codexTaskFile -Raw -Encoding utf8 -ErrorAction Stop |
+  codex -a never exec -C $codexRepoDir -s workspace-write --json -o $codexResultFile -
 ```
 
----
+`--json` emits JSONL events, not one JSON object. `-o` saves the final message, not image bytes. `--output-schema <file>` constrains the final response with an actual JSON Schema. Check exit status and persisted results; an agent message does not prove an import succeeded. Preserve useful diagnostics without exposing secrets.
 
-## Configuration (`~/.codex/config.toml`)
+`--ephemeral` disables session persistence; use it only when history/resume are unnecessary. `--skip-git-repo-check` supports intentional work outside Git. Neither grants file access.
 
-Config uses **TOML format** (not JSON). The file is `config.toml`, never `config.json`.
+For application launchers, use argument arrays and stdin rather than concatenating user text into shell commands. On Windows resolve the executable/shim: a PowerShell `.ps1` shim is not directly executable by every process API. Do not automatically retry costly or externally mutating tasks.
 
-### Minimal config
-```toml
-model = "gpt-5-codex"
-approval_policy = "on-request"
-```
+## Configuration, skills and tools
 
-### Full config example
-```toml
-model = "gpt-5-codex"
-approval_policy = "on-request"
+Configuration is TOML. Resolve `CODEX_HOME`, falling back to the user's `.codex` directory; preserve unrelated settings and secrets. Inspect the current configuration reference/schema before editing it.
 
-[sandbox_workspace_write]
-network_access = false   # true to allow network
+In installed 0.157.0, `-p <name>` help describes layering `$CODEX_HOME/<name>.config.toml` over base configuration. Older guides use `[profiles.<name>]` inside `config.toml`. Verify the target version before writing either layout.
 
-[features]
-shell_snapshot = true    # faster repeated commands
+Repository skills use `.agents/skills/<name>/SKILL.md`; user/system skill roots can differ. Invoke with `$skill-name`. Use single-quoted PowerShell prompts or a task file to avoid expanding the skill name as a shell variable.
 
-[tui]
-alternate_screen = "auto"
-animations = true
-```
+Shell networking depends on effective sandbox settings. When required, the workspace-write setting `-c 'sandbox_workspace_write.network_access=true'` can enable shell networking. It does not establish account access to built-in tools. Check TUI `/status` and `/permissions` or current CLI diagnostics.
 
-### Profiles (for different workflows)
+`codex mcp` manages external servers; invoking it does not publish Codex as an MCP server. Use the documented `codex app-server` protocol for app integration.
 
-Profiles use `[profiles.<name>]` (plural "profiles", not singular "profile"):
+## Replace stale examples
 
-```toml
-[profiles.ci]
-model = "gpt-5-codex"
-approval_policy = "never"
+| Old example                              | Current guidance                                                              |
+| ---------------------------------------- | ----------------------------------------------------------------------------- |
+| `--full-auto`                            | Prefer explicit `-a` / `-s`; docs mark it deprecated, installed help omits it |
+| `--path`                                 | `--cd` / `-C`                                                                 |
+| `codex exec --resume ID`                 | `codex exec resume ID`                                                        |
+| `--images`                               | `--image` / `-i`: input attachment, not image generation                      |
+| `--live-search`                          | Top-level `--search`, where supported                                         |
+| `--no-persist`                           | `exec --ephemeral`                                                            |
+| Repository `.codex/skills/name/skill.md` | `.agents/skills/name/SKILL.md`                                                |
 
-[profiles.review]
-model = "gpt-5-pro"
-model_reasoning_effort = "high"
-approval_policy = "untrusted"
-```
+## Completion evidence
 
-Use a profile: `codex --profile ci "task"` or `codex -p ci "task"`, or set `profile = "ci"` at the top level as default.
+Report changes, the version inspected, checks actually executed, saved artifact paths and unresolved errors. Distinguish configured image capabilities from a successful tool call and verified import. Do not generate merely to validate documentation unless requested.
 
-### Config precedence (highest → lowest)
-1. CLI flags (`--model`, `-c key=value`)
-2. Project config: `.codex/config.toml` in project root (trusted projects only)
-3. User config: `~/.codex/config.toml`
-4. System/built-in defaults
+## Official sources
 
----
-
-## Non-Interactive Mode (`codex exec`)
-
-For CI pipelines and shell scripts, always use `codex exec` (not bare `codex`). The `exec` subcommand runs non-interactively and exits when done:
-
-```bash
-# Basic
-codex exec "Update the CHANGELOG for v2.1.0"
-
-# With options
-codex exec \
-  --full-auto \
-  --model gpt-5-codex \
-  --path /my/project \
-  "Fix all TypeScript type errors"
-
-# JSON output (for parsing)
-codex exec --json "Find all TODO comments"
-
-# Resume previous session
-codex exec --resume <session-id> "Continue where we left off"
-```
-
-### GitHub Actions example
-```yaml
-- name: Run Codex
-  run: |
-    npm i -g @openai/codex
-    codex exec --full-auto "Update CHANGELOG"
-  env:
-    OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-```
-
----
-
-## TUI Slash Commands
-
-| Command | Effect |
-|---------|--------|
-| `/status` | Show model, approval policy, token usage, workspace roots |
-| `/permissions` | Change approval mode interactively |
-| `/model` | Switch model mid-session |
-| `/clear` | Clear transcript, start fresh conversation |
-| `/copy` | Copy latest Codex output to clipboard |
-| `/plan` | Enter plan mode |
-| `/review` | Review changes in working tree |
-| `/mcp` | List available MCP tools |
-| `/agent` | Switch between agent threads |
-| `/feedback` | Submit feedback |
-| `/logout` | Clear stored credentials |
-
-**Keyboard shortcuts:**
-- `Enter` while running → inject new instructions
-- `Tab` → queue follow-up for next turn
-- `Esc Esc` → edit previous message / fork from that point
-- `!command` → run local shell command, result feeds Codex
-
----
-
-## MCP Servers
-
-Add third-party tools to Codex via Model Context Protocol:
-
-```toml
-# ~/.codex/config.toml
-[mcp_servers.github]
-command = "npx"
-args = ["-y", "@modelcontextprotocol/server-github"]
-env = { GITHUB_TOKEN = "$GITHUB_TOKEN" }
-
-[mcp_servers.my-api]
-url = "https://my-server.example.com/mcp"
-```
-
-Run Codex itself as an MCP server (for other agents to consume) using the `mcp` subcommand (not a flag):
-```bash
-codex mcp
-# Note: this is a subcommand, NOT "codex --mcp-server"
-```
-
----
-
-## Network Access
-
-By default, network is **disabled** in sandbox:
-
-```bash
-# Enable network for one run
-codex -s workspace-write \
-  -c 'sandbox_workspace_write.network_access=true' \
-  "npm install and run tests"
-```
-
----
-
-## Agent Skills (`.codex/skills/`)
-
-Codex supports reusable skill bundles. Reference with `$skill-name` syntax in the TUI:
-
-```
-.codex/
-  skills/
-    my-skill/
-      skill.md   # instructions for this skill
-```
-
-Usage in TUI: `Use $my-skill to generate a new module`
-
----
-
-## Troubleshooting
-
-| Problem | Fix |
-|---------|-----|
-| Approval prompts won't stop | Check `/status`, restart with explicit `-a` flag or profile |
-| Network access denied | Add `-c 'sandbox_workspace_write.network_access=true'` |
-| Sandbox ENOENT on macOS | Run `xcode-select --install`, check dir permissions |
-| Landlock error on Linux/WSL | Update WSL2 or use `--dangerously-bypass-approvals-and-sandbox` in isolated env |
-| Auth loop / browser keeps opening | Run `codex logout`, then `rm -f ~/.codex/auth.json`, use `OPENAI_API_KEY` |
-| Settings reset after reconnect | Use a named profile in `config.toml` |
-
----
-
-## Key Flags Reference
-
-| Flag | Short | Description |
-|------|-------|-------------|
-| `--ask-for-approval` | `-a` | Approval mode: `untrusted`, `on-request`, `never`, `reject` |
-| `--sandbox` | `-s` | Sandbox mode: `read-only`, `workspace-write`, `danger-full-access` |
-| `--full-auto` | | Shortcut: `-a on-request -s workspace-write` |
-| `--dangerously-bypass-approvals-and-sandbox` | `--yolo` | No restrictions (isolated envs only) |
-| `--model` | `-m` | Override model for this run |
-| `--profile` | `-p` | Load named profile from config.toml |
-| `--cd` | | Set working directory without cd |
-| `--config` | `-c` | Override any config key: `-c model=gpt-4.1` |
-| `--json` | | Output newline-delimited JSON events |
-| `--oss` | | Use local Ollama provider |
-| `--images` | | Attach images to prompt (comma-separated paths) |
-| `--live-search` | | Enable live web search |
-| `--resume` | | Resume previous session by ID |
-| `--no-persist` | | Don't write session rollout files to disk |
-
-For detailed reference, see: https://developers.openai.com/codex/cli/reference/
+- [CLI reference](https://developers.openai.com/codex/cli/reference/)
+- [Non-interactive execution](https://developers.openai.com/codex/noninteractive/)
+- [Skills](https://developers.openai.com/codex/skills/)
+- [Configuration](https://developers.openai.com/codex/config-reference/)
+- [Release notes](https://github.com/openai/codex/releases)
+- [Published npm version](https://registry.npmjs.org/@openai/codex/latest)
+- [Official ImageGen skill](https://github.com/openai/codex/blob/main/codex-rs/skills/src/assets/samples/imagegen/SKILL.md)

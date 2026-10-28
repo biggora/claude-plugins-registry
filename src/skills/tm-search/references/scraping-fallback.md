@@ -9,6 +9,7 @@ Browser automation is the only reliable way to perform keyword searches programm
 ## Why Direct HTTP Doesn't Work
 
 The site's `configuration.json` reveals:
+
 - Search backend: `https://tmsearch.uspto.gov/prod-stage-v1-0-0/`
 - WAF challenge script: loaded dynamically from `awsWafChallengeUrl`
 - The browser must solve the WAF challenge to get a token that's sent with API requests
@@ -98,6 +99,7 @@ curl "https://uspto-trademark.p.rapidapi.com/v1/trademarkAvailable/CLOUDPEAK" \
 ```
 
 RapidAPI wrapper endpoints:
+
 - `/v1/trademarkSearch/{keyword}/{status}` — keyword search
 - `/v1/trademarkAvailable/{keyword}` — simple yes/no availability
 - `/v1/ownerSearch/{owner_name}/{postcode}` — search by owner
