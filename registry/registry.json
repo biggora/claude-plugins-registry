@@ -422,7 +422,7 @@
     },
     {
       "name": "seo-best-practices",
-      "version": "1.2.0",
+      "version": "1.3.0",
       "description": "Audit, review, and diagnose SEO — crawlability, indexation, Core Web Vitals, on-page, E-E-A-T, international/hreflang, search intent, content strategy, and authority/link building",
       "author": {
         "name": "biggora",
@@ -587,7 +587,7 @@
     },
     {
       "name": "project-delivery-orchestrator",
-      "version": "1.4.0",
+      "version": "1.5.0",
       "description": "Evidence-driven project delivery orchestrator with bounded specialists, vertical slices, TDD, fresh review, and readiness gates",
       "author": {
         "name": "biggora",

@@ -1,12 +1,12 @@
 {
   "name": "biggora-plugins",
   "owner": { "name": "biggora" },
-  "metadata": { "description": "Evidence-driven project delivery plugins and reusable agent skills", "version": "1.4.0" },
+  "metadata": { "description": "Evidence-driven project delivery plugins and reusable agent skills", "version": "1.5.0" },
   "plugins": [
     {
       "name": "project-delivery-orchestrator",
       "description": "Evidence-driven project delivery orchestrator with bounded specialists and readiness gates",
-      "version": "1.4.0",
+      "version": "1.5.0",
       "source": "."
     }
   ]
