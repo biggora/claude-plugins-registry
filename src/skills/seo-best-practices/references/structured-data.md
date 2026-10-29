@@ -54,6 +54,8 @@ Every indexable page carries one JSON-LD `@graph` with at least:
 - the `WebSite` node;
 - a `BreadcrumbList` on every page except the home page.
 
+Fallback rule: any HTML page whose type is not in the table still gets the base graph: WebPage + Organization + WebSite + BreadcrumbList (off the home page). No page ships without JSON-LD. Implementation: emit the base graph from the shared site layout/template, so new pages get it automatically, and let page templates add or override the primary node.
+
 An `@id` reference links nodes inside the same graph. Google documents no cross-page resolution of `@id`, and each page is processed on its own, so repeat the Organization and WebSite nodes in every page's graph (the Yoast and RankMath pattern). Do not define them only on the home page.
 
 | Page type | Example URL | Primary type | Required extras |
@@ -62,13 +64,23 @@ An `@id` reference links nodes inside the same graph. Google documents no cross-
 | About | `/about` | `AboutPage` | `Organization` |
 | Contacts | `/contacts` | `ContactPage` | `Organization` or a `LocalBusiness` subtype (when there is a physical location) with `address` (`PostalAddress`), `telephone`, `email`, `contactPoint` (`ContactPoint`: `contactType`, `telephone`/`email`, `areaServed`, `availableLanguage`). Values must match the visible page |
 | Legal, privacy, terms, cookies | `/legal/privacy` | `WebPage` | `name`, `url`, `inLanguage`, `dateModified`, `isPartOf`, `publisher` → Organization, plus `BreadcrumbList` |
+| Services | `/services/x` | `Service` | `provider` → Organization, `areaServed`, `serviceType` |
+| Pricing | `/pricing` | `WebPage` | `Offer`/`Product`, or `Service` with `offers`, only when prices are visible |
+| Blog index, tag or archive | `/blog`, `/blog/tag/x` | `CollectionPage` | `Blog` optional on the index |
 | Blog post or article | `/blog/post` | `BlogPosting` / `Article` | `headline`, dates, `author`, `publisher` |
+| Case study | `/case-studies/x` | `Article` | `headline`, dates, `author`, `publisher` |
+| Documentation or help article | `/docs/x` | `TechArticle` | `headline`, dates, `author`, `publisher` |
 | Author page | `/authors/jane` | `ProfilePage` | `Person` as `mainEntity` |
 | Product | `/products/widget` | `Product` | `Offer` |
 | Category or listing | `/category/widgets` | `CollectionPage` | `ItemList` optional |
 | FAQ page | `/faq` | `WebPage` (`FAQPage` optional) | `FAQPage` stays valid schema.org although the rich result is retired |
 | Local landing page | `/locations/london` | `LocalBusiness` subtype | `address`, `telephone`, `openingHoursSpecification` |
-| Search results, 404, cart, account, `noindex` pages | `/search?q=` | none | No markup needed |
+| Careers listing | `/careers` | `CollectionPage` | - |
+| Job posting | `/careers/x` | `JobPosting` | `title`, `description`, `datePosted`, `hiringOrganization`, `jobLocation` or `applicantLocationRequirements` |
+| Event | `/events/x` | `Event` | `name`, `startDate`, `location` with `address`; `eventStatus` recommended |
+| Video page | `/videos/x` | `VideoObject` | `name`, `thumbnailUrl`, `uploadDate` |
+| Search results | `/search?q=` | `SearchResultsPage` | Base graph only |
+| 404, cart, checkout, account, other `noindex` pages | - | `WebPage` | Base graph only. Not indexed, so missing markup here is Low impact, not Medium |
 
 Contacts page graph. `ContactPage` is a `WebPage` subtype, and `Organization` carries the contact details.
 
@@ -139,11 +151,48 @@ Legal page graph (`/legal/privacy`). The Organization and WebSite nodes are the 
 </script>
 ```
 
+### Checking Every URL
+
+Check every indexable URL, not a sample. Build the URL list from the XML sitemap(s) plus a crawl, because sitemaps miss pages; run crawl-only URLs through the same check. List every URL without JSON-LD in the report by URL, never as "some pages".
+
+Server-rendered check (reads `sitemap.xml` or a sitemap index one level deep, prints `OK <url> <types>` or `MISSING <url>`; `ERROR` means the fetch failed):
+
+```sh
+#!/bin/sh
+# Usage: sh jsonld-audit.sh https://example.com/sitemap.xml
+locs() { curl -fsSL "$1" | grep -o '<loc>[^<]*</loc>' | sed 's/<[^>]*>//g; s/&amp;/\&/g'; }
+locs "$1" | while read -r u; do
+  case "$u" in *.xml) locs "$u" ;; *) echo "$u" ;; esac   # sitemap index: one level deep
+done | sort -u | while read -r url; do
+  html=$(curl -fsL "$url") || { printf 'ERROR\t%s\n' "$url"; continue; }
+  if printf '%s' "$html" | grep -qi 'application/ld+json'; then
+    types=$(printf '%s' "$html" | grep -oE '"@type" *: *("[^"]*"|\[[^]]*\])' | sed 's/.*: *//; s/[]["]//g; s/ //g' | sort -u)
+    printf 'OK\t%s\t%s\n' "$url" "$(echo $types | sed 's/ /,/g')"
+  else
+    printf 'MISSING\t%s\n' "$url"
+  fi
+done
+```
+
+The snippet sees server-rendered JSON-LD only. For JS-injected markup, run Screaming Frog in JavaScript rendering mode with Structured Data extraction enabled, or loop a headless browser over the URLs and read `document.querySelectorAll('script[type="application/ld+json"]')`. Then cross-check every MISSING URL there before reporting it.
+
+Presence is not enough. For each page, also check that the graph contains the Organization and WebSite nodes and the right primary type for its page type (see the table). A bare `WebPage` where `ContactPage` belongs, or a page with a stray `Product` block and no Organization, is still a finding.
+
 - [schema.org: ContactPage](https://schema.org/ContactPage)
 - [schema.org: AboutPage](https://schema.org/AboutPage)
 - [schema.org: CollectionPage](https://schema.org/CollectionPage)
 - [schema.org: ProfilePage](https://schema.org/ProfilePage)
 - [schema.org: ContactPoint](https://schema.org/ContactPoint)
+- [schema.org: Service](https://schema.org/Service)
+- [schema.org: Blog](https://schema.org/Blog)
+- [schema.org: TechArticle](https://schema.org/TechArticle)
+- [schema.org: JobPosting](https://schema.org/JobPosting)
+- [schema.org: Event](https://schema.org/Event)
+- [schema.org: VideoObject](https://schema.org/VideoObject)
+- [schema.org: SearchResultsPage](https://schema.org/SearchResultsPage)
+- [Google: Job Posting](https://developers.google.com/search/docs/appearance/structured-data/job-posting)
+- [Google: Event](https://developers.google.com/search/docs/appearance/structured-data/event)
+- [Google: Video](https://developers.google.com/search/docs/appearance/structured-data/video)
 
 ## Quality Guidelines
 
@@ -269,9 +318,10 @@ One `@graph` block: an Organization linked by `@id` to the Article's `publisher`
 - [ ] Confirm required properties are present for each targeted rich-result type.
 - [ ] Confirm the type is still on Google's Search Gallery; do not recommend FAQ or HowTo.
 - [ ] Check that Organization, WebSite and Article entities link through `@id` instead of duplicating.
-- [ ] Every indexable URL has JSON-LD, sampled per template (home, about, contacts, legal, article, product, category); contacts and legal pages are not skipped.
+- [ ] Every URL from the sitemap and crawl has JSON-LD; list each MISSING URL individually (no sampling).
 - [ ] The Organization and WebSite nodes are present in every page's graph, not only on the home page.
 - [ ] The page type matches the Site-Wide Coverage table (for example `ContactPage` on contacts, not a bare `WebPage`).
+- [ ] Page types not in the table carry the base graph (fallback rule).
 - [ ] Check reviews: no self-serving reviews on LocalBusiness/Organization, and all visible reviews are marked up.
 - [ ] Prefer server-side output for Product price and availability.
 - [ ] Run the Rich Results Test and the Schema Markup Validator on key templates.

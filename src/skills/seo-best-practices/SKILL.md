@@ -159,7 +159,8 @@ Reporting "no schema found" based solely on `web_fetch` leads to false audit fin
 - Structured data is not a ranking factor; it makes a page eligible for rich results, and Google may still not show them.
 - Every indexable page carries JSON-LD: WebPage (or subtype) + Organization + WebSite, plus BreadcrumbList off the home page. Missing markup on any indexable page is a finding (Impact: Medium), including contacts, about, and legal pages.
 - Match type to page: ContactPage + Organization/LocalBusiness with address and contactPoint on contacts, AboutPage on about, WebPage with publisher on legal/privacy/terms, CollectionPage on categories. Full table in the reference.
-- Audit per template, not just the home page: fetch at least one URL of every template (home, about, contacts, legal, article, product, category).
+- Page types not covered by the table still get the base graph (WebPage + Organization + WebSite + BreadcrumbList); emit it from the shared layout so no page ships without JSON-LD.
+- Check every URL, not a sample: take all URLs from the XML sitemap(s) plus a crawl and verify JSON-LD on each; list every URL without it in the report. Script and JS-rendering method in the reference.
 - JSON-LD is Google's recommended format; Microdata and RDFa are equally supported.
 - Markup must match content visible on the page; never mark up hidden content.
 - Include every required property for the target rich-result type; a few complete, accurate properties beat many incomplete ones.
