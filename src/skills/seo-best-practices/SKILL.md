@@ -157,6 +157,9 @@ Reporting "no schema found" based solely on `web_fetch` leads to false audit fin
 ### Structured Data (JSON-LD)
 
 - Structured data is not a ranking factor; it makes a page eligible for rich results, and Google may still not show them.
+- Every indexable page carries JSON-LD: WebPage (or subtype) + Organization + WebSite, plus BreadcrumbList off the home page. Missing markup on any indexable page is a finding (Impact: Medium), including contacts, about, and legal pages.
+- Match type to page: ContactPage + Organization/LocalBusiness with address and contactPoint on contacts, AboutPage on about, WebPage with publisher on legal/privacy/terms, CollectionPage on categories. Full table in the reference.
+- Audit per template, not just the home page: fetch at least one URL of every template (home, about, contacts, legal, article, product, category).
 - JSON-LD is Google's recommended format; Microdata and RDFa are equally supported.
 - Markup must match content visible on the page; never mark up hidden content.
 - Include every required property for the target rich-result type; a few complete, accurate properties beat many incomplete ones.
@@ -494,7 +497,7 @@ Priority #5 in the audit framework: does the site have credibility and earned li
 
 ### Local Business
 - Inconsistent NAP
-- Missing local schema
+- Missing LocalBusiness markup on contacts and location pages
 - No Google Business Profile optimization
 - Missing location pages
 - No local content

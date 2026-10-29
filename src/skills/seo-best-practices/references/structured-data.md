@@ -6,6 +6,7 @@ Evidence for auditing structured data in the SEO Audit skill. Each topic states 
 
 - [Google's Stance](#googles-stance)
 - [Format and Structure](#format-and-structure)
+- [Site-Wide Coverage by Page Type](#site-wide-coverage-by-page-type)
 - [Quality Guidelines](#quality-guidelines)
 - [Types Still Worth Auditing](#types-still-worth-auditing)
 - [Retired or Restricted Types](#retired-or-restricted-types)
@@ -18,9 +19,9 @@ Evidence for auditing structured data in the SEO Audit skill. Each topic states 
 
 ## Google's Stance
 
-Structured data is not a ranking factor, and it is not required for good SEO. It describes a page in a machine-readable way so the page can be eligible for a rich result (stars, price, breadcrumb trail, event details and similar). Google's introduction to structured data frames the benefit as more engaging listings that may earn more interaction, not as higher rankings.
+Structured data is not a direct ranking factor, but this skill treats site-wide JSON-LD coverage as a required audit standard (see Site-Wide Coverage). It describes a page in a machine-readable way so the page can be eligible for a rich result (stars, price, breadcrumb trail, event details and similar). Google's introduction to structured data frames the benefit as more engaging listings that may earn more interaction, not as higher rankings.
 
-Valid markup never guarantees a rich result. Google decides per query and per page whether to show a feature. Report missing markup as a missed eligibility opportunity, never as a cause of low rankings.
+Valid markup never guarantees a rich result. Google decides per query and per page whether to show a feature. Missing markup on an indexable page is an audit finding (see Site-Wide Coverage), but never report it as the cause of low rankings.
 
 - [Google: Intro to How Structured Data Markup Works](https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data)
 - [Google: General Structured Data Guidelines](https://developers.google.com/search/docs/appearance/structured-data/sd-policies)
@@ -36,11 +37,113 @@ Two ways to organise several entities on one page:
 - **Multiple blocks:** one `<script>` per entity. Simple, and fine for independent items.
 - **`@graph`:** one block holding an array of entities. Cleaner when entities refer to each other.
 
-Link entities with `@id` instead of repeating them. Give the Organization an `@id` such as `https://example.com/#org`, then reference it as `{ "@id": "https://example.com/#org" }` from the WebSite's `publisher` and from each Article's `publisher`. Google's guidelines say to use the main type that matches the page's focus and to nest related items or link them with `@id`.
+Link entities with `@id` instead of repeating them. Give the Organization an `@id` such as `https://example.com/#org`, then reference it as `{ "@id": "https://example.com/#org" }` from the WebSite's `publisher` and from each Article's `publisher`. Google's guidelines say to use the main type that matches the page's focus and to nest related items or link them with `@id`. `@id` links nodes within one page's graph; across pages the Organization and WebSite nodes are repeated (see Site-Wide Coverage).
 
 - [Google: Intro to How Structured Data Markup Works](https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data)
 - [Google: General Structured Data Guidelines](https://developers.google.com/search/docs/appearance/structured-data/sd-policies)
 - [Google: Generate Structured Data with JavaScript](https://developers.google.com/search/docs/appearance/structured-data/generate-structured-data-with-javascript)
+
+## Site-Wide Coverage by Page Type
+
+Structured data is not a ranking factor. Site-wide coverage is still a required audit item: it is the convention, it gives Google and other consumers one consistent entity graph (Organization, WebSite, WebPage), and it keeps rich-result eligibility where a type applies. An indexable page with no JSON-LD is a finding (Impact: Medium), even when its type has no rich result (contacts, legal, about, category). Report it as a coverage gap, never as a cause of low rankings.
+
+Every indexable page carries one JSON-LD `@graph` with at least:
+
+- a `WebPage` node, or the subtype from the table, with `@id` (page URL + `#webpage`), `url`, `name`, `inLanguage`, `isPartOf` → WebSite `@id`, and `about` or `publisher` → Organization `@id`;
+- the `Organization` node (`@id` `https://example.com/#org`, `name`, `url`, `logo`);
+- the `WebSite` node;
+- a `BreadcrumbList` on every page except the home page.
+
+An `@id` reference links nodes inside the same graph. Google documents no cross-page resolution of `@id`, and each page is processed on its own, so repeat the Organization and WebSite nodes in every page's graph (the Yoast and RankMath pattern). Do not define them only on the home page.
+
+| Page type | Example URL | Primary type | Required extras |
+| --- | --- | --- | --- |
+| Home | `/` | `WebPage` + `WebSite` | Full `Organization`, including `sameAs` and `contactPoint` |
+| About | `/about` | `AboutPage` | `Organization` |
+| Contacts | `/contacts` | `ContactPage` | `Organization` or a `LocalBusiness` subtype (when there is a physical location) with `address` (`PostalAddress`), `telephone`, `email`, `contactPoint` (`ContactPoint`: `contactType`, `telephone`/`email`, `areaServed`, `availableLanguage`). Values must match the visible page |
+| Legal, privacy, terms, cookies | `/legal/privacy` | `WebPage` | `name`, `url`, `inLanguage`, `dateModified`, `isPartOf`, `publisher` → Organization, plus `BreadcrumbList` |
+| Blog post or article | `/blog/post` | `BlogPosting` / `Article` | `headline`, dates, `author`, `publisher` |
+| Author page | `/authors/jane` | `ProfilePage` | `Person` as `mainEntity` |
+| Product | `/products/widget` | `Product` | `Offer` |
+| Category or listing | `/category/widgets` | `CollectionPage` | `ItemList` optional |
+| FAQ page | `/faq` | `WebPage` (`FAQPage` optional) | `FAQPage` stays valid schema.org although the rich result is retired |
+| Local landing page | `/locations/london` | `LocalBusiness` subtype | `address`, `telephone`, `openingHoursSpecification` |
+| Search results, 404, cart, account, `noindex` pages | `/search?q=` | none | No markup needed |
+
+Contacts page graph. `ContactPage` is a `WebPage` subtype, and `Organization` carries the contact details.
+
+```html
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "ContactPage",
+      "@id": "https://example.com/contacts#webpage",
+      "url": "https://example.com/contacts",
+      "name": "Contact Example Co",
+      "inLanguage": "en",
+      "isPartOf": { "@id": "https://example.com/#website" },
+      "about": { "@id": "https://example.com/#org" },
+      "breadcrumb": { "@id": "https://example.com/contacts#breadcrumb" }
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://example.com/#org",
+      "name": "Example Co",
+      "url": "https://example.com/",
+      "logo": "https://example.com/logo.png",
+      "telephone": "+1-555-0100",
+      "email": "support@example.com",
+      "address": { "@type": "PostalAddress", "streetAddress": "1 Example Street", "addressLocality": "Springfield", "postalCode": "12345", "addressCountry": "US" },
+      "contactPoint": [{ "@type": "ContactPoint", "contactType": "customer support", "telephone": "+1-555-0100", "email": "support@example.com", "areaServed": "US", "availableLanguage": ["en"] }]
+    },
+    { "@type": "WebSite", "@id": "https://example.com/#website", "url": "https://example.com/", "name": "Example Co", "publisher": { "@id": "https://example.com/#org" } },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://example.com/contacts#breadcrumb",
+      "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://example.com/" }, { "@type": "ListItem", "position": 2, "name": "Contacts" }]
+    }
+  ]
+}
+</script>
+```
+
+Legal page graph (`/legal/privacy`). The Organization and WebSite nodes are the same as above and are repeated in full on the real page.
+
+```html
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": "https://example.com/legal/privacy#webpage",
+      "url": "https://example.com/legal/privacy",
+      "name": "Privacy Policy",
+      "inLanguage": "en",
+      "dateModified": "2026-05-10",
+      "isPartOf": { "@id": "https://example.com/#website" },
+      "publisher": { "@id": "https://example.com/#org" },
+      "breadcrumb": { "@id": "https://example.com/legal/privacy#breadcrumb" }
+    },
+    { "@type": "Organization", "@id": "https://example.com/#org", "name": "Example Co", "url": "https://example.com/", "logo": "https://example.com/logo.png" },
+    { "@type": "WebSite", "@id": "https://example.com/#website", "url": "https://example.com/", "name": "Example Co", "publisher": { "@id": "https://example.com/#org" } },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://example.com/legal/privacy#breadcrumb",
+      "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://example.com/" }, { "@type": "ListItem", "position": 2, "name": "Privacy Policy" }]
+    }
+  ]
+}
+</script>
+```
+
+- [schema.org: ContactPage](https://schema.org/ContactPage)
+- [schema.org: AboutPage](https://schema.org/AboutPage)
+- [schema.org: CollectionPage](https://schema.org/CollectionPage)
+- [schema.org: ProfilePage](https://schema.org/ProfilePage)
+- [schema.org: ContactPoint](https://schema.org/ContactPoint)
 
 ## Quality Guidelines
 
@@ -60,7 +163,7 @@ Structured-data spam or policy violations can trigger a manual action. It remove
 
 ## Types Still Worth Auditing
 
-Only types listed on Google's Search Gallery qualify as audit targets. At the time of writing the gallery lists: Article, Breadcrumb, Carousel, Course list, Dataset, Discussion forum, Education Q&A, Employer aggregate rating, Event, Image metadata, Job posting, Local business, Math solver, Movie, Organization, Product, Profile page, Q&A, Recipe, Review snippet, Software app, Speakable, Subscription and paywalled content, Vacation rental, Video. Re-check the gallery before recommending a type, because Google removes features.
+Only types listed on Google's Search Gallery can earn rich results; site-wide types such as WebPage subtypes, WebSite and Organization are audited for coverage regardless (see Site-Wide Coverage). At the time of writing the gallery lists: Article, Breadcrumb, Carousel, Course list, Dataset, Discussion forum, Education Q&A, Employer aggregate rating, Event, Image metadata, Job posting, Local business, Math solver, Movie, Organization, Product, Profile page, Q&A, Recipe, Review snippet, Software app, Speakable, Subscription and paywalled content, Vacation rental, Video. Re-check the gallery before recommending a type, because Google removes features.
 
 Key properties for the most common ones (confirm against the feature's own page):
 
@@ -68,7 +171,7 @@ Key properties for the most common ones (confirm against the feature's own page)
 - **Product, merchant listing:** requires `name`, `image`, and `offers` as an `Offer` with `price` (greater than zero) and `priceCurrency`. `availability`, `aggregateRating`, `review`, `gtin`/`sku` and `brand` are recommended. For pages where the product cannot be bought, use the product snippet variant.
 - **Review snippet / AggregateRating:** `Review` needs `author`, `itemReviewed` (unless nested), `reviewRating.ratingValue`. `AggregateRating` needs `ratingValue` plus `ratingCount` or `reviewCount`.
 - **Breadcrumb:** `BreadcrumbList` with `itemListElement` of at least two `ListItem`s, each with `name` and `item` (the last `item` may be omitted) and a `position`.
-- **Organization:** no required properties. Recommended: `name`, `url`, `logo` (at least 112x112 px, crawlable), `sameAs` (profile URLs). Put it on the home page or an about page.
+- **Organization:** no required properties. Recommended: `name`, `url`, `logo` (at least 112x112 px, crawlable), `sameAs` (profile URLs). It belongs in every page's graph (see Site-Wide Coverage), with full detail on home, about and contacts.
 - **Local business:** requires `name` and `address`. Recommended: `geo`, `openingHoursSpecification`, `telephone`, `url`, `priceRange`. Use the most specific subtype.
 
 - [Google: Search Gallery](https://developers.google.com/search/docs/appearance/structured-data/search-gallery)
@@ -166,10 +269,13 @@ One `@graph` block: an Organization linked by `@id` to the Article's `publisher`
 - [ ] Confirm required properties are present for each targeted rich-result type.
 - [ ] Confirm the type is still on Google's Search Gallery; do not recommend FAQ or HowTo.
 - [ ] Check that Organization, WebSite and Article entities link through `@id` instead of duplicating.
+- [ ] Every indexable URL has JSON-LD, sampled per template (home, about, contacts, legal, article, product, category); contacts and legal pages are not skipped.
+- [ ] The Organization and WebSite nodes are present in every page's graph, not only on the home page.
+- [ ] The page type matches the Site-Wide Coverage table (for example `ContactPage` on contacts, not a bare `WebPage`).
 - [ ] Check reviews: no self-serving reviews on LocalBusiness/Organization, and all visible reviews are marked up.
 - [ ] Prefer server-side output for Product price and availability.
 - [ ] Run the Rich Results Test and the Schema Markup Validator on key templates.
 - [ ] Review Search Console rich-result reports and the Manual Actions report.
-- [ ] Report findings as eligibility, never as a ranking factor.
+- [ ] Never present structured data as a ranking factor; report gaps as coverage and eligibility findings.
 
 Sources: [Intro](https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data) | [General Guidelines](https://developers.google.com/search/docs/appearance/structured-data/sd-policies) | [Search Gallery](https://developers.google.com/search/docs/appearance/structured-data/search-gallery) | [Generate with JavaScript](https://developers.google.com/search/docs/appearance/structured-data/generate-structured-data-with-javascript) | [Documentation Updates](https://developers.google.com/search/updates) | [Review Snippet](https://developers.google.com/search/docs/appearance/structured-data/review-snippet) | [Merchant Listing](https://developers.google.com/search/docs/appearance/structured-data/merchant-listing)
