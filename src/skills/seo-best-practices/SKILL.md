@@ -1,8 +1,8 @@
 ---
 name: seo-best-practices
-description: When the user wants to audit, review, or diagnose SEO on their site — technical, on-page, content, international, or off-page. Use when they mention "SEO audit," "technical SEO," "why am I not ranking," "traffic dropped," "lost rankings," "not showing up in Google," "Google update hit me," "page speed," "Core Web Vitals," "crawl errors," "indexing issues," "currently not indexed," "on-page SEO," "meta tags," "duplicate content," "keyword cannibalization," "search intent," "content refresh," "hreflang," "international SEO," "local SEO," or "backlinks." Trigger even on vague asks like "my SEO is bad" or a post-migration traffic drop — start with an audit. Do NOT use this skill for adjacent work; route instead. Structured data / JSON-LD → schema. AI Overviews or generative-engine optimization → ai-seo. Keyword-target pages at scale → programmatic-seo. Navigation, URL hierarchy, or information architecture → site-architecture. Conversion rate → cro. Analytics or GA4 setup → analytics.
+description: When the user wants to audit, review, or diagnose SEO on their site — technical, on-page, content, international, or off-page. Use when they mention "SEO audit," "technical SEO," "why am I not ranking," "traffic dropped," "lost rankings," "not showing up in Google," "Google update hit me," "page speed," "Core Web Vitals," "crawl errors," "indexing issues," "currently not indexed," "on-page SEO," "meta tags," "duplicate content," "keyword cannibalization," "search intent," "content refresh," "structured data," "schema markup," "JSON-LD," "rich results," "hreflang," "international SEO," "local SEO," or "backlinks." Trigger even on vague asks like "my SEO is bad" or a post-migration traffic drop — start with an audit. Do NOT use this skill for adjacent work; route instead. AI Overviews or generative-engine optimization → ai-seo. Keyword-target pages at scale → programmatic-seo. Navigation, URL hierarchy, or information architecture → site-architecture. Conversion rate → cro. Analytics or GA4 setup → analytics.
 metadata:
-  version: 1.1.0
+  version: 1.2.0
 ---
 
 # SEO Best Practices
@@ -32,18 +32,18 @@ Before auditing, understand:
 
 ## Audit Framework
 
-### Schema Markup Detection Limitation
+### Structured Data Detection Limitation
 
-**`web_fetch` and `curl` cannot reliably detect structured data / schema markup.**
+**`web_fetch` cannot see structured data; `curl` and raw HTML can see server-rendered JSON-LD.**
 
-Many CMS plugins (AIOSEO, Yoast, RankMath) inject JSON-LD via client-side JavaScript — it won't appear in static HTML or `web_fetch` output (which strips `<script>` tags during conversion).
+`web_fetch` converts the page to markdown and drops `<script>` tags, so it never shows JSON-LD. Yoast, RankMath and AIOSEO print JSON-LD server-side, so `curl` finds it. Only JSON-LD injected by JavaScript (Google Tag Manager, widgets, client-rendered SPAs) needs rendering.
 
-**To accurately check for schema markup, use one of these methods:**
+**To check for JS-injected structured data, use one of these methods:**
 1. **Browser tool** — render the page and run: `document.querySelectorAll('script[type="application/ld+json"]')`
 2. **Google Rich Results Test** — https://search.google.com/test/rich-results
 3. **Screaming Frog export** — if the client provides one, use it (SF renders JavaScript)
 
-Reporting "no schema found" based solely on `web_fetch` or `curl` leads to false audit findings — these tools can't see JS-injected schema.
+Reporting "no schema found" based solely on `web_fetch` leads to false audit findings. Check raw HTML with `curl` first, then render.
 
 ### Priority Order
 1. **Crawlability & Indexation** (can Google find and index it?)
@@ -153,6 +153,20 @@ Reporting "no schema found" based solely on `web_fetch` or `curl` leads to false
 - Consistent structure
 - No unnecessary parameters
 - Lowercase and hyphen-separated
+
+### Structured Data (JSON-LD)
+
+- Structured data is not a ranking factor; it makes a page eligible for rich results, and Google may still not show them.
+- JSON-LD is Google's recommended format; Microdata and RDFa are equally supported.
+- Markup must match content visible on the page; never mark up hidden content.
+- Include every required property for the target rich-result type; a few complete, accurate properties beat many incomplete ones.
+- Self-serving reviews on LocalBusiness/Organization are not eligible for review stars.
+- Link entities with `@id` (Organization, WebSite, Article publisher) instead of duplicating them.
+- Prefer server-side output; Google can process JS-injected JSON-LD, but server-rendered markup is more reliable.
+- FAQ and HowTo no longer produce rich results; existing markup is harmless but earns nothing.
+- Validate with the Rich Results Test and the Schema Markup Validator.
+
+Detail in [Structured Data](references/structured-data.md).
 
 ---
 
@@ -344,7 +358,8 @@ Three equivalent placement methods: HTML `<link>` in `<head>`, HTTP `Link` heade
 
 - Featured snippets: concise ~40-60 word answer near the top; ordered lists for steps, tables for comparisons (Google lifts these formats)
 - People Also Ask: cover the related questions for the target query
-- Rich results (FAQ, Product, Review, Article): audit eligibility via the Rich Results Test (renders JS) — implementation belongs to the **schema** skill
+- Rich results (Product, Review snippet, Article, Breadcrumb, Event, …): audit eligibility via the Rich Results Test (renders JS); see [Structured Data](references/structured-data.md)
+- FAQ and HowTo rich results are retired; don't recommend them as opportunities
 - Eligibility doesn't guarantee display
 
 Detail in [Content Strategy](references/content-strategy.md).
@@ -409,7 +424,7 @@ Full refresh audit in [Content Strategy](references/content-strategy.md).
 
 - Each page has one clearly defined main entity, named consistently
 - Related concepts/attributes a knowledgeable page would cover are present
-- Author/Organization identity with `sameAs` for disambiguation (hand markup to the **schema** skill)
+- Author/Organization identity with `sameAs` for disambiguation (see [Structured Data](references/structured-data.md))
 
 Reinforces E-E-A-T; AI-search specifics live in the **ai-seo** skill. Detail in [Content Strategy](references/content-strategy.md).
 
@@ -521,6 +536,7 @@ Same format as above
 
 - [SEO Fundamentals](references/seo-fundamentals.md): Google's official stance and common misconceptions (title/meta length, meta keywords, duplicate content, E-E-A-T, retired tools) with sources
 - [Content Strategy](references/content-strategy.md): Search intent, keyword clustering, content depth, freshness, topic clusters, SERP features, semantic SEO
+- [Structured Data](references/structured-data.md): JSON-LD format, Google guidelines, supported vs retired rich-result types, detection and validation
 - [Link Building](references/link-building.md): Authority and link building — linkable assets, white-hat acquisition, quality filters, backlink audit
 - [International SEO](references/international-seo.md): Evidence and sources for hreflang, canonical + i18n, sitemaps, URL structure, and content quality across locales
 - [AI Writing Detection](references/ai-writing-detection.md): Common AI writing patterns to avoid (em dashes, overused phrases, filler words)
@@ -538,7 +554,7 @@ Same format as above
 - Rich Results Test (**use this for schema validation — it renders JavaScript**)
 - Schema Validator
 
-> **Note on schema detection:** `web_fetch` strips `<script>` tags (including JSON-LD) and cannot detect JS-injected schema. Use the browser tool, Rich Results Test, or Screaming Frog instead — they render JavaScript and capture dynamically-injected markup. See the Schema Markup Detection Limitation section above.
+> **Note on structured data detection:** `web_fetch` strips `<script>` tags (including JSON-LD), but `curl` shows server-rendered JSON-LD (Yoast, RankMath and AIOSEO print it server-side). Only JS-injected markup needs rendering: use the browser tool, Rich Results Test, or Screaming Frog. See the Structured Data Detection Limitation section above.
 
 **Paid Tools** (if available)
 - Screaming Frog
@@ -563,6 +579,5 @@ Same format as above
 - **ai-seo**: For optimizing content for AI search engines (AEO, GEO, LLMO)
 - **programmatic-seo**: For building SEO pages at scale
 - **site-architecture**: For page hierarchy, navigation design, and URL structure
-- **schema**: For implementing structured data
 - **cro**: For optimizing pages for conversion (not just ranking)
 - **analytics**: For measuring SEO performance

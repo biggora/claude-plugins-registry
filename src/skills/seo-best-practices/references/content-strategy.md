@@ -151,7 +151,7 @@ Deep-dive companion to the SEO Audit skill. The main SKILL.md carries brief chec
 
 ## SERP Features & Rich Results
 
-**What it is.** SERP features are the enriched result types Google shows beyond the standard blue link: *featured snippets* (an answer block pulled to the top), *People Also Ask* (expandable related questions), and *rich results* (results enhanced with structured-data elements like star ratings, FAQs, prices). This section audits *eligibility and opportunity*; the actual schema markup belongs to the separate `schema` skill.
+**What it is.** SERP features are the enriched result types Google shows beyond the standard blue link: *featured snippets* (an answer block pulled to the top), *People Also Ask* (expandable related questions), and *rich results* (results enhanced with structured-data elements like star ratings, prices, breadcrumbs). This section audits *eligibility and opportunity*; the markup itself is covered in [Structured Data](structured-data.md).
 
 **Why it matters.** These features take prominent SERP real estate and can earn clicks above the #1 organic link. Structuring content to be snippet- and rich-result-eligible captures visibility you would otherwise miss.
 
@@ -159,7 +159,7 @@ Deep-dive companion to the SEO Audit skill. The main SKILL.md carries brief chec
 
 **Mine People Also Ask.** The PAA questions for your target query are a free list of related sub-questions real users ask. Cover them as H2/H3 sections or an FAQ block to expand topical coverage and qualify for those slots.
 
-**Rich results need structured data.** Eligibility for rich results (FAQ, Product, Review, Article, and others) comes from valid structured data on the page. This skill audits *whether the opportunity exists and whether the page qualifies*; implementing the markup is the `schema` skill's job. Validate eligibility with the [Google Rich Results Test](https://search.google.com/test/rich-results), which renders JavaScript and reports which rich-result types the page is eligible for. Note that eligibility does not guarantee Google displays the feature.
+**Rich results need structured data.** Eligibility for rich results (Product, Review, Article, and others) comes from valid structured data on the page. FAQ and HowTo rich results are retired. This skill audits *whether the opportunity exists and whether the page qualifies*; see [Structured Data](structured-data.md) for the markup. Validate eligibility with the [Google Rich Results Test](https://search.google.com/test/rich-results), which renders JavaScript and reports which rich-result types the page is eligible for. Note that eligibility does not guarantee Google displays the feature.
 
 **Audit checklist:**
 - [ ] For target queries, check whether a featured snippet exists and what format it uses (paragraph / list / table).
@@ -167,7 +167,7 @@ Deep-dive companion to the SEO Audit skill. The main SKILL.md carries brief chec
 - [ ] Use ordered lists for steps and tables for comparisons to match snippet formats.
 - [ ] Pull the PAA questions for the query; confirm the page covers them.
 - [ ] Run the page through the Rich Results Test; record which rich-result types it is eligible for.
-- [ ] Flag rich-result opportunities (FAQ, Product, Review, Article) and hand schema implementation to the `schema` skill.
+- [ ] Flag rich-result opportunities (Product, Review, Article) and check the markup against [Structured Data](structured-data.md).
 
 **Sources:** [SearchAtlas: SEO Best Practices](https://searchatlas.com/blog/seo-best-practices/) · [Google: Search Gallery (structured data)](https://developers.google.com/search/docs/appearance/structured-data/search-gallery) · [Google: Rich Results Test](https://search.google.com/test/rich-results) · [Google: SEO Starter Guide](https://developers.google.com/search/docs/fundamentals/seo-starter-guide?hl=en)
 
@@ -181,7 +181,7 @@ Deep-dive companion to the SEO Audit skill. The main SKILL.md carries brief chec
 
 **Cover the topic, don't chase magic.** Define the main entity clearly early on. Address the sub-concepts and attributes a knowledgeable writer naturally would — for a "running shoes" page, that means cushioning, drop, terrain, sizing, and durability. Use consistent naming for the entity throughout rather than scattering synonyms that obscure what the page is about. This is "cover the topic thoroughly and name your entity clearly," not a trick that bypasses quality.
 
-**Disambiguate with schema.** Organization, Person, and Author markup with a `sameAs` property (linking to authoritative profiles like Wikipedia, LinkedIn, or official social accounts) helps Google match your entity to the correct real-world thing. As with rich results, the *implementation* of this markup is the `schema` skill's responsibility; here you audit whether the entity is clearly defined and disambiguation signals exist.
+**Disambiguate with schema.** Organization, Person, and Author markup with a `sameAs` property (linking to authoritative profiles like Wikipedia, LinkedIn, or official social accounts) helps Google match your entity to the correct real-world thing. As with rich results, see [Structured Data](structured-data.md) for the markup; here you audit whether the entity is clearly defined and disambiguation signals exist.
 
 **Overlap notes.** Clear entities and consistent author/organization signals reinforce E-E-A-T (experience, expertise, authoritativeness, trust) — the two work together. AI-search-specific tactics (how generative engines cite sources) live in the `ai-seo` skill, not here.
 
@@ -189,7 +189,7 @@ Deep-dive companion to the SEO Audit skill. The main SKILL.md carries brief chec
 - [ ] Confirm each page has one clearly defined main entity, named early and consistently.
 - [ ] Check that the page covers the related concepts/attributes a knowledgeable page would include.
 - [ ] Verify entity naming is consistent (not scattered synonyms that blur the topic).
-- [ ] Confirm Organization/Person/Author identity with `sameAs` exists for disambiguation (hand markup to the `schema` skill).
+- [ ] Confirm Organization/Person/Author identity with `sameAs` exists for disambiguation (markup details in [Structured Data](structured-data.md)).
 - [ ] Cross-check that entity and author signals support E-E-A-T.
 - [ ] Frame entity work as thorough topic coverage and disambiguation, not a shortcut around content quality.
 
