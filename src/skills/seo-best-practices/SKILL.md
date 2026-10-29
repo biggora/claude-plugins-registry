@@ -2,7 +2,7 @@
 name: seo-best-practices
 description: When the user wants to audit, review, or diagnose SEO on their site — technical, on-page, content, international, or off-page. Use when they mention "SEO audit," "technical SEO," "why am I not ranking," "traffic dropped," "lost rankings," "not showing up in Google," "Google update hit me," "page speed," "Core Web Vitals," "crawl errors," "indexing issues," "currently not indexed," "on-page SEO," "meta tags," "duplicate content," "keyword cannibalization," "search intent," "content refresh," "structured data," "schema markup," "JSON-LD," "rich results," "hreflang," "international SEO," "local SEO," or "backlinks." Trigger even on vague asks like "my SEO is bad" or a post-migration traffic drop — start with an audit. Do NOT use this skill for adjacent work; route instead. AI Overviews or generative-engine optimization → ai-seo. Keyword-target pages at scale → programmatic-seo. Navigation, URL hierarchy, or information architecture → site-architecture. Conversion rate → cro. Analytics or GA4 setup → analytics.
 metadata:
-  version: 1.2.0
+  version: 1.3.0
 ---
 
 # SEO Best Practices
