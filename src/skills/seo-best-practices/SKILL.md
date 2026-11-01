@@ -165,6 +165,7 @@ Reporting "no schema found" based solely on `web_fetch` leads to false audit fin
 - Markup must match content visible on the page; never mark up hidden content.
 - Include every required property for the target rich-result type; a few complete, accurate properties beat many incomplete ones.
 - Self-serving reviews on LocalBusiness/Organization are not eligible for review stars.
+- Search Console "Missing field aggregateRating/review" on Products is non-critical: add them only from real reviews shown on the page; never fabricate or import ratings from other sites (marketplaces included). With no on-site reviews, leave the warning and note it as by design.
 - Link entities with `@id` (Organization, WebSite, Article publisher) instead of duplicating them.
 - Prefer server-side output; Google can process JS-injected JSON-LD, but server-rendered markup is more reliable.
 - FAQ and HowTo no longer produce rich results; existing markup is harmless but earns nothing.
