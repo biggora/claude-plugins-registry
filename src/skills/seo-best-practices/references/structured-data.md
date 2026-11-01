@@ -204,6 +204,8 @@ From Google's General Structured Data Guidelines:
 - Do not block pages that carry structured data with robots.txt, `noindex` or other access controls.
 - If a page marks up reviews, include all the reviews visible on the page. Fake reviews, or ratings not written by real users, can bring a manual action.
 - Self-serving reviews are not eligible. If the reviewed entity controls the reviews about itself (a `LocalBusiness` or other `Organization` marked up with its own reviews, including via an embedded third-party widget), the page is ineligible for the review-star feature.
+- Do not aggregate reviews or ratings from other websites (marketplaces, Amazon, Etsy, Redbubble, Trustpilot imports). Ratings in markup must come from reviews collected and shown on the marked-up site.
+- Do not mark up fake reviews or incentivized reviews without a clear, prominent disclosure of the incentive (money, discounts, free products). Google added this to the review snippet guidelines on July 24, 2026 ([Documentation Updates](https://developers.google.com/search/updates)).
 
 Structured-data spam or policy violations can trigger a manual action. It removes rich-result eligibility for the affected pages and does not affect ranking in web search. Check the Manual Actions report in Search Console.
 
@@ -217,7 +219,7 @@ Only types listed on Google's Search Gallery can earn rich results; site-wide ty
 Key properties for the most common ones (confirm against the feature's own page):
 
 - **Article:** no required properties. Recommended: `headline`, `image`, `datePublished`, `dateModified` (ISO 8601 with timezone), `author` (Person or Organization with `name` and `url`).
-- **Product, merchant listing:** requires `name`, `image`, and `offers` as an `Offer` with `price` (greater than zero) and `priceCurrency`. `availability`, `aggregateRating`, `review`, `gtin`/`sku` and `brand` are recommended. For pages where the product cannot be bought, use the product snippet variant.
+- **Product, merchant listing:** requires `name`, `image`, and `offers` as an `Offer` with `price` (greater than zero) and `priceCurrency`. `availability`, `aggregateRating`, `review`, `gtin`/`sku` and `brand` are recommended. Merchant listing applies only to pages where the site itself is the seller; pages that link out to marketplaces or other sellers use the product snippet variant.
 - **Review snippet / AggregateRating:** `Review` needs `author`, `itemReviewed` (unless nested), `reviewRating.ratingValue`. `AggregateRating` needs `ratingValue` plus `ratingCount` or `reviewCount`.
 - **Breadcrumb:** `BreadcrumbList` with `itemListElement` of at least two `ListItem`s, each with `name` and `item` (the last `item` may be omitted) and a `position`.
 - **Organization:** no required properties. Recommended: `name`, `url`, `logo` (at least 112x112 px, crawlable), `sameAs` (profile URLs). It belongs in every page's graph (see Site-Wide Coverage), with full detail on home, about and contacts.
@@ -274,6 +276,23 @@ Validation tools:
 - **[Schema Markup Validator](https://validator.schema.org/):** checks generic schema.org syntax, including types Google does not use.
 - **Search Console rich-result reports:** catch sitewide errors and warnings after launch.
 
+### Search Console Non-Critical Warnings
+
+Non-critical issues, for example Product snippets "Missing field "aggregateRating"" or "Missing field "review"", are suggestions. A Product with valid `offers` is still eligible, because Google needs only one of `review`, `aggregateRating` or `offers`. Decision rule:
+
+1. Real reviews are collected and visible on the page: mark them up with `review`/`aggregateRating` computed from that data.
+2. No reviews collected on the site (affiliate catalog, dropship pages, marketplace-linked listings): leave the warning; report it as "no action, by design".
+3. Never fabricate values, never use placeholder or zero ratings, and never import third-party ratings to silence the warning. The risk is a structured-data manual action and loss of rich results.
+
+**Merchant listings warnings (shipping, returns, identifiers).**
+
+- Merchant listings apply only when the site itself sells. Google excludes "pages with links to other sites that sell the product". On affiliate or marketplace-linked pages the Product is a product snippet: leave `shippingDetails` and `hasMerchantReturnPolicy` warnings as "no action, by design", and never copy another seller's shipping or return terms into your markup.
+- Real merchants: Google recommends one global return policy and one global shipping policy under Organization markup, with Offer-level markup only for products that override it.
+- "No global identifier": add `gtin`/`mpn` only when they really exist, and `brand` when a real brand is shown on the page. Never invent identifiers. Print-on-demand and handmade items usually have no GTIN, so a real `brand` is the honest fix; the non-critical warning may remain.
+
+Re-check the report periodically: Google says such issues could be reclassified as critical. Treat critical issues (for example a missing `offers.price`) as real errors.
+
+- [Google: Product Snippet](https://developers.google.com/search/docs/appearance/structured-data/product-snippet)
 - [Google: Generate Structured Data with JavaScript](https://developers.google.com/search/docs/appearance/structured-data/generate-structured-data-with-javascript)
 - [Google: General Structured Data Guidelines](https://developers.google.com/search/docs/appearance/structured-data/sd-policies)
 
@@ -326,6 +345,8 @@ One `@graph` block: an Organization linked by `@id` to the Article's `publisher`
 - [ ] Prefer server-side output for Product price and availability.
 - [ ] Run the Rich Results Test and the Schema Markup Validator on key templates.
 - [ ] Review Search Console rich-result reports and the Manual Actions report.
+- [ ] Search Console non-critical warnings are triaged: missing `review`/`aggregateRating` is fixed only with real on-site reviews, otherwise documented as no action.
+- [ ] Merchant-listing fields (shipping, returns) appear only when the site is the seller; affiliate/marketplace-linked Products carry no borrowed shipping/return terms and no invented GTINs.
 - [ ] Never present structured data as a ranking factor; report gaps as coverage and eligibility findings.
 
 Sources: [Intro](https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data) | [General Guidelines](https://developers.google.com/search/docs/appearance/structured-data/sd-policies) | [Search Gallery](https://developers.google.com/search/docs/appearance/structured-data/search-gallery) | [Generate with JavaScript](https://developers.google.com/search/docs/appearance/structured-data/generate-structured-data-with-javascript) | [Documentation Updates](https://developers.google.com/search/updates) | [Review Snippet](https://developers.google.com/search/docs/appearance/structured-data/review-snippet) | [Merchant Listing](https://developers.google.com/search/docs/appearance/structured-data/merchant-listing)
