@@ -1,17 +1,52 @@
 ---
 name: youtube-thumbnail
-description: "Generates professional YouTube thumbnails in 11 strategic styles with auto-detection of AI image backends (A1111, ComfyUI, MCP Imagen 4, Gemini API, fal.ai FLUX, OpenAI gpt-image-1) and Pillow compositing. Trigger when the user asks to create, generate, or design a YouTube thumbnail, video cover, channel art, or presentation title slide. Also trigger for batch thumbnail creation or YouTube visual workflow automation."
+description: "Create YouTube thumbnails in 11 static styles or use the Hover Hook workflow to match a thumbnail to the video's opening frame and motion. Use for video covers, thumbnails that appear to come alive on hover, coordinated thumbnail/opening design, or batch thumbnail workflows. Supports existing footage and planning new shoots; use the user's requested image backend, including Antigravity CLI (agy)."
 ---
 
 # YouTube Thumbnail Generation Skill (2026 Edition)
 
 ## Overview
 
-This skill enables **fully autonomous** generation of professional YouTube thumbnails
-in 11 strategic styles from THUMBNAILS.md. Zero user interaction required after the
-initial request. The agent auto-selects style, builds a prompt, generates the base
-image via the best available AI backend, applies compositing and text via Pillow,
+The static workflow generates professional YouTube thumbnails
+in 11 strategic styles from THUMBNAILS.md. The agent selects a style, builds a
+prompt, generates the base image via the best available AI backend, applies
+compositing and text via Pillow,
 and saves a final **1280×720 PNG** to `/mnt/user-data/outputs/thumbnail.png`.
+
+The **Hover Hook** workflow instead coordinates a static cover with the actual
+opening of the video. Select the mode before running the static generator.
+
+## Hover Hook mode: a thumbnail that becomes the opening
+
+When the user asks for an animated-looking thumbnail, a hover hook, seamless
+thumbnail-to-video motion, or the technique from
+[vidIQ's tutorial](https://www.youtube.com/watch?v=XqrMMgQMUdk), read
+[references/hover-hook.md](references/hover-hook.md) and follow that workflow.
+This is a coordinated production method, not a twelfth static visual style.
+
+- Build the thumbnail from the fully composited first frame of the opening;
+  keep text, graphics, crop, subject, and color treatment consistent as motion
+  begins. Plan the next 15 seconds to deliver the cover's promise without a
+  greeting/logo preamble.
+- For a new shoot, provide the opening composition and action plan. For an
+  edited video, use the actual first frame and inspect its opening. For an
+  already-published video, a thumbnail change does not change its video frames.
+- Return an actual thumbnail plus a matching opening/preview when source footage
+  and editing authorization are available. With no footage, return a clearly
+  labeled production plan or concept; do not claim a finished matched video.
+- A YouTube custom thumbnail remains a still image. The moving effect comes
+  from video playback; do not promise an animated PNG/GIF upload or that every
+  YouTube preview will start at frame zero.
+- For an explicitly requested `agy` image/concept task, use the existing
+  [Gemini CLI skill](../../.agents/skills/gemini-cli/SKILL.md) and its native
+  Google-account image workflow. An AI-generated cover alone is a concept until
+  matched to the actual video opening; it is not evidence of a finished hook.
+
+In this mode, bypass the static backend auto-detection, standalone text/effects,
+embedded generator, fixed Linux output path, and fallback rules below. Apply
+shared design decisions in the video timeline first, export the cover from it,
+and verify the decoded image size and the transition. Use the user's output
+directory or a dedicated directory in the current workspace.
 
 ---
 
@@ -22,10 +57,11 @@ Trigger when the user:
 - Provides a video title or topic and needs a visual
 - Wants product video covers, presentation title slides, or channel art
 - Needs batch thumbnail creation or automation for a YouTube workflow
+- Wants a Hover Hook: a cover matched to the opening video and its initial motion
 
 ---
 
-## Architecture: Two-Layer Pipeline
+## Static mode architecture: Two-Layer Pipeline
 ```
 [User Request]
       │
@@ -214,7 +250,7 @@ def select_style(niche: str, style_override: str = None) -> str:
 
 ---
 
-## Full Python Implementation
+## Static mode: Full Python Implementation
 
 When creating a thumbnail, write this complete script to `/home/claude/generate_thumbnail.py`,
 then execute it with `python3 generate_thumbnail.py`. All values in CAPS are filled in
@@ -941,7 +977,8 @@ if __name__ == "__main__":
 
 ## Agent Execution Protocol
 
-When the user asks for a thumbnail, the agent follows these steps:
+For an ordinary static thumbnail, follow these steps. For Hover Hook requests,
+use [the dedicated workflow](references/hover-hook.md) instead of this script.
 
 ### Step 1 — Parse
 Extract from message:
@@ -1034,7 +1071,7 @@ STYLE_PROMPTS = {
 
 ---
 
-## Output Specification
+## Static Output Specification
 - **Path:** `/mnt/user-data/outputs/thumbnail.png`
 - **Resolution:** 1280 × 720 px (YouTube 16:9 standard)
 - **Format:** PNG
