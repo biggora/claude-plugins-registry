@@ -1,187 +1,68 @@
-# Configuration Reference
+# Installation, authentication, and migration
 
-## File Locations
+Verified 2026-11-07. Use installed help for version-specific behavior.
 
-| File | Purpose |
-|---|---|
-| `~/.gemini/settings.json` | Global user settings |
-| `<project>/.gemini/settings.json` | Project-level settings (overrides global) |
-| `~/.gemini/GEMINI.md` | Global persistent memory/context |
-| `<project>/GEMINI.md` | Project context (loaded automatically) |
-| `<project>/.gemini/GEMINI.md` | Alternative project context location |
-| `~/.gemini/.env` | Global API key env file |
-| `./.gemini/.env` | Project-level env file |
-| `<project>/.geminiignore` | Files/dirs to exclude from Gemini tools |
+## Installation
 
-## settings.json — Full Schema
+Only install/update when the task requires it. Official installers:
 
-```json
-{
-  // Model selection (nested under "model" object)
-  "model": {
-    "name": "gemini-2.5-pro"
-  },
-
-  // UI theme (nested under "theme" object)
-  "theme": {
-    "name": "dark"
-  },
-
-  // Auto-accept all tool confirmations (like --auto-approve)
-  "autoAccept": false,
-
-  // Tools configuration (nested under "tools" object)
-  "tools": {
-    "core": ["read_file", "write_file", "run_shell_command", "google_web_search"],
-    "allowed": ["my_custom_tool"],
-    "disabled": ["dangerous_tool_name"]
-  },
-
-  // Generation parameters
-  "generationConfig": {
-    "temperature": 0.7,
-    "topP": 0.95,
-    "thinkingBudget": 8192
-  },
-
-  // MCP server configurations
-  "mcpServers": {
-    "serverName": {
-      "command": "node",
-      "args": ["./server.js"],
-      "cwd": "./mcp_tools",
-      "env": {
-        "API_KEY": "$MY_ENV_VAR"
-      },
-      "timeout": 600000,
-      "trust": false,
-      "includeTools": ["safe_tool_1"],
-      "excludeTools": ["unsafe_tool"]
-    }
-  },
-
-  // Sandbox settings
-  "sandbox": {
-    "enabled": false,
-    "command": "docker"
-  },
-
-  // Telemetry
-  "telemetry": {
-    "enabled": true
-  }
-}
+```powershell
+# Windows PowerShell
+irm https://antigravity.google/cli/install.ps1 | iex
+agy --version
 ```
 
-## Environment Variables
-
-| Variable | Purpose |
-|---|---|
-| `GEMINI_API_KEY` | Gemini API key (Option 2 auth) |
-| `GOOGLE_API_KEY` | Vertex AI API key (Option 3 auth) |
-| `GOOGLE_GENAI_USE_VERTEXAI` | Set to `true` to use Vertex AI |
-| `GOOGLE_CLOUD_PROJECT` | GCP project ID for Vertex AI |
-| `GEMINI_MODEL` | Override default model |
-| `GEMINI_SANDBOX` | Sandbox type (`docker`, `podman`, etc.) |
-
-## GEMINI.md Context Files
-
-Context files are plain Markdown. They're loaded hierarchically and merged.
-
-```markdown
-# Project Name
-
-## Rules
-- Always use TypeScript strict mode
-- Prefer async/await over .then()
-
-## Architecture
-The project follows a microservices pattern.
-Main services: auth, api, worker.
-
-## Include external files
-@./docs/api-reference.md
-@./src/types/index.ts
+```bash
+# macOS / Linux
+curl -fsSL https://antigravity.google/cli/install.sh | bash
+agy --version
 ```
 
-**`@` file references** — include any file's content:
-- `@./relative/path.md` — relative to GEMINI.md location
-- `@/absolute/path.js` — absolute path
+Windows default binary: `%LOCALAPPDATA%\agy\bin\agy.exe`.
+macOS/Linux default: `~/.local/bin/agy`. Reopen the terminal after PATH changes.
+`agy update` updates an installation; it is not a diagnostic command.
 
-**Memory commands:**
-```
-/memory add "Staging database is on port 5432"
-/memory show
-/memory reload     # reload from disk after external edits
-```
-(Writes to `~/.gemini/GEMINI.md`)
+## Authentication
 
-## .geminiignore
+Start interactive `agy` once for Google account sign-in. Existing local
+Antigravity credentials can be reused through the OS keyring. Headless runs need
+working credentials beforehand. Let the user complete browser sign-in.
 
-Similar to `.gitignore`. Place in project root.
+For Gemini API-key mode, merge `"modelProvider": "gemini"` into
+`~/.gemini/antigravity-cli/settings.json` and provide `GEMINI_API_KEY` through the
+execution environment or CI secret store. The variable alone does not select
+this provider. Preserve other settings; do not put keys in instructions or print
+their values. To return to account authentication, remove `modelProvider` and
+restart. `/logout` does not clear an environment key.
 
-```
-# .geminiignore
-/node_modules/
-/dist/
-*.log
-*.env
-secret-config.json
-/backups/
-```
+For Google Cloud ADC, follow the current authentication guide: configure ADC
+for the intended project and enable `AGY_ADC_AUTH=true` as documented. Do not
+assume legacy Vertex AI environment variables configure the new agent harness.
 
-Gemini CLI also respects `.gitignore` automatically.
+## Files and migration
 
-## Model Configuration
+| Purpose | Antigravity CLI location |
+| --- | --- |
+| User settings | `~/.gemini/antigravity-cli/settings.json` |
+| Global MCP | `~/.gemini/config/mcp_config.json` |
+| Workspace MCP | `<workspace>/.agents/mcp_config.json` |
+| Workspace skills | `<workspace>/.agents/skills/` |
+| Global skills | `~/.gemini/skills/` or `~/.gemini/antigravity-cli/skills/` |
+| Workspace instructions | Existing `AGENTS.md` and `GEMINI.md` |
+| Global instructions | `~/.gemini/GEMINI.md` |
 
-```json
-{
-  "model": {
-    "name": "gemini-2.5-pro"
-  },
-  "generationConfig": {
-    "temperature": 1.0,
-    "topP": 0.95,
-    "topK": 64,
-    "thinkingBudget": 8192,
-    "maxOutputTokens": 8192
-  }
-}
-```
+First-launch onboarding can migrate selected legacy assets. When migration is
+requested, inspect files and preserve unrelated entries. Convert extensions with
+`agy plugin import gemini`; inspect the resulting plugins before enabling them.
+Legacy command templates become skills. Do not assume old `.toml` commands or
+`~/.gemini/settings.json` schemas work unchanged. MCP field changes are in
+[MCP and plugins](mcp-and-extensions.md).
 
-- `thinkingBudget`: controls extended thinking for Gemini 2.5+ models
-- Lower `temperature` = more deterministic output (good for code)
-- Higher `temperature` = more creative (good for writing)
+Use `/config` or `/settings` for supported settings. `--settings` accepts an
+inline JSON object or file for session-only overrides without saving defaults.
+Do not invent a complete settings schema from the old CLI.
 
-## System Prompt Override
-
-Override the system prompt via settings.json:
-```json
-{
-  "systemPrompt": "You are a helpful assistant for Python development."
-}
-```
-
-Or use GEMINI.md context files to provide project-specific instructions (preferred approach).
-
-## Trusted Folders
-
-Control which directories allow shell command execution:
-
-```json
-{
-  "trustedFolders": ["/home/user/projects", "/workspace"]
-}
-```
-
-## Token Caching
-
-Enabled by default for large context files. Reduces costs and latency when GEMINI.md files are large.
-
-```json
-{
-  "tokenCaching": {
-    "enabled": true
-  }
-}
-```
+Sources: [quickstart](https://antigravity.google/docs/getting-started/),
+[authentication](https://antigravity.google/docs/install?tab=cli),
+[settings](https://antigravity.google/docs/cli/using/),
+[migration](https://antigravity.google/docs/cli/gcli-migration/).

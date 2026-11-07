@@ -1,260 +1,73 @@
-# MCP Servers & Extensions Reference
+# MCP, plugins, and reusable instructions
 
-## What is MCP?
+Read `agy mcp add --help` and `agy plugin --help` before changing configuration.
 
-Model Context Protocol (MCP) is a standard that lets external servers expose tools and
-resources to Gemini CLI. MCP servers act as a bridge between Gemini and external systems
-(databases, APIs, custom scripts, cloud services).
+## MCP
 
-## MCP Server Configuration in settings.json
+CLI servers belong in `~/.gemini/config/mcp_config.json` or workspace
+`.agents/mcp_config.json`, under `mcpServers`, rather than legacy settings.json.
 
 ```json
 {
   "mcpServers": {
-    "github": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-github"],
-      "env": {
-        "GITHUB_TOKEN": "$GITHUB_TOKEN"
-      }
-    },
-    "postgres": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-postgres"],
-      "env": {
-        "DATABASE_URL": "$DATABASE_URL"
-      }
-    },
-    "myPythonServer": {
+    "recipe-tools": {
       "command": "python",
-      "args": ["-m", "my_mcp_server"],
-      "cwd": "./mcp_tools",
-      "env": {
-        "API_KEY": "$MY_API_KEY"
-      },
-      "timeout": 15000,
-      "trust": false,
-      "includeTools": ["safe_tool_1", "safe_tool_2"],
-      "excludeTools": ["dangerous_tool"]
+      "args": ["-m", "recipe_mcp"],
+      "enabledTools": ["search_recipes"],
+      "timeoutSeconds": 180
     }
   }
 }
 ```
 
-## MCP Server Config Fields
+Use the actual installed module/executable. Supply credentials through the parent
+execution environment or an existing secret mechanism. Do not insert a literal
+key or assume old `$VAR` interpolation carries over to `env` values.
+For remote Streamable HTTP use `serverUrl`. Current docs support `${VAR}` in
+headers, e.g. `"Authorization": "Bearer ${RECIPE_TOKEN}"`; never print resolved
+headers. Legacy `httpUrl` and HTTP+SSE are unsupported in CLI configuration.
 
-| Field | Type | Description |
-|---|---|---|
-| `command` | string | Executable to run |
-| `args` | string[] | Arguments array |
-| `cwd` | string | Working directory |
-| `env` | object | Environment variables (use `"$VAR"` to reference env) |
-| `timeout` | number | Connection timeout in ms (default: 600000 — 10 minutes) |
-| `trust` | boolean | Skip all confirmation dialogs (use with caution) |
-| `includeTools` | string[] | Whitelist of tools to expose |
-| `excludeTools` | string[] | Blacklist of tools to hide |
-| `description` | string | Human-readable description of the server |
-| `httpUrl` | string | HTTP endpoint URL (for streamable HTTP transport) |
-| `headers` | object | Custom HTTP headers for remote connections |
+| Old field | Antigravity field |
+| --- | --- |
+| `includeTools` | `enabledTools` |
+| `excludeTools` | `disabledTools` |
+| `timeout` in milliseconds | `timeoutSeconds` in seconds |
 
-## Remote MCP Servers (SSE/HTTP)
+Do not transfer `trust: true` as a blanket permission grant. Merge entries while
+preserving unrelated configuration.
 
-```json
-{
-  "mcpServers": {
-    "cloudflare": {
-      "url": "https://mcp.cloudflare.com/sse",
-      "transport": "sse"
-    }
-  }
-}
+```powershell
+agy mcp list
+agy mcp add recipe-tools python -m recipe_mcp
+agy mcp add recipe-api https://example.com/mcp
 ```
 
-Supports OAuth 2.0 for authenticated remote servers.
+The add examples are alternatives to editing JSON, and require the integration
+to be requested. In 1.5.2 all MCP flags must precede the server name, e.g.
+`agy mcp add --type http recipe-api URL`. Check which file was written, reload,
+and use `/mcp` to inspect connection state and exposed tools. Do not call a
+mutating tool merely to test the connection.
 
-## CLI Commands for MCP Management
+## Plugins, skills, hooks
 
-```bash
-# Add a server
-gemini mcp add github --command "npx -y @modelcontextprotocol/server-github"
+`agy plugin list` inspects plugins; `agy plugin import gemini` migrates legacy
+extensions and converts commands to skills. `agy plugin validate PATH` checks a
+plugin, not a standalone skill. For new packages, follow the current
+[plugin authoring guide](https://antigravity.google/docs/build-plugins/) rather
+than copying a `gemini-extension.json` manifest.
 
-# List configured servers
-gemini mcp list
+Reusable workspace prompts go in `.agents/skills/<name>/SKILL.md` with `name`
+and `description` frontmatter. Convert the intent of `.toml` commands into
+instructions. Legacy shell expansion such as `!{git diff}` is not guaranteed to
+execute in a Markdown skill. For a commit-message skill, instruct the agent to
+read the staged diff and draft text; do not automatically commit.
 
-# Remove a server
-gemini mcp remove github
-```
+Use `/skills`, `/plugin`, and `/hooks` for discovery. For lifecycle automation,
+read the current [hook schema](https://antigravity.google/docs/hooks/) and
+configure only requested events. Browser, remote-control, scheduling, and agent
+orchestration features do not expand the task's authorization.
 
-**In interactive session:**
-```
-/mcp list           # list all servers and status
-/mcp status         # detailed connection info
-/mcp enable github  # enable a disabled server
-/mcp disable github # disable without removing
-```
-
-## Using MCP Tools in Prompts
-
-```
-> @github List my open pull requests
-> @github Create an issue titled "Bug: login fails"
-> @slack Send summary of today's commits to #dev
-> @database Find users who haven't logged in for 30 days
-```
-
-## MCP Prompts as Slash Commands
-
-MCP servers can expose predefined prompts, which become slash commands:
-
-```
-/poem-writer --title="Gemini CLI" --mood="reverent"
-/pr-review --repo="my-project" --pr-number=42
-```
-
-Positional args also work:
-```
-/mycommand arg1 arg2
-```
-
-## Security Notes
-
-- Never hardcode API keys in settings.json — use `"KEY": "$ENV_VAR"` pattern
-- The CLI redacts sensitive env vars (`*TOKEN*`, `*SECRET*`, `*KEY*`, etc.) from MCP processes unless explicitly listed in `env`
-- `"trust": true` disables all confirmation dialogs — only use for servers you completely control
-- MCP servers run with your user account permissions
-
----
-
-## Extensions
-
-Extensions bundle together MCP servers, context files, and custom commands into a reusable unit.
-
-### Install from Git URL
-```bash
-gemini extensions install https://github.com/GoogleCloudPlatform/cloud-run-mcp
-```
-
-### Browse the gallery
-https://geminicli.com/extensions/
-
-### Popular extensions
-- **Cloud Run** (Google) — deploy to Cloud Run
-- **GitHub** — manage issues, PRs, repositories
-- **Redis** — query Redis instances
-- **DynaTrace** — observability integration
-
-### Extension Structure
-
-```
-my-extension/
-├── gemini-extension.json    # required manifest
-├── GEMINI.md                # optional context instructions
-└── commands/
-    └── deploy.toml          # optional custom commands
-```
-
-### gemini-extension.json Manifest
-
-```json
-{
-  "name": "my-extension",
-  "version": "1.0.0",
-  "description": "My custom extension",
-  "mcpServers": {
-    "my-server": {
-      "command": "node",
-      "args": ["./server.js"]
-    }
-  },
-  "contextFileName": "GEMINI.md",
-  "excludeTools": ["run_shell_command"]
-}
-```
-
-### Extension Locations
-
-- `~/.gemini/extensions/<n>/` — user-scoped (all projects)
-- `<project>/.gemini/extensions/<n>/` — project-scoped
-
-### Managing Extensions
-
-```
-/extensions list          # list installed extensions
-/extensions enable <n>    # enable extension
-/extensions disable <n>   # disable extension
-```
-
----
-
-## Custom Slash Commands (.toml) — Full Reference
-
-### File Locations
-
-```
-~/.gemini/commands/plan.toml              → /plan         (global)
-<project>/.gemini/commands/review.toml   → /review       (project)
-<project>/.gemini/commands/git/commit.toml → /git:commit  (namespaced)
-```
-
-### .toml Schema
-
-```toml
-# Required
-prompt = "Your prompt text here"
-
-# Optional
-description = "What this command does"
-
-# Arguments placeholder
-# Use {{args}} to insert all user-provided arguments
-prompt = "Review this code: {{args}}"
-
-# Shell command execution
-prompt = "Review staged changes:\n!{git diff --cached}"
-
-# File content injection
-prompt = "Review this config:\n@{./config.json}"
-
-# Combined example
-description = "Commit with AI message"
-prompt = """
-Write a conventional commit message for these changes:
-!{git diff --cached}
-
-Format: <type>(<scope>): <description>
-Types: feat, fix, docs, style, refactor, test, chore
-"""
-```
-
-### Usage examples
-
-```
-/plan                    # Run /plan command
-/review src/auth.py      # {{args}} = "src/auth.py"
-/git:commit              # Namespaced command
-```
-
-### Invoking with args
-```
-/review --file="src/auth.py" --focus="security"
-/review src/auth.py      # positional
-```
-
-## Multi-Modal Tool Responses
-
-MCP tools can return mixed content (text + images):
-
-```json
-{
-  "content": [
-    { "type": "text", "text": "Here is the chart:" },
-    { "type": "image", "data": "BASE64_DATA", "mimeType": "image/png" },
-    { "type": "text", "text": "Analysis complete." }
-  ]
-}
-```
-
-Gemini CLI will:
-1. Combine all text blocks into a single response part
-2. Pass image data as inline content to the model
-3. Show a user-friendly summary in the terminal
+Sources: local subcommand help,
+[MCP](https://antigravity.google/docs/mcp?tab=cli),
+[migration](https://antigravity.google/docs/cli/gcli-migration/),
+[skills](https://antigravity.google/docs/skills/).
