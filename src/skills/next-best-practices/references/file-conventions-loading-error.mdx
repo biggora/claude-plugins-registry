@@ -1,6 +1,6 @@
 ---
 name: file-conventions-loading-error
-description: Route loading UI, error.tsx recovery, stable catchError boundaries, global errors, and not-found handling in Next.js 16.3
+description: Route loading UI, error.tsx recovery, stable catchError boundaries, global errors, and not-found handling in Next.js 16.4
 ---
 
 # Loading and Error Boundaries
@@ -20,7 +20,7 @@ For finer control, place `<Suspense>` around the smallest slow or request-time r
 
 ## Route-Segment Errors
 
-`error.tsx` is a Client Component. In Next.js 16.3, prefer the stable `retry()` prop because it re-fetches and re-renders the boundary's children. `reset()` only clears client error state and re-renders without re-fetching, so it often cannot recover from a Server Component failure.
+`error.tsx` is a Client Component. Since Next.js 16.3, prefer the stable `retry()` prop because it re-fetches and re-renders the boundary's children. `reset()` only clears client error state and re-renders without re-fetching, so it often cannot recover from a Server Component failure.
 
 ```tsx
 'use client'

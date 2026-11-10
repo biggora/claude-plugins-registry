@@ -1,6 +1,6 @@
 ---
 name: version-and-tooling
-description: Version authority, stable Next.js 16.3 behavior, bundled docs, Turbopack defaults, and experimental feature boundaries
+description: Version authority, stable Next.js 16.4 baseline and security floor, bundled docs, Turbopack defaults, and experimental feature boundaries
 ---
 
 # Version and Tooling Authority
@@ -9,13 +9,15 @@ description: Version authority, stable Next.js 16.3 behavior, bundled docs, Turb
 
 Read the installed `next` version from `package.json` and the lockfile. When dependencies are installed, prefer the version-matched documentation in `node_modules/next/dist/docs/` over remembered framework behavior or the latest website.
 
-Next.js 16.3 can create or maintain a managed block in root `AGENTS.md` and `CLAUDE.md` files when `next dev` detects a coding agent. Preserve project instructions outside the managed markers. Do not manually copy the entire current website docs into a repository.
+Since 16.3, Next.js can create or maintain a managed block in root `AGENTS.md` and `CLAUDE.md` files when `next dev` detects a coding agent. Preserve project instructions outside the managed markers. Do not manually copy the entire current website docs into a repository.
 
 If local docs are unavailable, use official Markdown pages by appending `.md` to `https://nextjs.org/docs/...`. Use `/docs/llms.txt` to find the canonical page. Use canary docs only when the installed dependency is canary or the user explicitly requests canary work.
 
 ## Stable Baseline
 
-This reference was checked against Next.js 16.3.3, the current stable release documented on August 25, 2026. Avoid hard-coding that patch into generated applications; install the newest patched release allowed by the project's constraints and lockfile policy.
+Next.js 16.4 is the current stable baseline as of Nov 2026; it requires Node.js 20.9+ and ships React 19.3. Project-local, version-matched docs still take precedence. Avoid hard-coding a patch version into generated applications; install the newest patched release allowed by the project's constraints and lockfile policy.
+
+Security: use Next.js >= 16.4.5 on 16.x (`use cache` cache-leak fixes; 16.x <= 16.4.4 is affected). On 15.x use >= 15.5.29 (image SVG, Edge cookie and response-forwarding fixes). Next.js 17 is not released as of Nov 2026; announced: Cache Components become the default.
 
 Changes in 16.3 that normally require no application code:
 
@@ -25,12 +27,12 @@ Changes in 16.3 that normally require no application code:
 - App Router server rendering uses native Node.js streams for lower overhead.
 - The project-local TypeScript CLI is the default build checker and supports TypeScript 7 when the project installs it.
 
-Stable 16.3 APIs and behavior worth applying when the installed version supports them:
+Stable APIs and behavior (16.3 onward) worth applying when the installed version supports them:
 
 - `catchError` and the `retry()` error-boundary prop are stable.
 - `next/root-params` exposes async getters for root-level dynamic segments in Server Components.
 - Turbopack supports Vite-compatible `import.meta.glob`; it is unavailable under webpack.
-- `cacheComponents` and the separate `partialPrefetching` opt-in support reusable route App Shells and instant-navigation tooling.
+- `cacheComponents` and the separate `partialPrefetching` opt-in support reusable route App Shells and instant-navigation tooling. With `cacheComponents`, also set `partialPrefetching: true` (recommended; leaving it unset logs a warning).
 
 ## Do Not Confuse Defaults With Experimental Controls
 

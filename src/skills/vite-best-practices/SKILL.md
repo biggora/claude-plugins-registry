@@ -1,11 +1,11 @@
 ---
 name: vite-best-practices
-description: Configure, migrate, debug, or review Vite applications, libraries, SSR integrations, and plugins. Use for vite.config files, HMR, import.meta APIs, Vite environment variables, Rolldown/Oxc migration, dependency optimization, or the Environment API; do not use for framework behavior that does not involve Vite.
+description: Configure, migrate, debug, or review Vite applications, libraries, SSR integrations, and plugins. Use for vite.config files, HMR, import.meta APIs, Vite environment variables, Rolldown/Oxc migration, dependency optimization, the Environment API, or configuring Vitest 5; do not use for framework behavior that does not involve Vite.
 ---
 
 # Vite Best Practices
 
-This edition was verified against stable `vite@8.2.2` (August 2026). Vite 8 uses Rolldown for dependency optimization and production builds, Oxc for JavaScript transforms and minification, and Lightning CSS for CSS minification.
+Based on Vite 8.3 (8.3.7 is current as of Nov 2026; 8.0 stable was March 2026). Vite 8 uses Rolldown for dependency optimization and production builds, Oxc for JavaScript transforms and minification, and Lightning CSS for CSS minification.
 
 For version-sensitive work, confirm the project's installed Vite version first. If the user requests the latest version, also confirm the current `latest` npm dist-tag and use the matching official documentation; do not apply Vite 8-only options to older projects unless the task includes migration.
 
@@ -52,6 +52,7 @@ Read only the references relevant to the task:
 | Production builds, chunking, libraries, MPA, SSR, JavaScript API | [build-and-ssr](references/build-and-ssr.md) |
 | Custom runtimes or multi-environment framework/plugin work | [environment-api](references/environment-api.md) |
 | Vite 7 to 8 or `rolldown-vite` migration | [rolldown-migration](references/rolldown-migration.md) |
+| Vitest 5: Node/Vite requirements, `clearMocks` default, removed `sequential`, `bench` fixture, project inheritance | [vitest-5](references/vitest-5.md) |
 
 ## Verification Guidance
 

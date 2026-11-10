@@ -1,17 +1,18 @@
 ---
 name: cache-components
-description: Cache Components, use cache directives, cacheLife, cacheTag, PPR, migration gates, and invalidation in Next.js 16.3
+description: Cache Components, use cache directives, cacheLife, cacheTag, PPR, migration gates, and invalidation in Next.js 16.4
 ---
 
 # Cache Components
 
-Cache Components makes data dynamic by default and lets each route combine a prerendered shell with cached and request-time regions. Enable it deliberately:
+Cache Components makes data dynamic by default and lets each route combine a prerendered shell with cached and request-time regions. It caches any async computation, not just `fetch`, through the `'use cache'` directive, which is preferred over the legacy `unstable_cache`. Enable it deliberately, and also set `partialPrefetching: true` (recommended):
 
 ```ts
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
+  partialPrefetching: true, // leaving this unset logs a warning
 }
 
 export default nextConfig
@@ -27,6 +28,7 @@ When `cacheComponents` is enabled, these route segment exports fail validation:
 - `revalidate`
 - `fetchCache`
 - `dynamicParams`
+- `runtime`
 
 Replace their intent rather than copying them forward:
 
@@ -57,13 +59,13 @@ export async function getProduct(id: string) {
 }
 ```
 
-Inputs and referenced closed-over values become part of the cache key. Return values and arguments must be serializable. Do not read `cookies()`, `headers()`, or other request-time APIs inside a normal `'use cache'` scope; read them outside and pass the needed value as an argument, or stream the request-time region.
+Inputs and referenced closed-over values become part of the cache key. Return values and arguments must be serializable. Do not read `cookies()`, `headers()`, `searchParams`, or other request-time APIs inside a normal `'use cache'` scope (even via helpers); read them outside and pass the needed value as an argument, or stream the request-time region.
 
 ## Cache Variants
 
 | Directive | Storage and use | Important boundary |
 |-----------|-----------------|--------------------|
-| `'use cache'` | Default in-memory server cache plus client-navigation semantics. Use for most reusable cached work and prerendered output. | Entries can be evicted and do not provide durable cross-instance storage. |
+| `'use cache'` | Default in-memory server cache, reused at prerender time and shared across all users and requests, plus client-navigation semantics. Use for most reusable cached work and prerendered output. | Per deployment: entries can be evicted and are not persisted across serverless instances or deploys. |
 | `'use cache: remote'` | Persistent shared handler across server instances. Use when protecting an expensive or rate-limited upstream justifies network lookup and infrastructure cost. | Requires a provider-supplied or self-hosted `cacheHandlers` implementation. Avoid low-reuse or very fast operations. |
 | `'use cache: private'` | Allows request APIs inside the scope, but stores results only in browser memory. Nothing is stored on the server and entries do not survive reload. | Use only when moving request reads outside the cached function is impractical or server storage is disallowed. It does not make private data globally shareable. |
 
@@ -84,6 +86,10 @@ async function getCatalog() {
 }
 ```
 
+Built-in profiles: `default`, `seconds`, `minutes`, `hours`, `days`, `weeks`, `max` (there is no `min`). Inline objects take `stale`, `revalidate`, `expire`; omitted keys inherit from `default`.
+
+Set an explicit `cacheLife` in every `use cache` scope: nesting a short-lived cache (revalidate 0 or expire under 5 minutes, including `seconds`) inside an outer scope without one fails prerender.
+
 Tag only data with a real invalidation event. A tag is not a substitute for a coherent cache lifetime.
 
 ## Invalidation
@@ -94,7 +100,7 @@ Tag only data with a real invalidation event. A tag is not a substitute for a co
 | `revalidateTag(tag, 'max')` | Server Actions and Route Handlers | Serves stale content and refreshes in the background. | Eventual freshness is acceptable. |
 | `revalidatePath(path, type?)` | Server Actions and Route Handlers | Invalidates route output for a path. | The mutation maps cleanly to a known page or layout. |
 
-The single-argument `revalidateTag(tag)` behavior is legacy. Do not use it in new 16.x code.
+The single-argument `revalidateTag(tag)` form is deprecated. Pass a profile and do not use it in new 16.x code. `updateTag` throws outside Server Actions; use `revalidateTag(tag, 'max')` in Route Handlers and webhooks.
 
 ```ts
 'use server'
@@ -114,6 +120,37 @@ export async function createPost(formData: FormData) {
   redirect(`/posts/${post.id}`)
 }
 ```
+
+## Static Guarantees and Instant Navigation (16.3-16.4)
+
+Export `ensureStatic` from a page or layout (requires `cacheComponents`). Only `'navigation'` fails `next dev` and `next build` when request-time work appears in the route (uncached data, `connection()`, `cookies()`, `headers()`, short-lived `use cache`); a dynamic route then also needs `generateStaticParams`. `'shell'` and `'prefetch'` (need `partialPrefetching`) add no build validation, they only constrain what the shell or per-link prefetch may contain:
+
+```tsx
+export const ensureStatic = 'navigation'
+```
+
+With Cache Components, `next dev` warns in the dev overlay about non-instant navigations (the build is unaffected). Fix with `<Suspense>` (stream) or `'use cache'` (cache); opt a segment out with:
+
+```tsx
+export const instant = false
+```
+
+Read root params with `next/root-params` (Server Components and `use cache` scopes; not route handlers or Server Actions):
+
+```tsx
+import { lang } from 'next/root-params'
+
+export default async function Page() {
+  const locale = await lang()
+  return <p>{locale}</p>
+}
+```
+
+Other Cache Components rules:
+- Sync IO (`new Date()`, `Math.random()`, `crypto.randomUUID()`) during prerender errors: move it behind `connection()` + `<Suspense>` or into a Client Component.
+- `generateStaticParams` must return at least one param.
+- Navigation keeps routes alive with `<Activity mode="hidden">`, so state persists: add reset logic for dialogs, dropdowns and forms.
+- Legacy `unstable_cache` still works and persists across deploys. Never call the same `use cache` function both directly and from inside `unstable_cache`.
 
 ## Request-Time Work
 
