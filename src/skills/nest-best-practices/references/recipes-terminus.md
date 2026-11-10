@@ -140,7 +140,8 @@ TerminusModule.forRoot({
 - Enable shutdown hooks for Terminus lifecycle
 - Use `@HealthCheck()` decorator on endpoints
 - `HttpHealthIndicator` requires `@nestjs/axios`
-- Custom indicators extend `HealthIndicatorService`
+- Custom indicators inject `HealthIndicatorService` (v12 removed the `HealthIndicator` base class and `HealthCheckError`); report state by returning `up()`/`down()`, not by throwing
+- v12: the `timeout` option of the built-in database, microservice and gRPC indicators is deprecated; chain `.withTimeout(1500)` on the returned attempt
 
 <!--
 Source references:

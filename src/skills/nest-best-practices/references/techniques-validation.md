@@ -140,7 +140,7 @@ email: string;
 ## Key Points
 
 - Use `ValidationPipe` globally for automatic validation
-- Use `StandardSchemaValidationPipe` for existing schema-first models; do not add a custom Zod pipe when the built-in v12 pipe meets the need
+- Use `StandardSchemaValidationPipe` for existing schema-first models (Zod, Valibot, ArkType); do not add a custom Zod pipe when the built-in v12 pipe meets the need. It can be registered together with `ValidationPipe` — see [migration-v12](migration-v12.md)
 - Decorate DTO properties with `class-validator` decorators
 - Enable `transform` to auto-transform payloads
 - Use `whitelist` to strip unknown properties

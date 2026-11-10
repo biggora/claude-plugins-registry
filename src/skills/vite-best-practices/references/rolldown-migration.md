@@ -1,39 +1,31 @@
 ---
 name: vite-rolldown-migration
-description: Migrate Vite 7 or rolldown-vite projects to stable Vite 8.2 with Rolldown and Oxc
+description: Migrate Vite 7 or rolldown-vite projects to stable Vite 8 with Rolldown and Oxc
 ---
 
 # Vite 8 Migration
 
-This guide was verified against stable `vite@8.2.2`. Vite 8 replaces the esbuild + Rollup split with Rolldown-based dependency optimization/builds, Oxc transforms and JavaScript minification, and Lightning CSS minification. The Vite team reported up to 10–30x faster production builds in its Vite 8 announcement; treat that as an upper reported result, not a guaranteed project-wide improvement.
+Vite 8 (stable since March 2026; 8.3.7 is current as of Nov 2026) replaces the esbuild + Rollup split with Rolldown-based dependency optimization/builds, Oxc transforms and JavaScript minification, and Lightning CSS minification. The Vite team reported up to 10–30x faster production builds in its Vite 8 announcement; treat that as an upper reported result, not a guaranteed project-wide improvement.
 
 ## Migration Sequence
 
-1. Confirm Node.js `20.19+` or `22.12+`, the package manager, installed Vite/plugin versions, framework support, and the current build/test baseline.
+1. Confirm Node.js `20.19+` or `22.12+` (Node 20 reached end of life on 2026-04-30; prefer Node 22 or newer for new work), the package manager, installed Vite/plugin versions, framework support, and the current build/test baseline.
 2. Upgrade Vite and official/framework plugins within their documented peer ranges. Do not force Vite 8 through package-manager overrides when the framework has not declared support.
 3. Run the existing config and build before renaming compatibility options. This separates dependency/plugin failures from config migration failures.
 4. Replace deprecated options using the mappings below; do not blindly rename nested objects.
 5. Test dev startup/HMR, production output, SSR/library paths, and plugins that use build hooks or CommonJS interop.
 
-## Gradual Rolldown Test
+## Upgrading
 
-For a large Vite 7 project, the official intermediate path is to alias the `vite` package to `rolldown-vite`, keeping source imports unchanged:
+Vite 8 is stable: upgrade directly with `pnpm add -D vite@8`. Don't add `rolldown-vite`. If a project is already on `rolldown-vite`, switch back:
 
 ```json
-{
-  "devDependencies": {
-    "vite": "npm:rolldown-vite@7.2.2"
-  }
-}
+{ "devDependencies": { "vite": "^8.0.0" } }
 ```
 
-Continue importing from `vite`:
+Then revert any `import ... from 'rolldown-vite'` to `'vite'`.
 
-```ts
-import { defineConfig } from 'vite'
-```
-
-After resolving Rolldown-only issues, replace the alias with a supported Vite 8 range and review the remaining Vite 8 migration changes. Skip this intermediate step when the project is small or already has reliable build/runtime coverage.
+If `build.minify: 'esbuild'`, `build.cssMinify: 'esbuild'`, or a plugin calling `transformWithEsbuild` is still in use, install `esbuild` as a devDependency (Vite no longer depends on it); prefer `oxc` and `transformWithOxc`.
 
 ## Configuration Renames
 

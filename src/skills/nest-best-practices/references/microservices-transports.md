@@ -58,7 +58,7 @@ NestJS 12 also accepts regular expressions in Kafka `@MessagePattern()` and `@Ev
 ## NATS
 
 ```bash
-npm i @nats-io/transport-node
+npm i @nats-io/transport-node   # v12 (NATS v3); v11 used `nats`
 ```
 
 ```typescript

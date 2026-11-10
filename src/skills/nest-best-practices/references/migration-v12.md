@@ -1,13 +1,15 @@
 ---
 name: migration-v12
-description: NestJS 11 to 12 migration gates, breaking changes, and verification
+description: NestJS v11 to v12 changes that affect code — upgrade command, ESM, Standard Schema validation, testing, Terminus, config
 ---
 
-# NestJS 11 to 12 Migration
+# Migrating NestJS v11 to v12
+
+NestJS 12.0 shipped 2026-08-27; 12.4 is current as of Nov 2026. Source: https://docs.nestjs.com/migration-guide
 
 Use this reference only for an explicit migration or compatibility review. Do not silently upgrade a project while implementing an unrelated change.
 
-## Establish the Baseline
+## Baseline
 
 Inspect the package manifest and lockfile before editing:
 
@@ -17,57 +19,109 @@ Inspect the package manifest and lockfile before editing:
 - HTTP adapter, GraphQL driver, microservice transports, compiler/bundler, linter, and test runner;
 - custom bootstrap, lifecycle-order assumptions, serializers, deserializers, filters, and transport adapters.
 
-Keep the framework and companion packages on compatible majors. Confirm the current stable versions at migration time instead of copying the dated `12.0.1` observation from `SKILL.md`.
+Confirm the current stable versions at migration time; version numbers in this skill are dated observations.
 
-## Supported Runtime
-
-Nest 12 core packages are ESM and have two distinct practical floors:
-
-| Operation | Supported minimum documented for v12 |
-|---|---|
-| Run a Nest application | Node.js 20.19+, or 22.12+ on the 22.x line |
-| Run current `nest new`, `nest generate`, or `nest upgrade` schematics | Node.js 22.22.3+, 24.15+, or 26+ |
-
-Prefer the latest active Node.js LTS that satisfies both the application and CLI. Do not infer CLI compatibility solely from `@nestjs/core`'s `engines` field.
-
-## Upgrade Flow
-
-Upgrade the CLI and schematics used by the repository, then preview the migration:
+## Upgrade
 
 ```bash
-npm install --save-dev @nestjs/cli@latest @nestjs/schematics@latest
-npx nest upgrade --dry-run
+npm i -g @nestjs/cli@latest @nestjs/schematics@latest   # update the CLI first
+nest upgrade --dry-run                                   # preview the report
+nest upgrade
 ```
 
-Review the report before running `npx nest upgrade`. The command aligns Nest package majors and applies supported mechanical changes, but it cannot prove runtime compatibility or correct behavior.
+- `nest upgrade` moves every `@nestjs/*` package to v12 at once, bumps TypeScript to v6 and Jest to v30, and migrates `nest-cli.json` webpack options, GraphQL `playground` to `graphiql`, NATS packages, and `@nestjs/config` validation options. It does not convert the project to ESM, Vitest, or oxlint.
+- Do not mix majors: every Nest package must be on v12. `@nestjs/schematics` v12 needs TypeScript 6.
+- Node.js: app 20.19+ or 22.12+; `nest new`/`generate`/`upgrade` need 22.22.3+, 24.15+ or 26+. Prefer the latest active LTS that satisfies both, and do not infer CLI compatibility from `@nestjs/core`'s `engines` field alone.
 
-Do not force the application itself to ESM. Nest 12 can be consumed by a supported CommonJS application. If the user separately requests an ESM migration, update the package/module-resolution configuration and local import extensions as one coherent change.
+## ESM
 
-## Review These v12 Changes
+- Nest packages are ESM-only. A CommonJS app keeps working through `require(esm)`; staying CommonJS is fine.
+- To make your own code ESM: `"type": "module"` in `package.json`, `"module": "nodenext"` and `"moduleResolution": "nodenext"` in `tsconfig.json`, `.js` suffix on relative imports, `import.meta.dirname` instead of `__dirname`.
 
-- New projects can choose CommonJS or ESM. Generated ESM projects default to Vitest; generated projects use oxlint. Existing projects may keep their test and lint stacks.
-- Rspack is the monorepo default. `--webpack`, `--webpackPath`, and matching `nest-cli.json` options are deprecated; migrate custom webpack behavior deliberately.
-- Route parameter decorators accept Standard Schema metadata. Validation still requires `StandardSchemaValidationPipe`.
-- `StandardSchemaSerializerInterceptor` adds schema-based response serialization.
-- `@nestjs/config` `validationSchema` accepts Standard Schema. Joi must be v18+; its custom options move under `validationOptions.libraryOptions`.
-- GraphiQL is the default GraphQL IDE. `subscriptions-transport-ws` support is removed; use `graphql-ws`.
-- NATS uses v3 and `@nats-io/transport-node`. Packet serialization and custom deserializer input changed.
-- Lifecycle hooks execute by component hierarchy level. Remove assumptions based only on module import order and test required sequencing.
-- Route shadow/duplicate diagnostics and specificity-based resolution are opt-in through application options.
-- `HttpExceptionOptions.errorCode` provides a stable machine-readable error identifier.
-- `ConsoleLogger` treats plain objects after the message as structured params by default.
-- Dedicated gRPC exceptions plus `GrpcExceptionFilter` preserve gRPC status codes.
-- Kafka message/event patterns can be regular expressions.
-- WebSocket gateways support request-scoped providers; disconnect handlers can receive a reason.
-- Express graceful shutdown drains in-flight requests.
-- Official `@nestjs/observe` instrumentation is available but remains optional and sends telemetry to an external service.
+```typescript
+import { AppModule } from './app.module.js';     // not './app.module'
+protoPath: join(import.meta.dirname, 'hero/hero.proto'),  // not __dirname
+```
+
+- The `__dirname` and extensionless imports in other references are CommonJS style; adjust them in ESM projects.
+- AWS Lambda disables `require(esm)` by default: set `NODE_OPTIONS=--experimental-require-module` for CommonJS apps.
+
+## Validation: Standard Schema
+
+`StandardSchemaValidationPipe` (from `@nestjs/common`) validates against any Standard Schema library (Zod, Valibot, ArkType). It only validates parameters that declare a `schema`; `ValidationPipe` only validates class-typed parameters, so both can be registered together.
+
+```typescript
+import { z } from 'zod';
+import { StandardSchemaValidationPipe } from '@nestjs/common';
+
+const createUserSchema = z.object({ email: z.email(), name: z.string() });
+type CreateUser = z.infer<typeof createUserSchema>;
+
+app.useGlobalPipes(new StandardSchemaValidationPipe());
+
+@Post()
+create(@Body({ schema: createUserSchema }) dto: CreateUser) {}
+
+@Get(':id')
+findOne(@Param('id', { schema: z.coerce.number().int().positive() }) id: number) {}
+```
+
+- `schema` works on `@Body()`, `@Query()`, `@Param()`, `@RawBody()`.
+- `StandardSchemaSerializerInterceptor` with `@SerializeOptions({ schema })` shapes responses from a schema.
+- Keep `ValidationPipe` + class-validator for class-based DTOs; both remain supported.
+- `ValidationPipe` gains `errorFormat: 'list' | 'grouped'`.
+
+## Config
+
+`ConfigModule.forRoot({ validationSchema })` accepts any Standard Schema schema. Existing Joi schemas need Joi v18+, and Joi options move under `libraryOptions`:
+
+```typescript
+validationOptions: { libraryOptions: { allowUnknown: false, abortEarly: true } },
+```
+
+## Testing
+
+- `nest new` generates Vitest for ESM projects and Jest for CommonJS projects. Existing projects keep their runner; `@nestjs/testing` works with either.
+- Jest can load the ESM-only v12 packages only on Node.js 24.9+ (older: `ERR_REQUIRE_ASYNC_MODULE`). Run Jest on 24.9+ or move to Vitest.
+
+## Terminus
+
+`HealthIndicator` and `HealthCheckError` are removed. Inject `HealthIndicatorService`; return `up()`/`down()` instead of throwing, or use `attempt()` (marks `down` when the operation throws). Use `.withTimeout(ms)` instead of the deprecated `timeout` option of built-in indicators.
+
+```typescript
+@Injectable()
+export class DogHealthIndicator {
+  constructor(
+    private readonly dogService: DogService,
+    private readonly healthIndicatorService: HealthIndicatorService,
+  ) {}
+
+  isHealthy(key: string) {
+    return this.healthIndicatorService
+      .check(key)
+      .attempt(() => this.dogService.ping())
+      .withTimeout(1000);
+  }
+}
+```
+
+## Other code-affecting changes
+
+- Lifecycle hooks (`onModuleInit`, `onApplicationBootstrap`, shutdown) run by component hierarchy level; re-check code that depends on hook order between related providers.
+- `@Optional()` is no longer inherited by a subclass that redeclares its constructor: repeat `@Optional()` in the subclass constructor.
+- `ConsoleLogger` treats objects after the message as structured params (`structuredParams: false` restores the old behavior).
+- GraphQL: `subscriptions-transport-ws` removed (use `graphql-ws`); GraphiQL replaces Playground (`graphiql` options object).
+- NATS: `@nats-io/transport-node` replaces `nats`; `StringCodec` and `JSONCodec` are gone. Custom deserializers receive the full NATS message and read JSON via `msg.json()`.
+- Kafka: `@MessagePattern()` and `@EventPattern()` accept regular expressions.
+- gRPC: dedicated gRPC exceptions plus `GrpcExceptionFilter` preserve gRPC status codes.
+- WebSockets: gateways support request-scoped providers; disconnect handlers can receive a reason.
+- Express: graceful shutdown drains in-flight requests.
+- Routing: route shadow/duplicate diagnostics (`routeConflictPolicy`) and specificity-based resolution (`routeResolutionStrategy: 'specificity'`) are opt-in application options.
+- New projects generate oxlint; existing projects may keep their lint stack.
+- `@nestjs/observe` is an optional hosted integration that sends telemetry to an external service; see [observability](observability.md).
+- CLI: `--webpack`/`--webpackPath` deprecated in favour of `--builder rspack` (Rspack is the monorepo default); `angular` schematic removed.
+- `HttpException` options accept `errorCode`, serialized into the response body: `throw new BadRequestException('Weak password', { errorCode: 'WEAK_PASSWORD' })`.
 
 ## Verification
 
-Run the repository's own install, type-check, lint, unit, integration/e2e, and build commands. Add targeted coverage for any affected route precedence, lifecycle order, error response, GraphQL subscription, NATS serializer, gRPC status, WebSocket scope, or shutdown behavior. Report pre-existing failures separately from regressions introduced by the migration.
-
-<!--
-Source references:
-- https://docs.nestjs.com/migration-guide
-- https://docs.nestjs.com/cli/usages
--->
+Run the repository's own install, type-check, lint, unit, integration/e2e, and build commands; `nest upgrade` cannot prove runtime compatibility. Add targeted coverage for any affected route precedence, lifecycle order, error response, GraphQL subscription, NATS serializer, gRPC status, WebSocket scope, or shutdown behavior. Report pre-existing failures separately from regressions introduced by the migration.

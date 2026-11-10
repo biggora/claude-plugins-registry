@@ -151,7 +151,7 @@ Name containers to target specific ones in nested structures:
 
 ### Size Containers (v4.3+)
 
-The normal `@container` utility creates an inline-size container. Use `@container-size` when queries or container units need the container's block size, such as `cqb` or `cqh`:
+Use `@container-size` instead of `@container` when you need container query length units that depend on block size, like `cqb` (`cqh` too). Name them with `@container-size/{name}`:
 
 ```html
 <div class="@container-size/preview">
@@ -159,7 +159,7 @@ The normal `@container` utility creates an inline-size container. Use `@containe
 </div>
 ```
 
-Use a size container only when block-size information is required; inline-size containers remain the normal choice.
+Use a size container only when block-size information is required; the normal `@container` utility creates an inline-size container and remains the usual choice.
 
 ## Key Points
 

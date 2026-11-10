@@ -57,15 +57,15 @@ Custom utilities work with variants:
 <div class="hover:content-auto">Content</div>
 ```
 
-For a reusable utility family, use `--value()` and optionally `--modifier()` to resolve theme, bare, literal, or arbitrary values. In v4.3+, `--default()` lets the bare utility resolve a fallback:
+For a reusable utility family, use `--value()` and optionally `--modifier()` to resolve theme, bare, literal, or arbitrary values. In v4.3+, `--default()` inside `--value()` / `--modifier()` makes the utility work without a value:
 
 ```css
-@utility tab-* {
+@utility tabsize-* {
   tab-size: --value(integer, --default(4));
 }
 ```
 
-This illustrative rule matches `tab`, `tab-2`, and similar candidates. Tailwind v4.3 already ships `tab-*`; do not re-register built-in families in application code.
+`tabsize` yields `tab-size: 4`; `tabsize-8` yields `tab-size: 8`. Note v4.3 ships built-in `tab-*` utilities, so pick a different name; do not re-register built-in families in application code.
 
 ### @variant
 
@@ -81,16 +81,16 @@ Apply Tailwind variants to styles in your CSS:
 }
 ```
 
-Tailwind v4.3 supports stacked and compound forms:
+Stacked and compound variants (v4.3+):
 
 ```css
 .my-element {
   @variant hover:focus {
-    color: var(--color-sky-700);
+    outline: 2px solid;
   }
 
-  @variant disabled, aria-disabled {
-    opacity: 0.5;
+  @variant hover, focus {
+    color: red;
   }
 }
 ```

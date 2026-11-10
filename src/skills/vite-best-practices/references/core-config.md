@@ -1,6 +1,6 @@
 ---
 name: vite-config
-description: Vite 8.2 configuration, config loading, entry points, resolution, Oxc, and development server options
+description: Vite 8 configuration, config loading, entry points, resolution, Oxc, and development server options
 ---
 
 # Vite Configuration

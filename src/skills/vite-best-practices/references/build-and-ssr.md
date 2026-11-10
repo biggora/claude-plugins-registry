@@ -1,6 +1,6 @@
 ---
 name: vite-build-ssr
-description: Vite 8.2 production builds, multi-page and library entries, chunking, SSR, and JavaScript API
+description: Vite 8 production builds, multi-page and library entries, chunking, SSR, and JavaScript API
 ---
 
 # Build and SSR

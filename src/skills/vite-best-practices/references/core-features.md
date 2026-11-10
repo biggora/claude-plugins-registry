@@ -1,6 +1,6 @@
 ---
 name: vite-features
-description: Vite 8.2 import patterns, assets, environment variables, CSS, WebAssembly, and HMR
+description: Vite 8 import patterns, assets, environment variables, CSS, WebAssembly, and HMR
 ---
 
 # Vite Features
