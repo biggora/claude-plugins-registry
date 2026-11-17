@@ -117,7 +117,7 @@ Add custom utilities with `@utility`:
 }
 ```
 
-Now you can use `tab-4` utility class, and it works with variants:
+Now you can use `content-auto` utility class, and it works with variants:
 
 ```html
 <div class="hover:content-auto">

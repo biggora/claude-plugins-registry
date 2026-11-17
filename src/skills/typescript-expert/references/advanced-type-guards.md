@@ -82,9 +82,6 @@ const strings = items.filter((x): x is string => x !== null);
 
 // TS 5.5+: inferred automatically
 const strings = items.filter(x => x !== null); // string[]
-
-// Also works with Boolean
-const truthy = items.filter(Boolean); // string[] (nulls removed)
 ```
 
 ## Assertion Functions

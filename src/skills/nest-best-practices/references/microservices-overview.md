@@ -20,7 +20,7 @@ npm install @nestjs/microservices
 | TCP | Built-in |
 | Redis | `redis` |
 | MQTT | `mqtt` |
-| NATS | `nats` |
+| NATS | `@nats-io/transport-node` (v12; v11 used `nats`) |
 | RabbitMQ | `amqplib` |
 | Kafka | `kafkajs` |
 | gRPC | `@grpc/grpc-js` |

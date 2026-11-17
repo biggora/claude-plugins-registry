@@ -1,11 +1,11 @@
 ---
 name: typescript-expert
-description: Apply TypeScript-specific guidance for type design, compiler diagnostics, tsconfig and module resolution, declaration emit, JavaScript migration, and version upgrades. Use when the task turns on TypeScript semantics or tooling; do not load it merely because an otherwise unrelated project happens to use TypeScript.
+description: Apply TypeScript-specific guidance for type design, compiler diagnostics, tsconfig and module resolution, declaration emit, JavaScript migration, and version upgrades across TypeScript 5.x, 6.0, and 7.0. Use when the task turns on TypeScript semantics or tooling; do not load it merely because an otherwise unrelated project happens to use TypeScript.
 ---
 
 # TypeScript Expert
 
-Use the project's installed TypeScript version and runtime/toolchain constraints as the source of truth. This guidance was checked against TypeScript 7.0.2, the stable `latest` release on 2026-08-29. When “latest” matters, verify the current stable tag and official release notes instead of relying on this date.
+Use the project's installed TypeScript version and runtime/toolchain constraints as the source of truth. This guidance was checked in Nov 2026 against TypeScript 7.0.2 (stable `latest`; 7.1 is in beta; 6.0.3 is the last JavaScript-codebase release). When “latest” matters, verify the current stable tag and official release notes instead of relying on this date.
 
 Canonical sources:
 
@@ -22,7 +22,7 @@ Canonical sources:
 4. Fix the earliest root cause with the smallest runtime-preserving change. Re-run the same command; use a focused compile or type test only as additional evidence.
 5. Report the compiler version, command, result, and any remaining baseline or compatibility limitation.
 
-When the user asks for an upgrade, read [modern TypeScript releases](references/modern-typescript-releases.md) before editing. TypeScript 7 is the current stable CLI/compiler, but it does not yet expose a stable programmatic API and is not a drop-in replacement for every tool that embeds TypeScript. Keep compatible tooling on TypeScript 6 where the official 7.0 guidance requires it.
+When the user asks for an upgrade or edits `tsconfig`, read [features-ts6-7](references/features-ts6-7.md) before editing. TypeScript 7 is the current stable native (Go) compiler shipped as `tsc`, but 7.0 ships no programmatic compiler API and is not a drop-in replacement for every tool that embeds TypeScript. Keep compatible tooling on TypeScript 6 where the official 7.0 guidance requires it.
 
 ## Decision Rules
 
@@ -55,7 +55,8 @@ Read only the references needed for the current task.
 | `tsconfig`, module resolution and emit | [best-practices-tsconfig](references/best-practices-tsconfig.md) |
 | Domain modeling and API patterns | [best-practices-patterns](references/best-practices-patterns.md) |
 | Slow type-checking or editor latency | [best-practices-performance](references/best-practices-performance.md) |
-| TypeScript 5.0–7.0 features and migrations | [modern TypeScript releases](references/modern-typescript-releases.md) |
+| TypeScript 5.0–5.9 features (`satisfies`, `const` params, `using`, `NoInfer`) | [features-ts5x](references/features-ts5x.md) |
+| TypeScript 6.0/7.0 defaults, removed `tsconfig` options, native `tsc`, tool compatibility, upgrade checklist | [features-ts6-7](references/features-ts6-7.md) |
 
 ## Verification
 

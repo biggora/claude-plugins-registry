@@ -213,10 +213,7 @@ GraphQLModule.forRootAsync<ApolloDriverConfig>({
   imports: [ConfigModule],
   useFactory: async (configService: ConfigService) => ({
     autoSchemaFile: true,
-    graphiql:
-      configService.get('NODE_ENV') !== 'production'
-        ? { shouldPersistHeaders: true }
-        : false,
+    graphiql: configService.get('NODE_ENV') !== 'production',
   }),
   inject: [ConfigService],
 }),

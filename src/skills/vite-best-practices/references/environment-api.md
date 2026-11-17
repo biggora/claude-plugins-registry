@@ -1,6 +1,6 @@
 ---
 name: vite-environment-api
-description: Vite 8.2 Environment API release-candidate guidance for custom runtimes, framework authors, and environment-aware plugins
+description: Vite 8 Environment API release-candidate guidance for custom runtimes, framework authors, and environment-aware plugins
 ---
 
 # Environment API

@@ -7,7 +7,7 @@ description: Implement, review, test, or migrate NestJS applications with versio
 
 Use the project's source, package manifest, lockfile, module format, HTTP adapter, and test runner as the primary context. Read only the references relevant to the task.
 
-This skill targets NestJS 12. The npm `latest` tag for `@nestjs/core` was verified as `12.0.1` on 2026-08-29. Treat that patch number as a dated observation: re-check the registry and official documentation before recommending or performing an upgrade.
+This skill targets NestJS 12, based on the NestJS documentation as of 2026-11-10: 12.4 is current and 11.x is still patched. `@nestjs/platform-express` 12.4 uses Express 5 (5.3) and `@nestjs/platform-fastify` 12.4 uses Fastify 5 (5.12). Treat these versions as dated observations: re-check the registry and official documentation before recommending or performing an upgrade.
 
 ## Version Gate
 
@@ -32,15 +32,53 @@ This skill targets NestJS 12. The npm `latest` tag for `@nestjs/core` was verifi
 
 ## NestJS 12 Decisions
 
-- **Runtime and CLI:** a Nest 12 application needs Node.js 20.19+ or 22.12+ on the 22.x line. Current schematics/CLI generation has a higher runtime floor; see the migration reference rather than inferring from `@nestjs/core.engines` alone.
-- **Validation:** keep `ValidationPipe` for decorator/class DTOs. Use the built-in `StandardSchemaValidationPipe` with `@Body({ schema })`, `@Query({ schema })`, or `@Param(..., { schema })` when the project already uses Zod, Valibot, ArkType, or another Standard Schema library.
+- **Runtime and CLI:** a Nest 12 application needs Node.js 20.19+ or 22.12+ on the 22.x line (21.x is unsupported). `nest new`/`generate`/`upgrade` need 22.22.3+, 24.15+, or 26+; see the migration reference rather than inferring from `@nestjs/core.engines` alone. Upgrade with `nest upgrade` after updating the global `@nestjs/cli`.
+- **Validation:** keep `ValidationPipe` for decorator/class DTOs. Use the built-in `StandardSchemaValidationPipe` with `@Body({ schema })`, `@Query({ schema })`, or `@Param(..., { schema })` when the project already uses Zod, Valibot, ArkType, or another Standard Schema library. On v11 use a custom `ZodValidationPipe` with `z.infer<typeof schema>`.
 - **Serialization:** keep `ClassSerializerInterceptor` for class-transformer models. Use `StandardSchemaSerializerInterceptor` with `@SerializeOptions({ schema })` for schema-driven response shaping.
 - **Configuration:** `@nestjs/config` accepts Standard Schema through `validationSchema`; Zod is the current documentation's default example. Joi requires v18+ and nests library-specific settings under `validationOptions.libraryOptions`.
 - **CLI/build:** use `nest upgrade --dry-run` before an explicit migration. Rspack is the v12 monorepo default; webpack CLI flags are deprecated. Do not migrate an existing build stack merely to match new-project defaults.
 - **Routes:** consider `routeConflictPolicy` and `routeResolutionStrategy: 'specificity'` when route shadowing is a real risk; both are opt-in.
 - **GraphQL:** GraphiQL is the default IDE. Use `graphql-ws`; `subscriptions-transport-ws` is no longer supported by the latest GraphQL package.
 - **NATS:** v12 uses NATS v3 and `@nats-io/transport-node`; review custom serializers/deserializers.
+- **Testing:** `nest new` generates Vitest for ESM projects and Jest for CommonJS projects; `@nestjs/testing` works with either runner.
+- **Health checks:** custom Terminus indicators must not extend `HealthIndicator` or throw `HealthCheckError` (both removed). Inject `HealthIndicatorService` and return `up()`/`down()`; see [recipes-terminus](references/recipes-terminus.md).
 - **Observability:** `@nestjs/observe` is an optional official hosted integration, not a universal dependency. Read [observability](references/observability.md) only when the task calls for it.
+
+## Production Practices
+
+Not repeated in the references below; apply them in production code.
+
+### Entity & Schema Discipline
+- Use explicit column lengths: `@Column({ length: 255 })`, not bare `@Column()`
+- Name tables explicitly: `@Entity('books')` to avoid surprises with naming conventions
+- Use `@CreateDateColumn()` and `@UpdateDateColumn()` for automatic timestamps
+- Use specialized validators like `@IsISBN()`, `@IsEmail()`, `@IsUUID()` — not just `@IsString()`
+- Align nullability between entity and DTO: if `@Column({ nullable: true })`, the DTO field should be `@IsOptional()`
+- Import `PartialType` from `@nestjs/swagger` (not `@nestjs/mapped-types`) when using Swagger — this preserves API documentation metadata on partial fields
+
+### Guards & Auth
+NestJS documents two auth approaches:
+1. **Native JWT** (recommended for simpler cases): Use `@nestjs/jwt` directly with a custom `CanActivate` guard that calls `JwtService.verifyAsync()`. No Passport dependency needed.
+2. **Passport-based** (for complex strategies like OAuth2, SAML): Use `@nestjs/passport` with `PassportStrategy`. Documented under "recipes" rather than primary auth docs.
+
+Regardless of approach:
+- Guard ordering matters: `@UseGuards(JwtAuthGuard, RolesGuard)` — JWT guard must run first to populate `request.user` before RolesGuard reads it
+- Use `Reflector.getAllAndOverride()` (not just `.get()`) so roles can be set at both handler and class level with handler taking precedence
+- RolesGuard must throw `ForbiddenException` with a descriptive message when the user lacks the required role — do NOT just return `false` from `canActivate()`. The generic 403 provides no diagnostic value. Include context: `throw new ForbiddenException(\`Requires roles: \${requiredRoles.join(', ')}\`)`
+- Never hardcode JWT secrets — use `JwtModule.registerAsync()` with `ConfigService`
+- Define a `Role` enum rather than raw strings for type safety
+- In `JwtStrategy.validate()` (or native guard), validate the presence of required payload fields (`sub`, `username`, `roles`) before returning the user object. Define a `JwtPayload` interface for type safety.
+
+### Error Messages
+All thrown exceptions (`ForbiddenException`, `UnauthorizedException`, `NotFoundException`, etc.) should include descriptive messages that identify what was expected, what was found, and what action the consumer should take. Do not rely on framework default messages in production code.
+
+### Testing
+- `@suites/unit` is a recommended testing library for NestJS:
+  - `TestBed.solitary(Service).compile()` — all dependencies auto-mocked
+  - `TestBed.sociable(Service).expose(RealDep).compile()` — selected real deps
+  - `Mocked<T>` type for full IntelliSense on mock methods
+  - Supports Jest, Vitest, and Sinon
+- For e2e testing, use `@nestjs/testing` with `Test.createTestingModule()` and `supertest`
 
 ## Reference Routing
 

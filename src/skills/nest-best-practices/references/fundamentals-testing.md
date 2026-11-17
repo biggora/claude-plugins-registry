@@ -5,7 +5,7 @@ description: Unit testing and e2e testing in NestJS with @nestjs/testing
 
 # Testing
 
-NestJS provides test-runner-agnostic utilities for unit and end-to-end testing. Existing Jest and Vitest projects can both use `@nestjs/testing`.
+NestJS provides utilities for unit and end-to-end testing, with built-in Jest and Supertest integration. `@nestjs/testing` is runner-agnostic; v12 `nest new` ESM projects use Vitest (the examples below use Jest).
 
 ## Installation
 
@@ -131,7 +131,7 @@ Each returns an object with `useClass`, `useValue`, or `useFactory`.
 
 ## Key Points
 
-- Nest 12 generated ESM projects default to Vitest; existing projects do not need to migrate runners
+- Existing projects do not need to migrate test runners
 - Keep test files near source files with `.spec.ts` or `.test.ts` suffix
 - E2E tests go in `test/` directory with `.e2e-spec.ts` suffix
 - `compile()` is async and must be awaited

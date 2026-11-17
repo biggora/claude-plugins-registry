@@ -1,6 +1,6 @@
 ---
 name: vite-plugin-api
-description: Vite 8.2 plugin authoring with Vite-specific hooks, Rolldown hook filters, virtual modules, and compatibility guidance
+description: Vite 8 plugin authoring with Vite-specific hooks, Rolldown hook filters, virtual modules, and compatibility guidance
 ---
 
 # Vite Plugin API

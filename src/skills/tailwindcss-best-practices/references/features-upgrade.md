@@ -1,11 +1,11 @@
 ---
 name: features-upgrade
-description: Migrating from Tailwind CSS v3 to v4, including renamed utilities, configuration compatibility, browser requirements, and additions through v4.3
+description: Migrating from Tailwind CSS v3 to v4, all renamed utilities, scale shifts, config migration, and v4.1-v4.3 changes
 ---
 
 # Upgrade Guide (v3 → v4)
 
-Key changes when upgrading from Tailwind CSS v3 to v4. This reference is current through stable v4.3.3. Inspect the installed version and read the current official upgrade guide before changing a real project.
+Key changes when upgrading from Tailwind CSS v3 to v4. This reference is current through stable v4.3. Inspect the installed version and read the current official upgrade guide before changing a real project.
 
 ## Upgrade Tool
 
@@ -18,7 +18,7 @@ Requires Node.js 20+. Run it from the project directory in a recoverable Git bra
 ## Installation Changes
 
 - **PostCSS**: Use `@tailwindcss/postcss`; remove `postcss-import` and `autoprefixer` (handled by v4)
-- **Vite**: Use `@tailwindcss/vite` for a Vite-based stack when the current framework guide recommends it
+- **Vite**: Prefer `@tailwindcss/vite` over PostCSS for a Vite-based stack when the current framework guide recommends it (supports Vite 5.2-8 as of v4.3.5)
 - **Webpack**: Use the dedicated `@tailwindcss/webpack` loader (new in v4.2)
 - **CLI**: Use `npx @tailwindcss/cli` instead of `npx tailwindcss`
 
@@ -128,8 +128,8 @@ These are the most commonly missed renames because the entire scale shifted down
 ## Deprecations in v4.2
 
 - `start-*` / `end-*` → use `inset-s-*` / `inset-e-*`
-- `bg-left-top` style → use `bg-top-left` (position order reversed)
-- `object-left-top` style → use `object-top-left` (position order reversed)
+
+v4.3 deprecates and removes nothing.
 
 ## Browser Support
 
@@ -147,7 +147,7 @@ v4 targets Safari 16.4+, Chrome 111+, Firefox 128+. For older browsers, stay on 
 - New variants: `details-content`, `inverted-colors`, `noscript`, `user-valid`, `user-invalid`
 - `@source not` and `@source inline()` directives
 
-### v4.2
+### v4.2 (February 2026)
 - New colors: mauve, olive, mist, taupe
 - Dedicated webpack loader (`@tailwindcss/webpack`)
 - Block logical property utilities (`pbs-*`, `mbs-*`, `border-bs-*`, `inline-*`, `block-*`)
@@ -155,7 +155,7 @@ v4 targets Safari 16.4+, Chrome 111+, Firefox 128+. For older browsers, stay on 
 - Font feature settings (`font-features-*`)
 
 ### v4.3 (May 2026)
-- Scrollbar width, color, and gutter utilities
+- Scrollbar width, color, and gutter utilities (see [effects-scrollbar-zoom-tab](effects-scrollbar-zoom-tab.md), which also covers `zoom-*` and `tab-*`)
 - Size containers with `@container-size` and named `@container-size/{name}`
 - CSS zoom utilities (`zoom-*`)
 - Tab size utilities (`tab-*`)
@@ -168,5 +168,5 @@ Source references:
 - https://tailwindcss.com/blog/tailwindcss-v4-1
 - https://github.com/tailwindlabs/tailwindcss/releases/tag/v4.2.0
 - https://tailwindcss.com/blog/tailwindcss-v4-3
-- https://github.com/tailwindlabs/tailwindcss/releases/tag/v4.3.3
+- https://github.com/tailwindlabs/tailwindcss/releases/tag/v4.3.0
 -->

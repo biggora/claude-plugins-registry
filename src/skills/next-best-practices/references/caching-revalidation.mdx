@@ -7,7 +7,7 @@ description: Caching strategies and revalidation in Next.js
 
 Next.js provides multiple APIs for caching and revalidating data: `fetch`, `cacheTag`, `revalidateTag`, `updateTag`, and `revalidatePath`.
 
-First inspect `next.config.*`. The fetch options and route segment examples below describe the model used when `cacheComponents` is absent or disabled. With `cacheComponents: true`, prefer `'use cache'`, `cacheLife`, `cacheTag`, and Suspense; route exports such as `dynamic`, `revalidate`, and `fetchCache` are incompatible. See [cache-components](cache-components.mdx).
+First inspect `next.config.*`. The fetch options and route segment examples below describe the model used when `cacheComponents` is absent or disabled. With `cacheComponents: true`, prefer `'use cache'`, `cacheLife`, `cacheTag`, and Suspense; route exports such as `dynamic`, `revalidate`, `fetchCache`, and `dynamicParams` error in this mode. See [cache-components](cache-components.mdx).
 
 ## Fetch Caching
 
@@ -75,10 +75,10 @@ export async function updateUser(id: string) {
 }
 ```
 
-Without the second argument (legacy behavior, deprecated):
+The single-argument form is deprecated; always pass a profile:
 
 ```tsx
-revalidateTag('user') // Immediately expires cache
+revalidateTag('user') // Deprecated: pass a profile
 ```
 
 ## Immediate Expiration with updateTag
@@ -132,7 +132,7 @@ revalidatePath('/blog', 'layout') // Revalidate all /blog/* routes
 
 ## Legacy `unstable_cache`
 
-Existing projects without Cache Components may still use `unstable_cache`; do not rewrite it incidentally. For new Cache Components code, use `'use cache'` and `cacheTag`. Root parameter getters from `next/root-params` cannot run inside `unstable_cache`.
+Existing projects without Cache Components may still use `unstable_cache`: it is legacy but still supported and persists across deploys, so do not rewrite it incidentally. For new Cache Components code, use `'use cache'` and `cacheTag`. Never call the same `use cache` function both directly and inside `unstable_cache`. Root parameter getters from `next/root-params` cannot run inside `unstable_cache`.
 
 ## Cache Strategies
 

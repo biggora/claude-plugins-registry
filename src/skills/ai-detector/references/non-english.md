@@ -87,6 +87,96 @@ The same logic applies to **канцелярит written by humans**: official l
 - **Non-native Russian** — gender and case slips, aspect mistakes, calques from the writer's first language. This is a human signal and also a reason for caution: it often reads "off" for reasons unrelated to AI.
 - **Caveat.** An LLM can be told to write casually, with slang and typos. Faked colloquialism is sparse, evenly sprinkled, and ornamental («Ну, короче, давайте разберёмся…»); genuine colloquial text is consistent with the writer's voice and tied to the situation.
 
+## Humanizing Russian text
+
+For rewrite mode. The pattern numbers are the § numbers in humanize.md; read the English entry for the reasoning and use this section for the Russian form. The general rules carry over: keep every fact, add no invented detail or personal anecdote, match the writer's voice, and leave alone anything inside a quotation, a title or a proper name.
+
+### The patterns in Russian
+
+| № | Pattern | Typical Russian form | How to rewrite |
+|---|---|---|---|
+| 1 | Не X, а Y | «Это не просто инструмент, а целая философия работы.» «Речь не о скидках. Речь о выборе.» | Say what the thing does: «Инструмент автоматически сверяет счета с заказами.» Keep the contrast only when the reader really believes X. |
+| 2 | One-line closers, fragments | «И это главное.» «Просто задумайтесь.» «Никакой воды. Никакой суеты.» | Cut a line that repeats the paragraph. Merge fragments into one sentence with a concrete claim. |
+| 3 | Sayings that sound deep | «По сути, всё упирается в доверие.» «В конечном счёте главный вопрос в том, готова ли команда меняться.» | Name the actual condition: «Всё зависит от того, выделит ли руководитель время на переход.» |
+| 4 | Staged run-up | «Давайте разберёмся.» «Итак, начнём.» «Честно? Это зависит от нагрузки.» | Delete the run-up and open with the point: «Стоит ли оно своих денег, зависит от нагрузки.» |
+| 5 | Arguing with no one | «Я не говорю, что документация не важна.» «Можно было бы подумать, что дело в длине промпта.» | Delete the defence. If it holds a claim, state the claim. Keep an objection the text attributes and answers. |
+| 6 | Forced triads | «быстро, удобно и безопасно», «опыт, экспертиза и инновации» | Check that each item adds an idea. Merge items that repeat each other; keep three when there are three. |
+| 12 | Stock words | ключевой, неотъемлемый, уникальный, данный, является, осуществлять, играет важную роль, широкий спектр | «данный» → «этот»; «осуществлять» → the plain verb; «широкий спектр услуг» → list the services. Drop «уникальный» unless it is true and shown. |
+| 13 | Inflated significance | «стал важной вехой», «оставил неизгладимый след», «перспективы развития», «несмотря на трудности, продолжает развиваться» | Keep the fact, drop the verdict: «Музей открыли в 1989 году.» End on the last concrete fact, with no «Перспективы» section unless real plans exist. |
+| 15 | Participle tails (the -ing analogue) | «…открыт в 1989 году, подчёркивая роль региона», «отражая богатую культуру» | Cut the tail, or state what the source supports as its own sentence. |
+| 16 | Sales language | «живописный городок, уютно расположившийся в самом сердце долины» | Say what it is: «Городок в долине.» |
+| 17 | Borrowed authority | «эксперты отмечают», «по мнению специалистов», «как считают аналитики» | Name the source and what it said, or cut the claim. |
+| 18 | Copula avoidance | «является», «представляет собой», «выступает в качестве» | «есть», «это» or the dash: «Москва — столица», «Сервис — платформа», «Он посредник». |
+| 19 | Bold labels | «**Экономия времени:** автоматизация позволяет…» on every bullet | Remove the bold. Turn the list into prose when the labels carry nothing. |
+| 20 | Decorative headings | «Как Эффективно Управлять Временем», «🚀 Запуск» | Sentence case: «Как эффективно управлять временем». Remove emoji, arrows and rules. |
+| 22 | Chatbot residue | «Отличный вопрос!» «Надеюсь, это поможет!» «Если нужно, могу сократить.» | Remove the wrapper and keep the content. |
+| 23 | Knowledge-limit hedges | «на момент моих последних данных», «информации немного, однако, вероятно, он…» | Say what the source does not show, or cut the sentence. Delete the guess. |
+
+### Канцелярит and nominalisation
+
+- **Verbal nouns.** Restore the verb and the real subject: «осуществляется проведение проверки» → «проверяем»; «производится оплата» → «платим»; «осуществляется доставка» → «доставляем».
+- **Genitive chains.** More than two genitives in a row is a signal to find the verb: «улучшение качества обслуживания клиентов компании» → «компания лучше обслуживает клиентов». Keep a chain that is a fixed term.
+- **Connective filler.** «с целью», «в целях» → «чтобы»; «в рамках» → «в» or «при»; «имеет место» → «есть» or «происходит».
+- **Impersonal passive.** «Было принято решение» → name the actor when the text gives one («директор решил»). If nobody is named, use a plain active form such as «решили», and never invent the actor.
+- **Genre limit.** Official regulations, orders and contracts keep their register. Edit канцелярит only where the text is meant to read as ordinary prose.
+
+### Punctuation in Russian rewrites
+
+- The humanizer's "no em dashes" rule does not apply to grammatical тире. Keep it between subject and predicate («Москва — столица России»), where a predicate is omitted («Я — в магазин»), in dialogue, in ranges («2019–2021»), and before a generalizing word («Лес, река, поле — всё это входит в заповедник»).
+- Remove only the dash that acts as a universal connector, where a comma, colon or period fits: «Мы обновили сайт — теперь заказ занимает минуту.» → «Мы обновили сайт: теперь заказ занимает минуту.»
+- If the user's sample uses dashes, keep them at about the same rate.
+- Keep «ёлочки» if the source uses them, and „лапки“ for nested quotes. The curly-to-straight rule (§21) does not apply.
+- Do not replace «ё» with «е» or back, and do not "fix" correct typography such as a spaced dash, «№» or non-breaking spaces. Do not type a hyphen " - " in place of a dash to look human.
+
+### Examples
+
+**1. Promotional blog paragraph**
+
+Before:
+> Кофейня «Зерно», открывшаяся в 2019 году, — это не просто место, где можно выпить кофе, а настоящий островок уюта в самом сердце города. Здесь вас ждут свежая выпечка, ароматный кофе и приветливые бариста. Кофейня работает с 8 до 22 часов и играет важную роль в жизни района, подчёркивая его неповторимую атмосферу. Приходите и убедитесь сами!
+
+After:
+> Кофейня «Зерно» открылась в 2019 году в центре города. Здесь варят кофе и продают свежую выпечку, гостей встречают приветливые бариста. Кофейня открыта с 8 до 22 часов.
+
+Cut: the contrast, the claim about the district (no checkable fact behind it) and the closing call to action.
+
+**2. School-style paragraph with канцелярит**
+
+Before:
+> В настоящее время в нашей школе осуществляется проведение мероприятий по повышению уровня безопасности учащихся. Было принято решение об установке камер видеонаблюдения на всех этажах. Установка будет осуществлена в течение октября. Данные меры являются неотъемлемой частью обеспечения комфортного пребывания детей в учебном заведении.
+
+After:
+> Мы повышаем безопасность учеников: в октябре установим камеры видеонаблюдения на всех этажах.
+
+The decision has no named actor in the source, so the rewrite uses the plain «мы». The last sentence only restated the purpose and is cut.
+
+**3. Short business email with chatbot residue**
+
+Before:
+> Добрый день, Анна!
+>
+> Отличный вопрос! Рада сообщить, что отчёт за октябрь готов и является важной частью нашей квартальной отчётности. Согласно данным, выручка составила 4,2 млн рублей, что на 8% выше, чем в сентябре. Надеюсь, это поможет! Если нужно, могу подготовить подробную разбивку по клиентам.
+>
+> С уважением,
+> Мария
+
+After:
+> Добрый день, Анна!
+>
+> Отчёт за октябрь готов, он входит в квартальную отчётность. Выручка составила 4,2 млн рублей, на 8% больше, чем в сентябре.
+>
+> С уважением,
+> Мария
+
+The greeting and sign-off stay. The praise, the hope and the generic offer are chatbot wrapper (§22) and carry no fact.
+
+### Do not fix
+
+- Quotations, titles, names and terms, including calques that are the established term in the field.
+- Fixed formulas of business correspondence: «Добрый день», «С уважением», «Прошу рассмотреть».
+- Mandatory wording in contracts, regulations, instructions and legal notices.
+- Correct typography and spelling (see the punctuation rules above).
+
 ## Other languages (brief)
 
 ### German

@@ -125,13 +125,13 @@ Before moving to 7:
 
 - add an explicit `rootDir` when output layout depends on it;
 - list required ambient packages in `types` instead of relying on every visible `@types` package;
-- replace `moduleResolution: "node"`/`"node10"` or `"classic"` with `nodenext` or `bundler` according to the runtime;
+- replace `moduleResolution: "node"`/`"node10"` or `"classic"` with `nodenext` (Node.js) or `bundler` (apps; allowed with `module: "commonjs"` since 6.0) according to the runtime;
 - remove `baseUrl` and make `paths` targets relative to the tsconfig;
 - replace legacy module outputs and `outFile`;
 - do not disable `esModuleInterop`, `allowSyntheticDefaultImports`, or strict-mode semantics;
 - move off an ES5 target.
 
-Read [modern TypeScript releases](modern-typescript-releases.md) for the full migration boundary, including TypeScript 7's lack of a stable programmatic API.
+Read [features-ts6-7](features-ts6-7.md) for the defaults table, removed options, and tool compatibility, including the fact that 7.0 ships no programmatic compiler API.
 
 ## Path Mapping and Import Rewriting
 
@@ -148,7 +148,7 @@ Read [modern TypeScript releases](modern-typescript-releases.md) for the full mi
 }
 ```
 
-TypeScript 6 deprecates `baseUrl`; it is no longer needed for `paths`. Configure the same aliases in the runtime/bundler or use package `imports` where appropriate.
+Note: `baseUrl` is deprecated in TS 6.0 and an error in TS 7.0. Don't add it; put the prefix in each `paths` target (`"./src/*"`, relative to the tsconfig). Configure the same aliases in the bundler (Vite, webpack), a runtime resolver (`tsconfig-paths`), or package `imports` where appropriate.
 
 `rewriteRelativeImportExtensions` is narrower: it rewrites explicit relative TypeScript extensions during emit. It does not rewrite aliases, package names, extensionless imports, or arbitrary dynamic-import expressions.
 

@@ -1,11 +1,11 @@
 ---
 name: tailwindcss-best-practices
-description: Tailwind CSS v4 implementation and review guidance. Use when installing Tailwind, styling UI, building responsive or dark-mode layouts, extending CSS-first themes and utilities, diagnosing class detection, or migrating from v3. Covers stable v4.3 behavior; inspect the project's installed version before applying version-specific advice.
+description: Tailwind CSS v4 implementation and review guidance. Use when installing Tailwind, styling UI, building responsive or dark-mode layouts, extending CSS-first themes and utilities, diagnosing class detection, or migrating from v3. Covers v4.0 through v4.3 (current as of Nov 2026); inspect the project's installed version before applying version-specific advice.
 ---
 
 # Tailwind CSS v4 Best Practices
 
-> Documentation snapshot: Tailwind CSS v4.3.3, verified against the npm `latest` tag and official documentation on 2026-08-29. Recheck https://tailwindcss.com/docs and the npm tag when the user asks for the latest version.
+> Covers Tailwind CSS v4.0 through v4.3 (v4.3.5 is current as of November 2026). Utilities introduced in v4.2/v4.3 need that minor version installed — check the installed `tailwindcss` version first. Recheck https://tailwindcss.com/docs and the npm `latest` tag when the user asks for the latest version.
 
 Tailwind v4 is CSS-first: `@theme` defines design tokens, `@utility` registers utilities, and `@custom-variant` registers variants. Legacy JavaScript configuration is still available through `@config`, but it is not detected automatically and some v3 options are unsupported.
 
@@ -22,7 +22,7 @@ Tailwind v4 is CSS-first: `@theme` defines design tokens, `@utility` registers u
 
 | Capability | Use |
 |---|---|
-| Scrollbars | `scrollbar-auto`, `scrollbar-thin`, `scrollbar-none`, `scrollbar-thumb-*`, `scrollbar-track-*`, and `scrollbar-gutter-*`; see [scrollbars](references/effects-scrollbars.md) |
+| Scrollbars | `scrollbar-auto`, `scrollbar-thin`, `scrollbar-none`, `scrollbar-thumb-*`, `scrollbar-track-*`, and `scrollbar-gutter-*`; see [scrollbar, zoom & tab size](references/effects-scrollbar-zoom-tab.md) |
 | Size containers | `@container-size` or `@container-size/{name}` when queries or container units need block-size information; see [responsive design](references/core-responsive.md) |
 | Zoom | `zoom-*`, `zoom-[value]`, and `zoom-(--property)` for CSS `zoom`; see [transforms](references/transform-base.md) |
 | Tab size | `tab-*`, `tab-[value]`, and `tab-(--property)` for rendered tab width; see [typography](references/typography-font-text.md) |
@@ -148,7 +148,7 @@ These are the most common mistakes when working with Tailwind v4. If you're migr
 | SVG | fill, stroke, stroke-width for SVG and icon styling | [visual-svg](references/visual-svg.md) |
 | Text Shadow | Text shadow sizes, colors, and opacity modifiers (v4.1) | [effects-text-shadow](references/effects-text-shadow.md) |
 | Mask | Composable mask utilities with gradient and radial masks (v4.1) | [effects-mask](references/effects-mask.md) |
-| Scrollbars | Width, thumb/track colors, and stable gutter utilities (v4.3) | [effects-scrollbars](references/effects-scrollbars.md) |
+| Scrollbar, Zoom & Tab Size | `scrollbar-*`, `scrollbar-gutter-*`, `zoom-*`, `tab-*` (v4.3) | [effects-scrollbar-zoom-tab](references/effects-scrollbar-zoom-tab.md) |
 
 ## Effects & Interactivity
 

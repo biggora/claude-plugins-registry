@@ -138,7 +138,7 @@ ConfigModule.forRootAsync({
 - Use `ConfigModule.forRoot()` for basic setup
 - `ConfigService` provides typed access to configuration
 - Use custom configuration files for complex setups
-- Validate configuration with a Standard Schema-compatible library
+- Validate configuration with Joi schemas (v12: requires Joi v18+; Joi options go under `validationOptions.libraryOptions`) or any Standard Schema validator such as Zod — see [migration-v12](migration-v12.md)
 - Make ConfigModule global to avoid repeated imports
 - Environment variables take precedence over .env files
 - Never make an external configuration call at startup without an explicit timeout and failure policy

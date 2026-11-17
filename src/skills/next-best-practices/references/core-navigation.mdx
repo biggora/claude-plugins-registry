@@ -1,6 +1,6 @@
 ---
 name: core-navigation
-description: Navigation, Link prefetching, App Shells, Partial Prefetching, and instant-navigation verification in Next.js 16.3
+description: Navigation, Link prefetching, App Shells, Partial Prefetching, and instant-navigation verification in Next.js 16.4
 ---
 
 # Navigation and Prefetching
@@ -17,7 +17,7 @@ Use `<Link>` from `next/link` for ordinary internal navigation and `useRouter` f
 | `cacheComponents: true` | The cached page render is prefetched. A legacy `prefetch={true}` may also request dynamic content. |
 | `cacheComponents: true`, `partialPrefetching: true` | Every link loads one reusable App Shell per route. URL-specific content streams after navigation unless a link intentionally uses `prefetch={true}`. |
 
-In Next.js 16.3, small prefetch responses are inlined automatically to reduce request count while large shared segments remain separately reusable. Do not add `experimental.prefetchInlining` unless measurements or debugging justify changing the default.
+Since Next.js 16.3, small prefetch responses are inlined automatically to reduce request count while large shared segments remain separately reusable. Do not add `experimental.prefetchInlining` unless measurements or debugging justify changing the default.
 
 ## Partial Prefetching
 

@@ -11,7 +11,7 @@ Each sign gives: what it looks like, example fragments, why models do it, streng
 - [Tier 1 — Artifacts (near-conclusive)](#tier-1--artifacts-near-conclusive)
 - [Tier 2 — Content and sourcing (strong)](#tier-2--content-and-sourcing-strong), including [How to verify citations](#how-to-verify-citations)
 - [Tier 3 — Style and vocabulary (moderate, cumulative)](#tier-3--style-and-vocabulary-moderate-cumulative)
-  - [Vocabulary](#vocabulary) · [Significance and legacy inflation](#significance-and-legacy-inflation) · [Trailing -ing analyses](#trailing--ing-analyses) · [Promotional language](#promotional-language) · [Vague association](#vague-association) · [Vague attributions](#vague-attributions-and-overgeneralized-opinion) · [Challenges-and-prospects formula](#challenges-and-prospects-formula) · [Copula avoidance](#copula-avoidance) · [Negative parallelisms](#negative-parallelisms) · [Rule of three](#rule-of-three) · [Elegant variation](#elegant-variation) · [Hedging disclaimers by era](#hedging-disclaimers-by-era) · [Formatting](#formatting) · [Customer-service voice and summaries](#customer-service-voice-and-summaries)
+  - [Structural staging](#structural-staging-20252026-models) · [Vocabulary](#vocabulary) · [Significance and legacy inflation](#significance-and-legacy-inflation) · [Trailing -ing analyses](#trailing--ing-analyses) · [Promotional language](#promotional-language) · [Vague association](#vague-association) · [Vague attributions](#vague-attributions-and-overgeneralized-opinion) · [Challenges-and-prospects formula](#challenges-and-prospects-formula) · [Copula avoidance](#copula-avoidance) · [Negative parallelisms](#negative-parallelisms) · [Rule of three](#rule-of-three) · [Elegant variation](#elegant-variation) · [Hedging disclaimers by era](#hedging-disclaimers-by-era) · [Formatting](#formatting) · [Customer-service voice and summaries](#customer-service-voice-and-summaries)
 - [Human signals (counter-evidence)](#human-signals-counter-evidence)
 - [Ineffective indicators and false-positive traps](#ineffective-indicators-and-false-positive-traps)
 - [Wikipedia-specific signs](#wikipedia-specific-signs)
@@ -57,6 +57,24 @@ Not conclusive, because sloppy humans also mis-cite and pad. They are strong bec
 ## Tier 3 — Style and vocabulary (moderate, cumulative)
 
 None of these proves anything alone: LLMs learned from human writing, and every feature below also appears in editorials, blogs, press releases and fan fiction. Weigh **density and co-occurrence**. Signs stack, and where there is one there are usually others. They carry more weight where humans rarely add flourish (short comments, terse summaries).
+
+### Structural staging (2025–2026 models)
+
+Newer models have dropped much of the old vocabulary and kept the shape. The tells below are sentences and paragraphs that signal weight instead of adding a fact, so they survive a word-level cleanup. Judge them at paragraph scale, and count them only when they repeat or cluster with other Tier 3 signs.
+
+- **One-line closers and dramatic fragments** (moderate) — a one-sentence paragraph that restates the paragraph before it, the same closer after several sections, or a row of fragments: "That is the real win." / "No prior. No nostalgia." *Caveat:* a short sentence that adds a new fact is ordinary emphasis.
+- **Sayings that sound deep** (moderate) — an ordinary point dressed as a hidden truth: "The real question is…", "At its core…", "Symmetry is the language of trust." *Caveat:* essayists and columnists write aphorisms on purpose; the tell is one per paragraph with no detail behind it.
+- **Staged run-up and staged candor** (moderate) — an opener that announces the point: "Let's dive in. Here's what you need to know.", or a standalone "Honestly?" before a routine claim. *Caveat:* "honestly" or "look" inside a casual sentence is plain speech, and tutorial writers open with "let's" by habit.
+- **Arguing with no one, fake alternatives** (moderate) — a defense against an objection that appears nowhere else: "I'm not saying docs don't matter.", "A tempting approach would be X, but…". Several unrelated rejections in a row are stronger. *Caveat:* an objection the text attributes and answers in full is argument, and an option a reader would really weigh is fair to mention.
+- **Repeated sentence openings** (moderate) — three or more sentences in a row with the same subject: "She noted the door. She noted the lock. She filed both away." *Caveat:* deliberate anaphora ("She came. She saw.") and terse notes or logs repeat openings by nature.
+- **Stacked qualifiers** (weak alone) — hedge on hedge, usually patching an earlier overstatement: "could potentially possibly be argued", "to be fair, it's also possible". *Caveat:* ordinary hedges ("perhaps", "tends to") are human, as are legal and safety scope notes.
+- **Hyphenated pairs after the noun** (weak alone) — "the report is high-quality, the process is well-documented", where the hyphen belongs only before a noun. *Caveat:* many editors and some style guides keep the hyphen everywhere, and words such as "third-party" always carry it.
+- **Passive voice and missing subjects** (weak alone) — "No configuration file needed. The results are preserved automatically." *Caveat:* passive is standard in methods sections, specs and news; weigh it only where the actor matters and is hidden.
+- **Heading restated in the first sentence** (moderate) — "## Performance" followed by "Speed matters." before the real content. *Caveat:* a lead sentence that defines the topic or gives a new fact is ordinary structure.
+- **Writing about the document instead of its subject** (moderate; a single description is weak alone) — "was added to replace the previous approach", "generated from vendor pricing pages", "the table below compares…". *Caveat:* change logs, release notes and migration guides legitimately describe earlier versions, and a source credit the reader can follow is normal.
+- **Re-explaining what the reader already knows** (moderate) — in a reply or comment, a recap of the problem, the diagnosis and the evidence, with the decision in the last line. *Caveat:* the reader may truly lack the background (a new participant, an escalation), and some people write long replies by habit. Judge it only when the surrounding thread is visible.
+
+For how to rewrite each of these, see humanize.md §2, §3, §4, §5, §7, §9, §10, §11, §24, §25, §26.
 
 ### Vocabulary
 
@@ -121,10 +139,14 @@ Three kinds, all "correcting" a misconception nobody held:
 - **"Not X, but Y" / "no X, no Y, just Z"** — "It's not a mirror but a portal", "Not a career, not a body of work, just…". Frequent in arguments, rebuttals, art and literature analysis. *Strength:* moderate–strong.
 - **"Y rather than X"** — "prioritizing A rather than B", "acts as an interface rather than introducing a new tool". Particularly common in recent output, and the backbone of the mid-2026 corrective disclaimers below. *Strength:* moderate.
 
+For how to rewrite these, see humanize.md §1.
+
 ### Rule of three
 
 Triplets of adjectives, phrases or items used to make shallow analysis look complete: "tiles, metals, and plastics", "mythological image, magical weapons, and spirit of resistance". Habitual, not purposeful.
 - *Strength:* weak–moderate alone; stronger where humans would not bother (a one-line comment, an edit note). *Caveat:* triples are a standard rhetorical device and people use them deliberately.
+
+For how to rewrite this, see humanize.md §6.
 
 ### Elegant variation
 
@@ -148,10 +170,14 @@ Disclaimers that advise or correct an imagined reader. The form changes with the
 - **Em dashes** — dashes where commas, parentheses or colons fit, a "punched-up" sales feel, often spaced. Heavy 2022–2025. *Strength:* weak–moderate alone, useful in combination. *Era note:* GPT-5.1 was tuned to suppress them (Nov 2025); by July 2026 only Claude was reported above professional-writer rates. From Sept 2026 the newest models avoid them, and uniformly low punctuation variety (more commas and periods than even human text) is emerging as a sign in its own right; that last claim is not well sourced, so use it lightly. Do not read an absence of dashes as human.
 - **Headings containing only other headings** — a section with no text of its own, only subsections. *Strength:* weak–moderate.
 
+For how to rewrite these, see humanize.md §8, §19, §20, §21.
+
 ### Customer-service voice and summaries
 
 - **Clerk voice** — "I carefully reviewed…", apologies for "any inconvenience", "If there are specific issues, point them out and I will try to resolve them", "I hope this message finds you well", "Dear Editorial Team… I am writing to…". *Strength:* moderate. Related: downplaying AI use ("this reflects my own thoughts") or answering a suspicion by demanding the critic "name exactly what is wrong". *Caveat:* formal business letters are formulaic by nature.
 - **"In conclusion", "Overall", section summaries** — a closing section or paragraph that restates what was just said; meta lines like "In this section, we will discuss…". Typical of older models. *Strength:* weak–moderate. *Caveat:* school essays are taught this way.
+
+For how to rewrite these, see humanize.md §22.
 
 ## Human signals (counter-evidence)
 
