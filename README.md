@@ -50,7 +50,7 @@ claude-plugins skills remove commafeed-api
 
 | Skill | Category | Description |
 |-------|----------|-------------|
-| `ai-detector` | other | Judge whether a text was written by AI or a human — chatbot artifacts, fabricated citations, style clusters, human counter-signals, and calibrated verdicts |
+| `ai-detector` | other | Judge whether a text was written by AI or a human, and humanize AI-sounding text — quoted evidence, calibrated verdicts, 26 rewrite patterns and voice matching |
 | `autoresearch` | workflow | Autonomous iterative optimization loop (Agent-Optimizer pattern) — atomic mutations, scalar metrics, git-based checkpoints for any measurable improvement |
 | `brand-guidelines` | other | Create brand books — structured interview for colors, typography, logo, voice & tone, generates professional self-contained HTML brand guidelines |
 | `captcha` | workflow | Integrate CAPTCHA-solving services (2captcha, CapMonster) for authorized automation — reCAPTCHA v2/v3, hCaptcha, Turnstile, image grid via vision AI |
