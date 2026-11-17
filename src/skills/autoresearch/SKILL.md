@@ -105,7 +105,7 @@ git commit -m "autoresearch: baseline"
 
 Then create the project files:
 
-**`program.md`** — write this yourself, following the template:
+**`program.md`** — write this yourself, following the template (the full version with filled-in examples is in [references/program-template.md](references/program-template.md)):
 ```
 # Optimization Program
 
@@ -382,4 +382,10 @@ autoresearch/
 
 The sandbox file lives in the main project tree, not in `autoresearch/`. It is a real project file being actively improved.
 
-If the project has a `references/` directory, look there for domain-specific evaluation techniques, scoring rubrics, or benchmark patterns relevant to the current optimization goal.
+This skill ships three reference files. Read the one that matches the step you are on:
+
+- [references/program-template.md](references/program-template.md): the full `program.md` template with filled-in examples. Read it when writing `program.md`.
+- [references/evaluator-patterns.md](references/evaluator-patterns.md): what makes a good evaluator, output format, handling noisy metrics, and minimal Python and Bash evaluator templates. Read it before writing `evaluator/run.sh`.
+- [references/domain-examples.md](references/domain-examples.md): sandbox, evaluator, metric and program for ten domains (code, prompts, email, CSS, SQL, config, copy, APIs, business rules, ML). Read it when the goal's domain is unfamiliar.
+
+If the user's project has its own `references/` directory, also look there for domain-specific evaluation techniques, scoring rubrics, or benchmark patterns relevant to the current optimization goal.

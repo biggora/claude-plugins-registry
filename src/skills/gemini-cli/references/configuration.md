@@ -48,7 +48,7 @@ assume legacy Vertex AI environment variables configure the new agent harness.
 | Workspace MCP | `<workspace>/.agents/mcp_config.json` |
 | Workspace skills | `<workspace>/.agents/skills/` |
 | Global skills | `~/.gemini/skills/` or `~/.gemini/antigravity-cli/skills/` |
-| Workspace instructions | Existing `AGENTS.md` and `GEMINI.md` |
+| Workspace instructions | Existing `<workspace>/AGENTS.md` and `<workspace>/GEMINI.md` |
 | Global instructions | `~/.gemini/GEMINI.md` |
 
 First-launch onboarding can migrate selected legacy assets. When migration is
