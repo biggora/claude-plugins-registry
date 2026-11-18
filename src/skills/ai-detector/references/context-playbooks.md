@@ -68,6 +68,11 @@ The same rule runs through every section: a style verdict is a reason to look cl
 - Judge the piece on quality and accuracy problems you can name, and give the writer a chance to respond.
 - For future work, set an explicit disclosure rule. The Wikipedia article mentions a 2024 AI transparency statement, proposed by Kimberly Acquaviva (University of Virginia School of Nursing), that creators can use to disclose AI use.
 
+**When a book and its listing are in scope:**
+- Review the full manuscript, including any branches, along with captions, cover text, and listing copy. State what you read. Short labels and recurring prompts can be necessary for navigation or instruction. Point to the repetition that weakens the prose and explain its effect on the reader.
+- After authorized edits, check the exported text against the source for names, quantities, worked results, and links whose labels tell readers what to do. Check the listing's claims against the final work.
+- Use verifiable provenance to fill any publisher disclosure. Record a style impression with exact quotes and counterexamples. Revision and a smoother reading experience leave the original provenance intact.
+
 **What not to do:**
 - Do not withhold payment or end the relationship on a detector score alone.
 - Do not assume undisclosed AI use is the same as dishonesty if the contract was silent.
