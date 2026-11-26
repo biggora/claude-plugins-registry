@@ -60,6 +60,7 @@ claude-plugins skills remove commafeed-api
 | `delegate-bounded-work` | workflow | Keep simple tasks single-agent, delegate bounded work with explicit contracts, and use independent fresh-context review when warranted |
 | `gemini-cli` | devops | Install, configure, and script with Gemini CLI — headless prompts, MCP servers, custom slash commands, extensions, and CI automation |
 | `google-merchant-api` | workflow | Work with Google Merchant Center APIs — products, inventory, promotions, data sources, reports, and account management |
+| `google-spam-policies` | other | Audit a live site or repository against Google's spam policies — scaled content abuse, cloaking, doorways, hidden text, link spam, sneaky redirects, manual actions, and recovery |
 | `harden-agent-loop` | code-quality | Harden agent workflows with hooks, guardrails, tool contracts, traces, regression evals, and measurable harness improvements |
 | `keep-goal` | workflow | Maintain durable repository context, progress, decisions, and handoffs so long-running agent work resumes safely across sessions |
 | `klix-integration` | workflow | Integrate Klix payment gateway — API, card payments, Apple/Google Pay, Baltic bank transfers, Pay Later, recurring payments |
@@ -100,6 +101,7 @@ npx skills add https://github.com/biggora/claude-plugins-registry --skill define
 npx skills add https://github.com/biggora/claude-plugins-registry --skill delegate-bounded-work
 npx skills add https://github.com/biggora/claude-plugins-registry --skill gemini-cli
 npx skills add https://github.com/biggora/claude-plugins-registry --skill google-merchant-api
+npx skills add https://github.com/biggora/claude-plugins-registry --skill google-spam-policies
 npx skills add https://github.com/biggora/claude-plugins-registry --skill harden-agent-loop
 npx skills add https://github.com/biggora/claude-plugins-registry --skill keep-goal
 npx skills add https://github.com/biggora/claude-plugins-registry --skill klix-integration
